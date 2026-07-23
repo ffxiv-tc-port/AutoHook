@@ -195,7 +195,8 @@ public class TabSettings : BaseTab
             @"ja",
             @"ko",
             @"ru",
-            @"zh"
+            @"zh",
+            @"zh-Hant"
         };
         var currentLanguage = languages.IndexOf(Service.Configuration.CurrentLanguage);
 

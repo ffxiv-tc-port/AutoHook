@@ -20,7 +20,8 @@ namespace AutoHook.Configurations;
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 5;
-    public string CurrentLanguage { get; set; } = @"en";
+    // TC fork: default to Traditional Chinese; users can switch in settings
+    public string CurrentLanguage { get; set; } = @"zh-Hant";
 
     public bool HideLocButtonn = true;
 

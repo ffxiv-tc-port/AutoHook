@@ -1,14 +1,17 @@
 {
   "Author": "Det",
   "Name": "AutoHook",
-  "Punchline": "Makes fishing less (or more) boring",
-  "Description": "It hooks the fish for you, can you believe it?",
+  "Punchline": "讓釣魚不再無聊(或更無聊)。",
+  "Description": "自動幫你提鉤釣魚,你能相信嗎?\n支援自訂預設集、自動以小釣大、自動刺魚等功能。",
   "InternalName": "AutoHook",
   "RepoUrl": "https://github.com/PunishXIV/AutoHook",
   "ApplicableVersion": "any",
-  "Tags": [ "Gathering", "Fishing" ],
+  "Tags": [
+    "Gathering",
+    "Fishing"
+  ],
   "AcceptsFeedback": false,
-  "Changelog": "Click the Changelog button to see whats new",
+  "Changelog": "點擊更新日誌按鈕查看新內容",
   "DalamudApiLevel": 12,
   "IconURL": "https://s3.puni.sh/media/plugin/47/icon-k1slevjorpo.png"
 }
