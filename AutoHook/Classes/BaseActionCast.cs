@@ -3,7 +3,7 @@ using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -217,7 +217,7 @@ public abstract class BaseActionCast
         ImGui.PushID(@$"{GetName()}_gp");
         if (ImGui.Button($"GP"))
         {
-            ImGui.OpenPopup(str_id: @"gp_cfg");
+            ImGui.OpenPopup(strId: @"gp_cfg");
         }
 
         if (ImGui.BeginPopup(@"gp_cfg"))

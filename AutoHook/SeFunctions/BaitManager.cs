@@ -9,6 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using FishingState = AutoHook.Enums.FishingState;
 
 namespace AutoHook.SeFunctions;
 
