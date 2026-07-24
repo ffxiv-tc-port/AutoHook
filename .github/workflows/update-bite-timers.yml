@@ -1,0 +1,43 @@
+name: Update Bite Timers
+
+on:
+  schedule:
+    - cron: '0 0 * * SUN'  # Runs every Sunday
+  workflow_dispatch:
+  
+jobs:
+  update-bite-timers:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        
+    - name: Run update script
+      run: python update_bite_timers.py
+      
+    - name: Check for changes
+      id: check_changes
+      run: |
+        git diff --quiet AutoHook/AutoHook/Data/FishData/bitetimers.json || echo "changes=true" >> $GITHUB_OUTPUT
+        
+    - name: Commit and push if changed
+      if: steps.check_changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions"
+        git add AutoHook/Data/FishData/bitetimers.json
+        git commit -m "Update bitetimers.json"
+        git push
