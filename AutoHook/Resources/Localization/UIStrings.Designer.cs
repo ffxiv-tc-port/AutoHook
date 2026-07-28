@@ -4104,6 +4104,42 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Support AutoHook.
+        /// </summary>
+        internal static string SupportAutoHook {
+            get {
+                return ResourceManager.GetString("SupportAutoHook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minor Changes.
+        /// </summary>
+        internal static string MinorChanges {
+            get {
+                return ResourceManager.GetString("MinorChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initial Bait:.
+        /// </summary>
+        internal static string InitialBait_ {
+            get {
+                return ResourceManager.GetString("InitialBait_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Preset and Close.
+        /// </summary>
+        internal static string CreatePresetAndClose {
+            get {
+                return ResourceManager.GetString("CreatePresetAndClose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to When Angler&apos;s Art stack is at....
         /// </summary>
         internal static string WhenAnglersAt {

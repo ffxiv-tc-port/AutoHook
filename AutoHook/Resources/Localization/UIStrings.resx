@@ -1495,4 +1495,16 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
     <value>Moving folder:</value>
     <comment>Moving folder: FolderName</comment>
   </data>
+  <data name="SupportAutoHook" xml:space="preserve">
+    <value>Support AutoHook</value>
+  </data>
+  <data name="MinorChanges" xml:space="preserve">
+    <value>Minor Changes</value>
+  </data>
+  <data name="InitialBait_" xml:space="preserve">
+    <value>Initial Bait:</value>
+  </data>
+  <data name="CreatePresetAndClose" xml:space="preserve">
+    <value>Create Preset and Close</value>
+  </data>
 </root>

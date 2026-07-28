@@ -51,7 +51,7 @@ public class PluginUi : Window, IDisposable
         {
             Click = (m) => { OpenBrowser(@"https://ko-fi.com/initialdet"); },
             Icon = FontAwesomeIcon.Heart,
-            ShowTooltip = () => ImGui.SetTooltip("Support AutoHook"),
+            ShowTooltip = () => ImGui.SetTooltip(UIStrings.SupportAutoHook),
         });
     }
 
@@ -196,7 +196,7 @@ public class PluginUi : Window, IDisposable
                 using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight },
                            false, ImGuiWindowFlags.NoDecoration))
                 {
-                    if (ImGui.Selectable($"Start Actions"))
+                    if (ImGui.Selectable(UIStrings.StartActions))
                         AutoHook.Plugin.HookManager.StartFishing();
 
                     var image = Service.Configuration.PluginEnabled ? "images/Fishy.png" : "images/Fishy_g.png";
@@ -438,7 +438,7 @@ public class PluginUi : Window, IDisposable
 
                 if (changes[0].Minor.Count > 0)
                 {
-                    ImGui.TextWrapped("Minor Changes");
+                    ImGui.TextWrapped(UIStrings.MinorChanges);
                     foreach (var minorChange in changes[0].Minor)
                     {
                         ImGui.TextWrapped($"- {minorChange}");
@@ -460,7 +460,7 @@ public class PluginUi : Window, IDisposable
                         if (changes[i].Minor.Count > 0)
                         {
                             ImGui.Spacing();
-                            ImGui.TextWrapped("Minor Changes");
+                            ImGui.TextWrapped(UIStrings.MinorChanges);
 
                             foreach (var minorChange in changes[i].Minor)
                                 ImGui.TextWrapped($"- {minorChange}");

@@ -1384,4 +1384,67 @@
   <data name="StellarHookset" xml:space="preserve">
     <value />
   </data>
+  <data name="Create" xml:space="preserve">
+    <value>建立</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>建立資料夾</value>
+  </data>
+  <data name="CreateNewFolder" xml:space="preserve">
+    <value>建立新資料夾</value>
+  </data>
+  <data name="EnterNewFolderName" xml:space="preserve">
+    <value>請輸入資料夾的新名稱：</value>
+  </data>
+  <data name="ExportFolderClipboard" xml:space="preserve">
+    <value>將資料夾匯出到剪貼簿</value>
+  </data>
+  <data name="FolderExported" xml:space="preserve">
+    <value>資料夾已匯出到剪貼簿</value>
+  </data>
+  <data name="FolderMostBeEmpty" xml:space="preserve">
+    <value>資料夾必須清空才能刪除</value>
+  </data>
+  <data name="FolderName" xml:space="preserve">
+    <value>資料夾名稱</value>
+  </data>
+  <data name="FolderNameHint" xml:space="preserve">
+    <value>請為新資料夾輸入名稱：</value>
+  </data>
+  <data name="ImportFolderAndPresets" xml:space="preserve">
+    <value>要匯入這個資料夾及其預設嗎？</value>
+  </data>
+  <data name="ImportPresetOrFolder" xml:space="preserve">
+    <value>從剪貼簿匯入預設或資料夾</value>
+  </data>
+  <data name="MovingFolder_" xml:space="preserve">
+    <value>移動資料夾：</value>
+  </data>
+  <data name="Moving_" xml:space="preserve">
+    <value>移動：</value>
+  </data>
+  <data name="NoPresetsSelected" xml:space="preserve">
+    <value>未選取要匯入的預設</value>
+  </data>
+  <data name="Presets_" xml:space="preserve">
+    <value>預設：</value>
+  </data>
+  <data name="RenameFolder" xml:space="preserve">
+    <value>重新命名資料夾</value>
+  </data>
+  <data name="RenamePreset" xml:space="preserve">
+    <value>重新命名預設</value>
+  </data>
+  <data name="SupportAutoHook" xml:space="preserve">
+    <value>贊助 AutoHook</value>
+  </data>
+  <data name="MinorChanges" xml:space="preserve">
+    <value>次要變更</value>
+  </data>
+  <data name="InitialBait_" xml:space="preserve">
+    <value>初始魚餜：</value>
+  </data>
+  <data name="CreatePresetAndClose" xml:space="preserve">
+    <value>建立預設並關閉</value>
+  </data>
 </root>

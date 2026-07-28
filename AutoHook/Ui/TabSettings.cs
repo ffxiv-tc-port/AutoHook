@@ -200,7 +200,8 @@ public class TabSettings : BaseTab
         };
         var currentLanguage = languages.IndexOf(Service.Configuration.CurrentLanguage);
 
-        if (!ImGui.Combo("Language###currentLanguage", ref currentLanguage, languages.ToArray(), languages.Count))
+        if (!ImGui.Combo($"{UIStrings.PluginUi_Language}###currentLanguage", ref currentLanguage, languages.ToArray(),
+                languages.Count))
             return;
 
         Service.Configuration.CurrentLanguage = languages[currentLanguage];

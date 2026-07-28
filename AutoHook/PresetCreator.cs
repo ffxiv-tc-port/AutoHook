@@ -82,7 +82,7 @@ public class PresetCreator
 
             DrawUtil.SpacingSeparator();
             ImGui.TextWrapped(
-                $"Initial Bait: {MultiString.GetItemName(_selectedTargetFish.InitialBait)}");
+                $"{UIStrings.InitialBait_} {MultiString.GetItemName(_selectedTargetFish.InitialBait)}");
             
             if (_selectedTargetFish.Mooches.Count > 0)
             {
@@ -144,7 +144,7 @@ public class PresetCreator
                 ImGui.Unindent();
             }
 
-            if (ImGui.Button("Create Preset and Close"))
+            if (ImGui.Button(UIStrings.CreatePresetAndClose))
             {
                 GeneratePreset(_presetMoochList, _presetPrepList);
             }
