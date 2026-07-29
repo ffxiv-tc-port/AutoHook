@@ -1148,10 +1148,10 @@
     <value>Fish Hitbox偏移</value>
   </data>
   <data name="OffsetLR" xml:space="preserve">
-    <value />
+    <value>偏移（左→右）</value>
   </data>
   <data name="OffsetRL" xml:space="preserve">
-    <value>Offset (R-&gt;L)</value>
+    <value>偏移（右→左）</value>
   </data>
   <data name="OffsetLRHelpText" xml:space="preserve">
     <value>從左至右游來的魚的擊中框偏移量</value>
@@ -1346,10 +1346,10 @@
     <value>不在專一垂釣啟用時使用擬餌技能</value>
   </data>
   <data name="Prize_Catch_Options" xml:space="preserve">
-    <value />
+    <value>大魚獵手選項</value>
   </data>
   <data name="Prize_Catch_Required" xml:space="preserve">
-    <value />
+    <value>僅在「大魚獵手」生效時提鉤</value>
   </data>
   <data name="Conditions" xml:space="preserve">
     <value>條件</value>
@@ -1382,7 +1382,7 @@
     <value>跳過咬鉤 - 大魚獵手已啟用，但提鉤無需其啟用</value>
   </data>
   <data name="StellarHookset" xml:space="preserve">
-    <value />
+    <value>華麗提鉤</value>
   </data>
   <data name="Create" xml:space="preserve">
     <value>建立</value>
