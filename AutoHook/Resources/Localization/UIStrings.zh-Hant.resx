@@ -158,7 +158,7 @@
     <value>您可以在這裡自定義 AutoCast 提供的的技能和道具的採集力門檻值。</value>
   </data>
   <data name="GP" xml:space="preserve">
-    <value>採集力</value>
+    <value>GP</value>
   </data>
   <data name="Above" xml:space="preserve">
     <value>高於</value>
@@ -439,7 +439,7 @@
     <value>開啟配置視窗</value>
   </data>
   <data name="TabAutoCasts_When_Stack_Equals" xml:space="preserve">
-    <value>當漁師之技的檔數 = </value>
+    <value>當漁師之計的層數 = </value>
   </data>
   <data name="Use_Prize_Catch" xml:space="preserve">
     <value>使用大魚獵手</value>
@@ -520,10 +520,10 @@
     <value>拋竿(技能) 會在咬鉤後使用
 
 重要！！！
-如果自動以小釣大(全域性或自定預設) 未啟用，將正常拋竿，同時你將失去以小釣大機會(如有)</value>
+如果自動以小釣大(全域或自定預設) 未啟用，將正常拋竿，同時你將失去以小釣大機會(如有)</value>
   </data>
   <data name="Global_Auto_Cast_Line" xml:space="preserve">
-    <value>全域性自動拋竿</value>
+    <value>全域自動拋竿</value>
   </data>
   <data name="Use_Thaliaks_Favor" xml:space="preserve">
     <value>使用沙利亞克的恩寵</value>
@@ -538,7 +538,7 @@
     <value>命中框</value>
   </data>
   <data name="GigHitbox" xml:space="preserve">
-    <value>叉魚判定框</value>
+    <value>刺魚命中框</value>
   </data>
   <data name="Use_Makeshift_Bait" xml:space="preserve">
     <value>使用熟練漁技</value>
@@ -547,7 +547,7 @@
     <value>這可能與自動沙利亞克的恩寵衝突</value>
   </data>
   <data name="TabAutoCasts_DrawExtraOptionsThaliaksFavor_" xml:space="preserve">
-    <value>當漁師之技的檔數 =</value>
+    <value>當漁師之計的層數 =</value>
   </data>
   <data name="TabAutoCasts_DrawThaliaksFavor_HelpText" xml:space="preserve">
     <value>這可能與自動熟練漁技衝突</value>
@@ -577,7 +577,7 @@
     <value>使用以小釣大II</value>
   </data>
   <data name="Global_Auto_Mooch" xml:space="preserve">
-    <value>全域性自動以小釣大</value>
+    <value>全域自動以小釣大</value>
   </data>
   <data name="TabAutoCasts_DrawHeader_Guide_Collectables" xml:space="preserve">
     <value>指南：如何自動接受收藏品</value>
@@ -627,7 +627,7 @@
     <value>普通提鉤</value>
   </data>
   <data name="GlobalPreset" xml:space="preserve">
-    <value>全域性預設</value>
+    <value>全域預設</value>
   </data>
   <data name="Bait" xml:space="preserve">
     <value>魚餌</value>
@@ -711,11 +711,11 @@
     <value>描述</value>
   </data>
   <data name="TabDefaultPreset_Description" xml:space="preserve">
-    <value>當未檢測到自定義的魚餌/以小到大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的掛鉤行為，除非建立了自定義預設。 
+    <value>當未檢測到自定義的魚餌/以小到大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的提鉤行為，除非建立了自定義預設。 
 請檢查指南選項卡。</value>
   </data>
   <data name="TabGlobalPreset_Description" xml:space="preserve">
-    <value>當未檢測到自定義的魚餌/以小到大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的掛鉤行為，除非建立了自定義預設。 請檢查指南選項卡。</value>
+    <value>當未檢測到自定義的魚餌/以小到大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的提鉤行為，除非建立了自定義預設。 請檢查指南選項卡。</value>
   </data>
   <data name="Old_Preset_Warning" xml:space="preserve">
     <value>這是一箇舊的配置，可能缺少一些設定。</value>
@@ -730,7 +730,7 @@
     <value>最大值</value>
   </data>
   <data name="DrawConfigs_Min_" xml:space="preserve">
-    <value>最小.</value>
+    <value>最小值</value>
   </data>
   <data name="Delay_Between_Casts" xml:space="preserve">
     <value>延遲拋竿(毫秒)：</value>
@@ -763,7 +763,7 @@
     <value>[預設] 正在使用自動拋竿</value>
   </data>
   <data name="GlobalActionsBeingUsed" xml:space="preserve">
-    <value>正在使用來自全域性預設的自動操作</value>
+    <value>正在使用來自全域預設的自動操作</value>
   </data>
   <data name="Custom_AutoCast_Being_Used" xml:space="preserve">
     <value>正在使用自定義預設 [{0}] 進行自動拋竿。</value>
@@ -772,7 +772,7 @@
     <value>[預設] 正在使用自動拋竿</value>
   </data>
   <data name="Global_Extra_Being_Used" xml:space="preserve">
-    <value>[全域性] 正在使用額外配置</value>
+    <value>[全域] 正在使用額外配置</value>
   </data>
   <data name="Custom_Extra_Being_Used" xml:space="preserve">
     <value>正在使用自定義預設 [{0}] 進行自動拋竿。</value>
@@ -953,13 +953,13 @@
     <value>僅在魚眼中使用</value>
   </data>
   <data name="HookType" xml:space="preserve">
-    <value>掛鉤型別</value>
+    <value>提鉤型別</value>
   </data>
   <data name="HookingTimer" xml:space="preserve">
-    <value>掛鉤計時</value>
+    <value>提鉤計時</value>
   </data>
   <data name="EnableHookingTimer" xml:space="preserve">
-    <value>使用掛鉤計時器</value>
+    <value>使用提鉤計時器</value>
   </data>
   <data name="EnableChumTimer" xml:space="preserve">
     <value>使用撒餌計時器</value>
@@ -1017,7 +1017,7 @@
     <comment>{0} Represents a status effect. For Example: Use this setting when Fisher's Intuition is active</comment>
   </data>
   <data name="NormalPatienceHookset" xml:space="preserve">
-    <value>提什麼 / 用輕重</value>
+    <value>一般提鉤 / 耐心提鉤組</value>
   </data>
   <data name="AutoCastOnlyUnderFishEyesHelpText" xml:space="preserve">
     <value>如果啟用計時器，這將在時間視窗中被忽略</value>
@@ -1145,7 +1145,7 @@
     <value>僅在以小釣大II冷卻時使用</value>
   </data>
   <data name="Fish_Hitbox_Offset" xml:space="preserve">
-    <value>Fish Hitbox偏移</value>
+    <value>魚類命中框偏移</value>
   </data>
   <data name="OffsetLR" xml:space="preserve">
     <value>偏移（左→右）</value>
@@ -1283,7 +1283,7 @@
     <value>重新命名</value>
   </data>
   <data name="GlobalPresetHelpText" xml:space="preserve">
-    <value>如果沒有選擇預設，將使用全域性預設</value>
+    <value>如果沒有選擇預設，將使用全域預設</value>
   </data>
   <data name="AlreadySwapped" xml:space="preserve">
     <value>(已交換)</value>
@@ -1331,7 +1331,7 @@
     <value>建立副本</value>
   </data>
   <data name="StatusNoPreset" xml:space="preserve">
-    <value>無預設執行中，將使用全域性預設</value>
+    <value>無預設執行中，將使用全域預設</value>
   </data>
   <data name="LureSSActive" xml:space="preserve">
     <value>僅當拍打水面啟用時使用擬餌技能</value>
@@ -1442,7 +1442,7 @@
     <value>次要變更</value>
   </data>
   <data name="InitialBait_" xml:space="preserve">
-    <value>初始魚餜：</value>
+    <value>初始魚餌：</value>
   </data>
   <data name="CreatePresetAndClose" xml:space="preserve">
     <value>建立預設並關閉</value>
