@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoHook", "AutoHook\AutoHo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunishLib", "PunishLib\PunishLib\PunishLib.csproj", "{CB14784B-D047-49F0-BB31-37AA8984B213}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{DC9C4EF8-CFEF-4754-85D3-A286EE81097B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,10 +21,6 @@ Global
 		{CB14784B-D047-49F0-BB31-37AA8984B213}.Debug|x64.Build.0 = Debug|x64
 		{CB14784B-D047-49F0-BB31-37AA8984B213}.Release|x64.ActiveCfg = Release|x64
 		{CB14784B-D047-49F0-BB31-37AA8984B213}.Release|x64.Build.0 = Release|x64
-		{DC9C4EF8-CFEF-4754-85D3-A286EE81097B}.Debug|x64.ActiveCfg = Debug|x64
-		{DC9C4EF8-CFEF-4754-85D3-A286EE81097B}.Debug|x64.Build.0 = Debug|x64
-		{DC9C4EF8-CFEF-4754-85D3-A286EE81097B}.Release|x64.ActiveCfg = Release|x64
-		{DC9C4EF8-CFEF-4754-85D3-A286EE81097B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
