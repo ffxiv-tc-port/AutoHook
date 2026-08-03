@@ -38,6 +38,12 @@ public class AutoHookIPC
         Service.Save();
     }
 
+    // 這裡原本漏了 [EzIPC]：夾在 SetPreset 與 CreateAndSelectAnonymousPreset 兩個有屬性的方法中間，
+    // 自己卻沒有掛，所以 AutoHook.SetPresetAutogig 從來沒被註冊過。
+    // 消費端（ICE 的 IPC/AutoHookIPC.cs）早就宣告了訂閱，帶的又是 SafeWrapper.AnyException，
+    // 呼叫下去只會被吞掉、回傳 default —— 完全靜默。
+    // 它只做「在既有的魚叉 preset 清單裡挑一個」，沒有任何危險行為，補上屬性即可。
+    [EzIPC]
     public void SetPresetAutogig(string preset)
     {
         Service.Save();
