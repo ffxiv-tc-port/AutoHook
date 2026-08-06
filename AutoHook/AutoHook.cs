@@ -52,6 +52,8 @@ public class AutoHook : IDalamudPlugin
 
     private static AutoGig _autoGig = null!;
 
+    private readonly WeatherWatcher _weatherWatcher;
+
     public readonly FishingManager HookManager;
 
     public AutoHookIPC AutoHookIpc;
@@ -92,6 +94,11 @@ public class AutoHook : IDalamudPlugin
         
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
+
+        // 「前一個時段的天氣」問不到遊戲（負 offset 會靜默算錯、API13 沒有 GetPreviousWeather），
+        // 只能趁它還是「目前時段」的時候抄下來。每幀先比一次 TickCount64 就返回，
+        // 真正的取樣最多 5 秒一次。
+        _weatherWatcher = new WeatherWatcher();
 
 #if (DEBUG)
         OnOpenConfigUi();
@@ -177,6 +184,7 @@ public class AutoHook : IDalamudPlugin
 
     public void Dispose()
     {
+        _weatherWatcher.Dispose();
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();
