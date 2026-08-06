@@ -32,15 +32,17 @@ public unsafe class BaitManager
     {
         get
         {
-            var managerPtr = (nint)EventFramework.Instance() + FishingManagerOffset;
+            // 🔴 原本是先算 `(nint)EventFramework.Instance() + 0x70` 再檢查那個和是不是 0。
+            //    加了 0x70 之後**永遠不可能是 0**，所以那兩個檢查（而且還重複寫了兩次）
+            //    等於沒有：EventFramework 還沒建好時會去解參考位址 0x70 → AccessViolation。
+            //    ⚠️ AVE 是 corrupted-state exception，try/catch 攔不到，直接讓遊戲當掉。
+            //    要檢查的是**實例本身**，不是加了偏移之後的位址。
+            var eventFramework = EventFramework.Instance();
 
-            if (managerPtr == nint.Zero)
+            if (eventFramework == null)
                 return null;
 
-            if (managerPtr == nint.Zero)
-                return null;
-
-            return *(FishingManagerStruct**)managerPtr;
+            return *(FishingManagerStruct**)((nint)eventFramework + FishingManagerOffset);
         }
     }
 
@@ -68,6 +70,25 @@ public unsafe class BaitManager
                 0x02 when ptr->SwimBaitId3 != 0 => ptr->SwimBaitId3,
                 _ => null,
             };
+        }
+    }
+
+    /// <summary>
+    /// 三個泳餌欄位目前放的魚 id（0 ＝ 空欄位）。給 <c>SwimbaitCountCD</c> 條件用。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 一次解參考、當場把三個值複製出來。**不保存指標**，也不快取結果 ——
+    ///    這個值每一竿都會變，而原生指標跨幀一律不能留。
+    /// </remarks>
+    public uint[] SwimBaitIds
+    {
+        get
+        {
+            var ptr = FishingMan;
+            if (ptr == null)
+                return [];
+
+            return [ptr->SwimBaitId1, ptr->SwimBaitId2, ptr->SwimBaitId3];
         }
     }
 

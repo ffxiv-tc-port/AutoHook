@@ -123,6 +123,32 @@ public partial class FishingManager
 
         public static List<Guid> ToBeRemoved = new();
 
+        /// <summary>
+        /// 本次釣魚期間，每個**魚 id** 釣起的數量。
+        ///
+        /// 🔑 為什麼不能用上面的 <see cref="FishCount"/> 代替：那一份的鍵是
+        /// <c>FishConfig.UniqueId</c>，也就是「某一份 preset 裡的某一條魚設定」。
+        /// 換了 preset 就換成另一組 Guid，計數自然歸零。
+        /// 而上游的 <c>FishCaughtCountCD</c>（＝<c>SessionCaughtCountCD</c>）算的是
+        /// **整段釣魚期間、跨 preset** 的某魚 id 數量 —— 多階段 preset 的換階條件靠的正是它。
+        /// 兩者語意不同，混用會在「換過 preset 之後」開始給錯答案，而且看不出來。
+        ///
+        /// 生命週期跟 <see cref="FishCount"/> 一致：<see cref="Reset"/>（收竿）時清空。
+        /// </summary>
+        public static Dictionary<int, int> SessionCatch = new();
+
+        public static void AddSessionCatch(int fishId, int amount)
+        {
+            if (fishId <= 0 || amount <= 0)
+                return;
+
+            SessionCatch.TryAdd(fishId, 0);
+            SessionCatch[fishId] += amount;
+        }
+
+        public static int GetSessionCatch(int fishId)
+            => SessionCatch.TryGetValue(fishId, out var count) ? count : 0;
+
         public static void AddFishCount(Guid guid)
         {
             FishCount.TryAdd(guid, 0);
@@ -192,6 +218,7 @@ public partial class FishingManager
             FishCount = new Dictionary<Guid, int>();
             FishPresetSwapped = [];
             FishBaitSwapped = [];
+            SessionCatch = new Dictionary<int, int>();
         }
     }
 }

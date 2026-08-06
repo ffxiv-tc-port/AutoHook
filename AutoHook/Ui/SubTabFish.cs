@@ -2,12 +2,14 @@
 using System.Linq;
 using System.Numerics;
 using AutoHook.Classes;
+using AutoHook.Conditions;
 using AutoHook.Configurations;
 using AutoHook.Enums;
 using AutoHook.Fishing;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -206,9 +208,45 @@ public class SubTabFish
         ImGui.PopID();
     }
 
+    /// <summary>
+    /// 匯入的 preset 用的是「條件式換 preset」（上游 config v6／v7 的格式），而畫面上那個
+    /// <c>Swap Preset</c> 勾選框綁的是舊的 <c>SwapPresets</c> 旗標 —— 條件式的 preset 那個旗標是
+    /// false，勾選框會顯示成「沒有開啟」。
+    ///
+    /// 🔴 那是**騙人的**：它其實會換。所以在勾選框上面直接畫一列，把「有條件、換去哪、條件是什麼」
+    ///    講明白。詳細條件放 tooltip（長字串不佔列上版面），但「有這回事」必須在列上看得見。
+    ///
+    /// ⚠️ 這裡只用 <see cref="ConditionEvaluator.DescribeShape"/>（不讀遊戲狀態）——
+    ///    設定視窗可以在標題畫面開著，在那裡去解原生指標就是 AccessViolation。
+    /// </summary>
+    private static void DrawSwapPresetConditionNotice(FishConfig fishConfig)
+    {
+        if (!ConditionEvaluator.HasAnyCondition(fishConfig.SwapPresetConditionSet))
+            return;
+
+        var supported = ConditionEvaluator.IsSupported(fishConfig.SwapPresetConditionSet);
+
+        ImGui.TextColored(supported ? ImGuiColors.HealerGreen : ImGuiColors.DalamudOrange,
+            supported ? @"● 由匯入的條件控制換 preset" : @"● 匯入的換階條件含有本外掛還不支援的項目");
+        ImGui.SameLine();
+        ImGui.TextColored(ImGuiColors.ParsedGold, @$"→ {fishConfig.PresetToSwap}");
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.TextUnformatted(@$"條件：{ConditionEvaluator.DescribeShape(fishConfig.SwapPresetConditionSet)}");
+            ImGui.TextUnformatted(supported
+                ? @"下面那個勾選框是舊版的計數式設定，條件存在時以條件為準。"
+                : @"含有不支援的條件時一律「不換」，並在記錄裡寫一行 Information 說明是哪個條件。");
+            ImGui.EndTooltip();
+        }
+    }
+
     private static void DrawSwapPreset(FishConfig fishConfig)
     {
         ImGui.PushID("DrawSwapPreset");
+
+        DrawSwapPresetConditionNotice(fishConfig);
 
         var alreadySwapped = "";
         if (FishingManager.FishingHelper.SwappedPreset(fishConfig.UniqueId))

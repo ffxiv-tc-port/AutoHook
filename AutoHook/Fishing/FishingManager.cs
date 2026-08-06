@@ -491,6 +491,12 @@ public partial class FishingManager : IDisposable
 
         _lastStep = FishingSteps.FishCaught;
 
+        // 跨 preset 的「本次釣魚某魚 id 釣了幾條」。
+        // ⚠️ 刻意用遊戲傳進來的 fishId 而不是 _lastCatch.Id —— 後者查不到魚時會是 -1，
+        //    那會讓計數靜默落到一個不存在的鍵上。收藏品的 +500000 已經在 UpdateCatchDetour 扣掉了。
+        // 這一份計數與下面的 per-FishConfig 計數**互不取代**，用途見 FishingHelper.SessionCatch。
+        FishingHelper.AddSessionCatch((int)fishId, (int)amount);
+
         if (lastFishCatchCfg != null)
         {
             for (var i = 0; i < amount; i++)

@@ -16,6 +16,20 @@ public class BaseBiteConfig
 
     public bool EnableHooksetSwap;
 
+    /// <summary>
+    /// 「這一格提鉤可不可以出手」的條件（上游 config v6／v7 的格式）。
+    ///
+    /// 📌 上游把舊的 <see cref="HookTimerEnabled"/>／<see cref="MinHookTimer"/>／<see cref="MaxHookTimer"/>
+    ///    整組換成了一條 <c>BiteTimerCD</c> 條件（上游 <c>HookConfig.SetBiteTimerInConditionSet</c> 就是
+    ///    那個遷移函式）。所以匯入的新版 preset 裡**時間窗只存在於這個屬性**，
+    ///    舊欄位一律缺鍵 → 落在 false／0 → 我們的 <c>CheckTimer</c> 等於完全沒有限制。
+    ///
+    /// 🔴 <c>null</c> 時完全不參與判斷（＝既有使用者與所有 AH4_ preset 行為逐位元相同）。
+    ///    含有我們不認得的條件時**也不擋** —— 見 <see cref="Conditions.ConditionEvaluator"/> 的說明：
+    ///    在提鉤這條路徑上「不認得就不提鉤」會讓外掛看起來整個壞掉，比忽略條件更糟。
+    /// </summary>
+    public Conditions.ConditionSet? ConditionSet { get; set; }
+
     public bool HookTimerEnabled;
     public double MinHookTimer;
     public double MaxHookTimer;

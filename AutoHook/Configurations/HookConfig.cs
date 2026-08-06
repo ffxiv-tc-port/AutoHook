@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AutoHook.Classes;
+using AutoHook.Conditions;
 using AutoHook.Data;
 using AutoHook.Enums;
 using AutoHook.Fishing;
@@ -289,14 +290,48 @@ public class HookConfig : BaseOption
 
         if (!CheckSurfaceSlap(hookType))
             return false;
-        
+
         if (!CheckPrizeCatch(hookType))
             return false;
 
         if (!ignoreTimers && !CheckTimer(hookType, timePassed))
             return false;
 
+        if (!CheckConditionSet(hookType, timePassed, ignoreTimers))
+            return false;
+
         return true;
+    }
+
+    /// <summary>
+    /// 上游 config v6／v7 把提鉤的時間窗（以及「要有某狀態才提」之類的限制）從固定欄位
+    /// 改成了一份條件。這裡是它的求值點，對應上游的 <c>hook.xx.ConditionSet.PassesOrUnconfigured()</c>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 三個保底規則，缺一個都會變成「外掛看起來壞掉」：
+    /// <list type="number">
+    /// <item>沒有條件（<c>null</c>／空群組）＝通過。既有使用者與所有 AH4_ preset 走這一條。</item>
+    /// <item>含有我們還沒實作的條件＝**通過**（不擋）。這條路徑上「不認得就不提鉤」會讓每一咬都放生。</item>
+    /// <item><paramref name="ignoreTimers"/> 為 true 時，條件裡的時間窗（BiteTimerCD／ChumTimerCD）
+    ///       一律視為成立 —— 否則 2026-08-06 那個「每條魚都算分的任務忽略時間窗」的修法
+    ///       會在帶條件的 preset 上靜默失效。</item>
+    /// </list>
+    /// </remarks>
+    private bool CheckConditionSet(BaseBiteConfig hookType, double timePassed, bool ignoreTimers)
+    {
+        var set = hookType.ConditionSet;
+
+        if (!ConditionEvaluator.HasGroups(set))
+            return true;
+
+        var ctx = ConditionContext.OnBite(timePassed, ignoreTimers);
+
+        if (ConditionEvaluator.Passes(set, ctx, unconfiguredResult: true, unsupportedResult: true,
+                where: @"提鉤條件"))
+            return true;
+
+        Service.Status = $"Skipping bite - {ConditionEvaluator.Describe(set, ctx)}";
+        return false;
     }
 
     private bool IsHookAvailable(BaseBiteConfig hookType)
