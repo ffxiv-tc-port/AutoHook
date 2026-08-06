@@ -78,6 +78,31 @@ public class BaseHookset
     public bool StellarBeforeMultiHook;
 
     /// <summary>
+    /// 任務說明自己講明「任意／每條魚都算分」時，忽略提鉤的時間窗設定。
+    ///
+    /// 🔴 為什麼需要這個（2026-08-06 實機回報「一直不提鉤」的真因）：
+    ///    ICE 內建的宇宙 preset 有很多份是拿時間窗來**挑特定魚種**的
+    ///    （例如 [488] EX: Coexisting Species I 把 Weak 限在 16~20 秒、Strong 限在 20~25 秒，
+    ///     而且雙重／三重提鉤全關）。窗外的咬鉤一律放生。
+    ///    但那個任務的計分方式是「每條魚均給予評價」—— 任何一條魚都算分，
+    ///    放掉六成的咬鉤是純粹的損失，preset 的窗跟任務的目標互相矛盾。
+    ///
+    /// ⚠️ 只在任務說明**自己講明**「任意／每一條」時才套用（WKSMissionText 115、121）。
+    ///    113/114/141 那種「幾種不同／特定／目標水產品」的任務**不套用** ——
+    ///    那裡的時間窗正是拿來選魚的，繞過去只會一直釣到不要的魚。
+    ///    判不出任務型別時也不套用（不知道就不要放寬限制）。
+    /// </summary>
+    [DefaultValue(true)] public bool IgnoreTimersWhenEveryFishCounts = true;
+
+    /// <summary>
+    /// 這一竿要不要忽略提鉤時間窗。看 <see cref="IgnoreTimersWhenEveryFishCounts"/> 有沒有開，
+    /// 以及目前任務是不是「任意／每條魚都算分」那一型。
+    /// 不在宇宙探索、沒有進行中的任務、型別判不出來 → 一律 false（維持 preset 原本的行為）。
+    /// </summary>
+    public bool ShouldIgnoreHookTimers()
+        => IgnoreTimersWhenEveryFishCounts && CosmicMissionInfo.GetCurrentProfile().EveryFishCounts;
+
+    /// <summary>
     /// 依目前任務的計分方式，決定華麗提鉤要不要排在雙重／三重提鉤之前。
     ///
     /// 🔑 偵測不到就退回 <see cref="StellarBeforeMultiHook"/>，**不猜**。
@@ -262,6 +287,15 @@ public class BaseHookset
             }
 
             ImGui.Unindent();
+
+            ImGui.Spacing();
+            DrawUtil.Checkbox(
+                Loc.Safe(UIStrings.IgnoreTimersEveryFishCounts, nameof(UIStrings.IgnoreTimersEveryFishCounts),
+                    @"Ignore hook timers when every fish counts"),
+                ref IgnoreTimersWhenEveryFishCounts,
+                Loc.Safe(UIStrings.IgnoreTimersEveryFishCountsHelpText,
+                    nameof(UIStrings.IgnoreTimersEveryFishCountsHelpText),
+                    @"Only applies to missions whose own text says any/every fish is rated."));
 
             ImGui.Separator();
             StellarWeak.DrawOptions(

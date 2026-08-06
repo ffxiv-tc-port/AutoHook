@@ -1495,4 +1495,14 @@
 
 不在宇宙探索、或没有进行中的任务时，同样视为「判不出来」。</value>
   </data>
+  <data name="IgnoreTimersEveryFishCounts" xml:space="preserve">
+    <value>任意鱼都算分的任务忽略提钩时间窗</value>
+  </data>
+  <data name="IgnoreTimersEveryFishCountsHelpText" xml:space="preserve">
+    <value>有些宇宙探索的预设组会把提钩限制在很窄的时间窗里，用来挑出某一种特定的鱼。但如果任务说明自己写的是「尽可能钓起水产品…每条鱼均给予评价」，那种窗只会把咬钩白白放掉。
+
+打开之后，侦测到这类任务时就忽略时间窗，每一咬都提。
+
+要求「特定／目标水产品」的任务不会套用，判不出任务类型时也不会套用 —— 那些情况下时间窗正是拿来选鱼的。</value>
+  </data>
 </root>

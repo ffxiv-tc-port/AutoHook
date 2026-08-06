@@ -150,18 +150,33 @@ public class HookConfig : BaseOption
         // 一次算完存起來，保證底下兩個分支看到的是同一個決定。
         var stellarFirst = hookset.ResolveStellarFirst();
 
+        // 🔴 這是 2026-08-06 實機回報「一直不提鉤，只有華麗提鉤 CD 完才會提」的修法。
+        //    根因不在華麗提鉤，而在 preset 的提鉤時間窗：ICE 內建的
+        //    [488] EX: Coexisting Species I 把 Weak 限制在 16~20 秒、Strong 限制在 20~25 秒，
+        //    而且 UseDoubleHook / UseTripleHook 都是 false。窗外的咬鉤一律 "No hook found, using Rest"。
+        //    實機 log 逐筆對得上：13.0 秒的咬鉤放生、18.5 秒（Strong）放生、
+        //    21.5 秒（Strong，落在窗內）用普通提鉤、16.0／23.5 秒落在窗內時用華麗提鉤。
+        //
+        //    問題是那份 preset 的時間窗是拿來「挑特定魚種」的（名字就叫 HEAVY rng），
+        //    但這個任務（WKSMissionText 121）的計分是「每條魚均給予評價」——
+        //    任何一條魚都算分，放掉六成的咬鉤是純粹的損失。
+        //
+        //    所以只在任務說明**自己講明**「任意／每條魚都算分」時（115、121）忽略時間窗。
+        //    113/114/141 那種「特定／目標水產品」的任務**不套用** —— 那裡的時間窗是選魚用的。
+        var ignoreTimers = hookset.ShouldIgnoreHookTimers();
+
         Service.Status = "";
 
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
             // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前。
-            if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
+            if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
                 return HookType.Stellar;
 
             // Triple Hook
             if (hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
-                if (CheckHookCondition(hook.th, timePassed))
+                if (CheckHookCondition(hook.th, timePassed, ignoreTimers))
                     if (IsHookAvailable(hook.th))
                         return hook.th.HooksetType;
 
@@ -177,7 +192,7 @@ public class HookConfig : BaseOption
             // Double Hook
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
-                if (CheckHookCondition(hook.dh, timePassed))
+                if (CheckHookCondition(hook.dh, timePassed, ignoreTimers))
                     if (IsHookAvailable(hook.dh))
                         return hook.dh.HooksetType;
 
@@ -192,13 +207,13 @@ public class HookConfig : BaseOption
 
             // 華麗提鉤（宇宙探索）—— 另一種順位：雙重／三重沒有出手時才補位，
             // 但仍然排在精準／強力提鉤之前（它不耗 GP，而且評價比較高）。
-            if (!stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
+            if (!stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
                 return HookType.Stellar;
 
             // Normal - Patience
             if (hook.ph.HooksetEnabled)
             {
-                if (CheckHookCondition(hook.ph, timePassed))
+                if (CheckHookCondition(hook.ph, timePassed, ignoreTimers))
                     return IsHookAvailable(hook.ph) ? hook.ph.HooksetType : HookType.Normal;
                 
                 Service.Status = $"(Normal/Patience Hook) {Service.Status}";
@@ -225,7 +240,7 @@ public class HookConfig : BaseOption
     /// <param name="hook">同一個 bite 型別原本的三重／雙重／精準設定，用來判斷這一咬本來要不要提鉤。</param>
     private bool ShouldUseStellarHook(BaseHookset hookset,
         (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph) hook,
-        BaseBiteConfig? stellar, double timePassed)
+        BaseBiteConfig? stellar, double timePassed, bool ignoreTimers)
     {
         if (!hookset.UseStellarHook || stellar is not { HooksetEnabled: true })
             return false;
@@ -248,8 +263,14 @@ public class HookConfig : BaseOption
         if (!PlayerRes.ActionTypeAvailable((uint)HookType.Stellar))
             return false;
 
+        // ⚠️ 條件要沿用「這一咬原本那一格」的設定，不能用華麗提鉤自己那格的空白預設。
+        //    華麗提鉤只是換一個提鉤**動作**，不該自帶一套條件 ——
+        //    原本用 stellar 自己的空白設定，結果是 preset 設好的時間窗對華麗提鉤完全無效，
+        //    表現成「preset 說要放掉的咬鉤，只有華麗提鉤會去勾」。
+        var conditionSource = hook.ph.HooksetEnabled ? hook.ph : stellar;
+
         var statusBefore = Service.Status;
-        if (!CheckHookCondition(stellar, timePassed))
+        if (!CheckHookCondition(conditionSource, timePassed, ignoreTimers))
         {
             Service.Status = statusBefore;
             return false;
@@ -261,7 +282,7 @@ public class HookConfig : BaseOption
         return true;
     }
 
-    private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)
+    private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed, bool ignoreTimers)
     {
         if (!CheckIdenticalCast(hookType))
             return false;
@@ -272,7 +293,7 @@ public class HookConfig : BaseOption
         if (!CheckPrizeCatch(hookType))
             return false;
 
-        if (!CheckTimer(hookType, timePassed))
+        if (!ignoreTimers && !CheckTimer(hookType, timePassed))
             return false;
 
         return true;

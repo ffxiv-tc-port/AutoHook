@@ -1502,4 +1502,14 @@
 不在宇宙探索、或沒有進行中的任務時，同樣視為「判不出來」。
 每次換任務會在記錄裡寫一行判定結果，可以事後核對。</value>
   </data>
+  <data name="IgnoreTimersEveryFishCounts" xml:space="preserve">
+    <value>任意魚都算分的任務忽略提鉤時間窗</value>
+  </data>
+  <data name="IgnoreTimersEveryFishCountsHelpText" xml:space="preserve">
+    <value>有些宇宙探索的預設組會把提鉤限制在很窄的時間窗裡，用來挑出某一種特定的魚。但如果任務說明自己寫的是「盡可能釣起水產品…每條魚均給予評價」，那種窗只會把咬鉤白白放掉。
+
+打開之後，偵測到這類任務時就忽略時間窗，每一咬都提。
+
+要求「特定／目標水產品」的任務不會套用，判不出任務型別時也不會套用 —— 那些情況下時間窗正是拿來選魚的。</value>
+  </data>
 </root>

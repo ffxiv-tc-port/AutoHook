@@ -3359,6 +3359,24 @@ namespace AutoHook.Resources.Localization {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Ignore hook timers when every fish counts.
+        /// </summary>
+        internal static string IgnoreTimersEveryFishCounts {
+            get {
+                return ResourceManager.GetString("IgnoreTimersEveryFishCounts", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Some Cosmic Exploration presets restrict hooking to a narrow time window.
+        /// </summary>
+        internal static string IgnoreTimersEveryFishCountsHelpText {
+            get {
+                return ResourceManager.GetString("IgnoreTimersEveryFishCountsHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Stellar Hookset priority.
         /// </summary>
         internal static string StellarPriorityLabel {

@@ -1559,4 +1559,14 @@ On: favour evaluation instead.</value>
 Not in Cosmic Exploration, or no mission in progress, also counts as "cannot tell".
 A log line is written whenever the mission changes so the decision can be checked afterwards.</value>
   </data>
+  <data name="IgnoreTimersEveryFishCounts" xml:space="preserve">
+    <value>Ignore hook timers when every fish counts</value>
+  </data>
+  <data name="IgnoreTimersEveryFishCountsHelpText" xml:space="preserve">
+    <value>Some Cosmic Exploration presets restrict hooking to a narrow time window in order to select one specific fish. On missions whose own description says ANY fish is rated ("catch as many as you can - every fish is rated"), those windows only throw away bites.
+
+When this is on and such a mission is detected, the hook timers are ignored and every bite is hooked.
+
+It never applies to missions that ask for a specific or target fish, nor when the mission type cannot be detected - there the timing window is the fish-selection mechanism.</value>
+  </data>
 </root>
