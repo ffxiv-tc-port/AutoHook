@@ -3350,11 +3350,56 @@ namespace AutoHook.Resources.Localization {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Off (default): Stellar Hookset is only used when Double/Triple Hook did not fire.
+        ///   Looks up a localized string similar to Which way &quot;Auto&quot; goes when it cannot tell what the current mission scores on.
         /// </summary>
         internal static string StellarHookBeforeMultiHookHelpText {
             get {
                 return ResourceManager.GetString("StellarHookBeforeMultiHookHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Stellar Hookset priority.
+        /// </summary>
+        internal static string StellarPriorityLabel {
+            get {
+                return ResourceManager.GetString("StellarPriorityLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Auto (follow the mission&apos;s scoring method).
+        /// </summary>
+        internal static string StellarPriorityAuto {
+            get {
+                return ResourceManager.GetString("StellarPriorityAuto", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Evaluation first (Stellar before Double/Triple).
+        /// </summary>
+        internal static string StellarPriorityEvaluation {
+            get {
+                return ResourceManager.GetString("StellarPriorityEvaluation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Quantity first (Double/Triple Hook first).
+        /// </summary>
+        internal static string StellarPriorityQuantity {
+            get {
+                return ResourceManager.GetString("StellarPriorityQuantity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;Auto&quot; reads the Cosmic Exploration mission you are currently on and classifies how it scores.
+        /// </summary>
+        internal static string StellarPriorityHelpText {
+            get {
+                return ResourceManager.GetString("StellarPriorityHelpText", resourceCulture);
             }
         }
 

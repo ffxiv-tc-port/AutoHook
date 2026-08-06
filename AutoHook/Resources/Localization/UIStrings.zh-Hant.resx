@@ -1463,11 +1463,43 @@
 如果某個咬鉤強度的三重／雙重／精準提鉤全部關掉（也就是這一咬本來就要放它跑），華麗提鉤也不會去勾它。</value>
   </data>
   <data name="StellarHookBeforeMultiHook" xml:space="preserve">
-    <value>順位排在雙重／三重提鉤之前</value>
+    <value>判不出任務型別時，改為評價優先</value>
   </data>
   <data name="StellarHookBeforeMultiHookHelpText" xml:space="preserve">
-    <value>關閉（預設）：只有在雙重／三重提鉤沒有出手時才用華麗提鉤。雙重／三重提鉤一次能起 2～3 條魚，華麗提鉤只起 1 條，所以「要數量」的任務維持原本的效率。
+    <value>「自動」判不出目前任務靠什麼拿分時，要走哪一邊。
 
-開啟：華麗提鉤優先。適合分數型任務 —— 用華麗提鉤釣起的魚完好無損，評價比較高。</value>
+不勾（預設）：維持數量優先。雙重／三重提鉤一次能起 2～3 條魚，華麗提鉤只起 1 條；不知道任務要什麼的時候，維持吞吐量比賭品質安全。
+
+勾起：改為評價優先。</value>
+  </data>
+  <data name="StellarPriorityLabel" xml:space="preserve">
+    <value>華麗提鉤的順位</value>
+  </data>
+  <data name="StellarPriorityAuto" xml:space="preserve">
+    <value>自動（依任務的計分方式）</value>
+  </data>
+  <data name="StellarPriorityEvaluation" xml:space="preserve">
+    <value>評價優先（華麗提鉤排在雙重／三重之前）</value>
+  </data>
+  <data name="StellarPriorityQuantity" xml:space="preserve">
+    <value>數量優先（雙重／三重提鉤先）</value>
+  </data>
+  <data name="StellarPriorityHelpText" xml:space="preserve">
+    <value>「自動」會讀目前進行中的宇宙探索任務，判斷它的計分方式屬於哪一種：
+
+• 數量／速度型 → 雙重、三重提鉤優先。
+  這類任務的說明是「盡快釣到指定數量…剩餘時間越多評價越高」或「每條魚均給予評價」，
+  分數綁在條數或速度上，一竿多魚直接加分。
+
+• 評價／收藏價值型 → 華麗提鉤優先。
+  這類任務的說明是「釣到收藏品…根據收藏價值給予評價」，
+  分數看單條魚的品質，而華麗提鉤釣起的魚完好無損、評價較高。
+
+• 判不出來 → 照下面那格的設定走，不會自己亂選。
+  尺寸型（根據最大尺寸給予評價）、種類型（種類越多評價越高）與雙職業任務都歸在這裡：
+  這幾種用現有資料證不出哪一邊比較好，與其猜錯不如維持現狀。
+
+不在宇宙探索、或沒有進行中的任務時，同樣視為「判不出來」。
+每次換任務會在記錄裡寫一行判定結果，可以事後核對。</value>
   </data>
 </root>

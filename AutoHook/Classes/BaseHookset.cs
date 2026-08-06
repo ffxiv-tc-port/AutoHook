@@ -63,15 +63,37 @@ public class BaseHookset
     //    掛上之後：true 省略（匯入端初始值本來就是 true，等價），false 才寫出去。
     [DefaultValue(true)] public bool UseStellarHook = true;
 
+    /// <summary>華麗提鉤的順位怎麼決定。預設 <see cref="StellarPriorityMode.Auto"/>。</summary>
+    public StellarPriorityMode StellarPriority = StellarPriorityMode.Auto;
+
     /// <summary>
     /// 華麗提鉤要不要排在雙重／三重提鉤之前。
     ///
-    /// 預設 false（排在後面）。理由：雙重／三重提鉤一次能起 2/3 條魚，
-    /// 而華麗提鉤只起 1 條，只是品質較好。在「要數量」的任務上把三重提鉤換成華麗提鉤
-    /// 是淨損失，所以預設不搶它們的順位 —— 只在它們沒開／GP 不夠／條件不符時才補位。
-    /// 要衝評價（分數型任務）的人再自己打開。
+    /// 在 <see cref="StellarPriorityMode.Auto"/> 底下，這一格是**判不出任務型別時的退路**
+    /// （不在宇宙探索、沒有進行中的任務、或該任務的計分方式不在對照表裡）。
+    ///
+    /// 預設 false（排在後面）。理由：雙重／三重提鉤一次能起 2/3 條魚，而華麗提鉤只起 1 條、
+    /// 只是品質較好。不知道任務要什麼的時候，維持原本的吞吐量比賭品質安全。
     /// </summary>
     public bool StellarBeforeMultiHook;
+
+    /// <summary>
+    /// 依目前任務的計分方式，決定華麗提鉤要不要排在雙重／三重提鉤之前。
+    ///
+    /// 🔑 偵測不到就退回 <see cref="StellarBeforeMultiHook"/>，**不猜**。
+    ///    「不知道」的正確行為是維持現狀，不是隨便選一邊 —— 選錯在遊戲裡完全看不出來。
+    /// </summary>
+    public bool ResolveStellarFirst() => StellarPriority switch
+    {
+        StellarPriorityMode.Evaluation => true,
+        StellarPriorityMode.Quantity => false,
+        _ => CosmicMissionInfo.GetCurrentFocus() switch
+        {
+            CosmicScoreFocus.Evaluation => true,
+            CosmicScoreFocus.Quantity => false,
+            _ => StellarBeforeMultiHook,
+        },
+    };
 
     public BaseBiteConfig StellarWeak = new(HookType.Stellar);
     public BaseBiteConfig StellarStrong = new(HookType.Stellar);
@@ -191,14 +213,41 @@ public class BaseHookset
             ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.StellarHookCosmicOnly);
 
             DrawUtil.Checkbox(UIStrings.UseStellarHook, ref UseStellarHook, UIStrings.UseStellarHookHelpText);
-            DrawUtil.Checkbox(UIStrings.StellarHookBeforeMultiHook, ref StellarBeforeMultiHook,
-                UIStrings.StellarHookBeforeMultiHookHelpText);
+
+            ImGui.Spacing();
+            ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.StellarPriorityLabel);
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(UIStrings.StellarPriorityHelpText);
+
+            ImGui.Indent();
+            DrawPriorityRadio(UIStrings.StellarPriorityAuto, StellarPriorityMode.Auto);
+            DrawPriorityRadio(UIStrings.StellarPriorityEvaluation, StellarPriorityMode.Evaluation);
+            DrawPriorityRadio(UIStrings.StellarPriorityQuantity, StellarPriorityMode.Quantity);
+
+            // 這一格只有「自動」才有意義 —— 它是判不出型別時的退路，不是獨立開關。
+            if (StellarPriority == StellarPriorityMode.Auto)
+            {
+                DrawUtil.Checkbox(UIStrings.StellarHookBeforeMultiHook, ref StellarBeforeMultiHook,
+                    UIStrings.StellarHookBeforeMultiHookHelpText);
+            }
+
+            ImGui.Unindent();
+
             ImGui.Separator();
             StellarWeak.DrawOptions(UIStrings.HookWeakExclamation);
             StellarStrong.DrawOptions(UIStrings.HookStrongExclamation);
             StellarLegendary.DrawOptions(UIStrings.HookLegendaryExclamation);
             ImGui.TreePop();
         }
+    }
+
+    private void DrawPriorityRadio(string label, StellarPriorityMode mode)
+    {
+        if (!ImGui.RadioButton(label, StellarPriority == mode))
+            return;
+
+        StellarPriority = mode;
+        Service.Save();
     }
 
     private void DrawTimeout()

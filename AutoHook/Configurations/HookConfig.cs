@@ -146,12 +146,16 @@ public class HookConfig : BaseOption
 
         stellarDictionary.TryGetValue(bite, out var stellar);
 
+        // 「自動」模式會去讀目前任務的計分方式（判不出來就退回使用者手動設定的那一態）。
+        // 一次算完存起來，保證底下兩個分支看到的是同一個決定。
+        var stellarFirst = hookset.ResolveStellarFirst();
+
         Service.Status = "";
 
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
-            // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前，只有使用者主動打開才會走這裡。
-            if (hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
+            // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前。
+            if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
                 return HookType.Stellar;
 
             // Triple Hook
@@ -186,9 +190,9 @@ public class HookConfig : BaseOption
                 Service.Status = $"(Triple Hook) {Service.Status}";
             }
 
-            // 華麗提鉤（宇宙探索）—— 預設的順位：雙重／三重沒有出手時才補位，
+            // 華麗提鉤（宇宙探索）—— 另一種順位：雙重／三重沒有出手時才補位，
             // 但仍然排在精準／強力提鉤之前（它不耗 GP，而且評價比較高）。
-            if (!hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
+            if (!stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
                 return HookType.Stellar;
 
             // Normal - Patience

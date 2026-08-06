@@ -1523,11 +1523,40 @@ When Stellar Hookset cannot be used, AutoHook simply falls through to your norma
 If every hookset for a bite strength is disabled (i.e. you deliberately let that bite escape), Stellar Hookset will not hook it either.</value>
   </data>
   <data name="StellarHookBeforeMultiHook" xml:space="preserve">
-    <value>Prioritise over Double/Triple Hook</value>
+    <value>When the mission type cannot be detected, favour evaluation</value>
   </data>
   <data name="StellarHookBeforeMultiHookHelpText" xml:space="preserve">
-    <value>Off (default): Stellar Hookset is only used when Double/Triple Hook did not fire. Double/Triple Hook land 2-3 fish while Stellar lands 1, so this keeps throughput on quantity missions.
+    <value>Which way "Auto" goes when it cannot tell what the current mission scores on.
 
-On: Stellar Hookset takes priority. Better for score-based missions, since fish caught with it are undamaged and rated higher.</value>
+Off (default): stay on quantity. Double/Triple Hook land 2-3 fish while Stellar lands 1 - when the mission is unknown, keeping throughput is safer than betting on quality.
+
+On: favour evaluation instead.</value>
+  </data>
+  <data name="StellarPriorityLabel" xml:space="preserve">
+    <value>Stellar Hookset priority</value>
+  </data>
+  <data name="StellarPriorityAuto" xml:space="preserve">
+    <value>Auto (follow the mission's scoring method)</value>
+  </data>
+  <data name="StellarPriorityEvaluation" xml:space="preserve">
+    <value>Evaluation first (Stellar before Double/Triple)</value>
+  </data>
+  <data name="StellarPriorityQuantity" xml:space="preserve">
+    <value>Quantity first (Double/Triple Hook first)</value>
+  </data>
+  <data name="StellarPriorityHelpText" xml:space="preserve">
+    <value>"Auto" reads the Cosmic Exploration mission you are currently on and classifies how it scores:
+
+- Quantity / speed -&gt; Double and Triple Hook first.
+  These missions read "catch N as fast as you can - the more time left, the higher the rating" or "every fish is rated". Score is tied to fish count or speed, so multi-catch is a direct gain.
+
+- Evaluation / collectability -&gt; Stellar Hookset first.
+  These missions read "catch collectables - rated by collectability". Score depends on each fish's quality, and Stellar lands undamaged, higher-rated fish.
+
+- Cannot tell -&gt; use the checkbox below. It never picks a side on its own.
+  Size-based missions, species-variety missions and dual-class missions land here: the available data cannot prove which side is better, and guessing wrong is invisible in game.
+
+Not in Cosmic Exploration, or no mission in progress, also counts as "cannot tell".
+A log line is written whenever the mission changes so the decision can be checked afterwards.</value>
   </data>
 </root>
