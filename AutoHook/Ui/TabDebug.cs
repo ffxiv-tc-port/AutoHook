@@ -10,6 +10,7 @@ using Dalamud.Bindings.ImGui;
 using HtmlAgilityPack;
 using System.Linq;
 using AutoHook.Enums;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
@@ -100,9 +101,14 @@ public class TabDebug : BaseTab
                     _taskManager.Enqueue(ProcessRepair, "Repair");
                 }
 
-                if (ImGui.Button("Scan Offsets"))
+                ImGui.SetNextItemWidth(140 * ImGuiHelpers.GlobalScale);
+                ImGui.InputInt("##wksScanValue", ref _wksScanValue);
+                ImGui.SameLine();
+                if (ImGui.Button("Scan WKS Offsets"))
                 {
-                    Checkoffsets();
+                    // 原本寫死找 45949（宇宙大蚊）。掃描目標本來就該由使用者指定，
+                    // 不然想找別的欄位還要改碼重編。
+                    Checkoffsets(_wksScanValue < 0 ? 0u : (uint)_wksScanValue);
                 }
 
                 if (ImGui.Button("Export fish ids"))
@@ -178,6 +184,9 @@ public class TabDebug : BaseTab
     private static Dictionary<string, List<string>> Presets = new();
     private int _swimbaitId = 45949;
 
+    /// <summary>WKSManager 偏移掃描要找的值。預設 45949 是「宇宙大蚊」的 item ID，沿用原本寫死的那個。</summary>
+    private int _wksScanValue = 45949;
+
     public static async Task UpdateWiki()
     {
         if (!EzThrottler.Throttle("WikiUpdate", 10000))
@@ -241,24 +250,47 @@ public class TabDebug : BaseTab
         _taskManager.Dispose();
     }
 
-    public unsafe void Checkoffsets()
+    /// <summary>
+    /// 在 <see cref="WKSManager"/> 裡找出「哪個偏移放著某個餌的 item ID」。
+    ///
+    /// 🔴 原本這裡是 <c>for (offset = 1; offset &lt;= 10000; offset++)</c>。
+    ///    WKSManager 在目前釘住的 FFXIVClientStructs 裡宣告 <c>Size = 0xF60</c>（3936 bytes），
+    ///    所以原本的迴圈會往結構尾端外面讀最多約 6 KB。讀到未對映的分頁就是
+    ///    AccessViolationException —— 那在 .NET Core 是 corrupted-state exception，
+    ///    <c>try/catch</c> 攔不到，直接整個遊戲崩。按一次按鈕就可能中。
+    ///
+    /// 現在：上界收到 <c>sizeof(WKSManager) - sizeof(uint)</c>，且以 4 bytes 對齊掃描
+    ///    （欄位本來就對齊，逐 byte 掃只是多產生 3 倍的假命中）。
+    ///
+    /// 另外把輸出改成 Information：使用者的記錄等級是 2，原本寫 Debug 等於按了按鈕
+    /// 什麼都不會出現，看起來像「掃不到」。開頭先印一行 CS 已知的 FishingBait 欄位當
+    /// 校準基準 —— 沒有已知會命中的對照，掃出 0 筆是分不出「真的沒有」還是「掃錯了」的。
+    /// </summary>
+    public unsafe void Checkoffsets(uint searchValue)
     {
-        Service.PluginLog.Debug($"Initializing WKSManager offset scan");
         var cosmicManager = WKSManager.Instance();
         if (cosmicManager == null)
         {
-            Service.PluginLog.Debug("WKSManager pointer is null.");
+            Service.PrintInfo("[Debug] WKSManager 是空指標（沒進宇宙探索時本來就會是這樣）。");
             return;
         }
-        for (int offset = 1; offset <= 10000; offset++)
+
+        var size = sizeof(WKSManager);
+        Service.PrintInfo($"[Debug] 開始掃 WKSManager 找值 {searchValue}。" +
+                          $"結構大小 0x{size:X}，校準用：CS 已知的 FishingBait(+0xC4C) 目前是 {cosmicManager->FishingBait}。");
+
+        var hits = 0;
+        for (var offset = 0; offset <= size - sizeof(uint); offset += sizeof(uint))
         {
-            uint value = *(uint*)((byte*)cosmicManager + offset);
-            if (value == 45949)
-            {
-                Service.PluginLog.Debug($"Match found at offset 0x{offset:X}: {value}");
-            }
-           
-            // else Service.PluginLog.Debug($"Offset 0x{offset:X}: {value}");
+            var value = *(uint*)((byte*)cosmicManager + offset);
+            if (value != searchValue)
+                continue;
+
+            hits++;
+            Service.PrintInfo($"[Debug] 命中：偏移 0x{offset:X} = {value}");
         }
+
+        Service.PrintInfo($"[Debug] 掃描結束，共 {hits} 筆命中。" +
+                          (hits == 0 ? "（0 筆的時候先確認上面那行的 FishingBait 是不是你要找的值，別直接當成『沒有』。）" : ""));
     }
 }
