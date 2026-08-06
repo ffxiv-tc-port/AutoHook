@@ -4,6 +4,7 @@ using AutoHook.Classes;
 using AutoHook.Enums;
 using AutoHook.Utils;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
@@ -71,22 +72,72 @@ public unsafe class BaitManager
     }
 
     //public uint Current => PlayerState.Instance()->FishingBait;
-    
+
     public uint CurrentBaitSwimBait => CurrentSwimBait ?? Current;
+
+    /// <summary>
+    /// 台服目前唯一的宇宙探索地區（渴望灣，TerritoryType 1237）。
+    /// 只當成「<see cref="WKSManager.TerritoryId"/> 讀不到時的退路」使用 ——
+    /// 寫死地區 ID 在下一個探索地開放時會靜默失效，所以不能是唯一判準。
+    /// </summary>
+    private const ushort CosmicTerritoryFallback = 1237;
+
+    /// <summary>
+    /// 目前是不是站在宇宙探索地區。優先信 <see cref="WKSManager"/> 自己記的地區 ID
+    /// （這樣新探索地開放時不必改碼），對不上再退回寫死的 <see cref="CosmicTerritoryFallback"/>。
+    /// </summary>
+    private bool IsInCosmicZone(WKSManager* cosmicManager)
+    {
+        if (cosmicManager == null)
+            return false;
+
+        var territory = Service.ClientState.TerritoryType;
+        if (territory == 0)
+            return false;
+
+        return territory == cosmicManager->TerritoryId || territory == CosmicTerritoryFallback;
+    }
 
     public uint Current
     {
         get
         {
-            if (Service.ClientState.TerritoryType == 1237)
+            var cosmicManager = WKSManager.Instance();
+            if (IsInCosmicZone(cosmicManager))
             {
-                var cosmicManager = WKSManager.Instance();
-                if (cosmicManager != null)
-                    return *(uint*)((byte*)cosmicManager + 0xC9C);
+                // ⚠️ 這裡原本是寫死的 `*(uint*)((byte*)cosmicManager + 0xC9C)`。
+                //    在目前釘住的 FFXIVClientStructs 裡，餌的欄位是 WKSManager+0xC4C（FishingBait），
+                //    而 0xC9C 落在 0xC55~0xCDD 的 _missionCompletionFlags 中間 —— 讀出來是
+                //    任務完成旗標被當成 uint 解讀的垃圾值，不會崩，只會一直給錯的餌 ID。
+                //    影響不只顯示：GetCurrentBaitMoochId() 用這個值去 preset 裡挑「這個餌的設定」，
+                //    值不對就永遠挑不到，只會退回 All Baits 的預設設定。
+                //    台服實機佐證：ICE 讀同一個 CS 欄位印出 45952（宇宙幼蟲），是合法的月面餌。
+                var cosmicBait = cosmicManager->FishingBait;
+                LogCosmicBait(cosmicBait);
+                return cosmicBait;
             }
 
-            return PlayerState.Instance()->FishingBait;
+            var playerState = PlayerState.Instance();
+            return playerState == null ? 0 : playerState->FishingBait;
         }
+    }
+
+    private uint _lastLoggedCosmicBait = uint.MaxValue;
+
+    /// <summary>
+    /// 宇宙探索的餌 ID 只在「換餌」那一刻寫一行 Information。
+    /// 刻意不用 Debug：使用者的記錄等級是 2，Debug 收不到，
+    /// 而這個值一旦讀錯，症狀是「preset 選錯」這種完全沒有錯誤訊息的形狀。
+    /// </summary>
+    private void LogCosmicBait(uint baitId)
+    {
+        if (baitId == _lastLoggedCosmicBait)
+            return;
+
+        _lastLoggedCosmicBait = baitId;
+        Service.PrintInfo(baitId == 0
+            ? @"[BaitManager] 宇宙探索：目前沒有掛餌（WKSManager.FishingBait = 0）。"
+            : @$"[BaitManager] 宇宙探索：目前掛的餌 ID = {baitId}（{MultiString.GetItemName((int)baitId)}）。");
     }
 
     public ChangeBaitReturn ChangeBait(uint baitId)
@@ -98,9 +149,30 @@ public unsafe class BaitManager
             return ChangeBaitReturn.InvalidBait;
 
         if (PlayerRes.HasItem(baitId) <= 0)
+        {
+            WarnIfInventoryUnreadable(baitId);
             return ChangeBaitReturn.NotInInventory;
+        }
 
         return _executeCommand(701, 4, baitId, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
+    }
+
+    /// <summary>
+    /// <c>InventoryManager.GetInventoryItemCount</c> 在換區／傳送期間（BetweenAreas / BetweenAreas51）
+    /// 對**所有**道具都回 0，不報錯。所以「身上沒有這個餌」有兩種完全不同的成因，
+    /// 而它們在 log 裡長得一模一樣。
+    ///
+    /// 這裡刻意**不改行為**（這種時候拒絕換餌本來就是對的），只把成因寫成 Information，
+    /// 免得下次又要從「ICE 一直重送 /ahbait」倒推回來。
+    /// </summary>
+    private static void WarnIfInventoryUnreadable(uint baitId)
+    {
+        if (!Service.Condition[ConditionFlag.BetweenAreas] && !Service.Condition[ConditionFlag.BetweenAreas51])
+            return;
+
+        Service.PrintInfo(
+            @$"[BaitManager] 換餌被判定為「身上沒有餌 {baitId}」，但目前正在換區／傳送中 —— " +
+            @"這段期間道具數量一律讀成 0，所以這個判定不可信。等傳送結束後會自動重試。");
     }
 
 
@@ -129,6 +201,7 @@ public unsafe class BaitManager
         if (PlayerRes.HasItem((uint)bait.Id) <= 0)
         {
             Service.PrintChat($"Bait \"{bait.Name}\" is not in your inventory.");
+            WarnIfInventoryUnreadable((uint)bait.Id);
             return ChangeBaitReturn.NotInInventory;
         }
 

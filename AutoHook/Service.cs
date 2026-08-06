@@ -76,6 +76,22 @@ public class Service
         PluginLog.Debug(msg);
     }
     
+    /// <summary>
+    /// 給「要使用者回報時看得到」的診斷用。使用者的 Dalamud 記錄等級是 2（Information），
+    /// <see cref="PrintDebug"/> 寫出去的東西他們的 log 裡一行都不會有 ——
+    /// 只在「值錯了也不會報錯、只會表現成行為怪怪的」那種地方用這個等級，不要拿來當一般 log。
+    /// </summary>
+    public static void PrintInfo(string msg)
+    {
+        if (LogMessages.Count >= MaxLogSize)
+        {
+            LogMessages.Dequeue();
+        }
+
+        LogMessages.Enqueue(msg);
+        PluginLog.Information(msg);
+    }
+
     public static void PrintVerbose(string msg)
     {
         if (LogMessages.Count >= MaxLogSize)
