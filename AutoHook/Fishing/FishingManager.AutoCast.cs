@@ -29,7 +29,9 @@ public partial class FishingManager
         if (!hookCfg.Enabled)
             return;
 
-        Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(_lureSuccess));
+        // 傳的是「鎖定 或 魚影」的合併判斷（LureStopRequested），不再只看每竿重設的 _lureSuccess ——
+        // 否則魚影還在的時候只要釣起別的魚，下一竿就會重新引誘而毀掉已觸發的魚影。
+        Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(LureStopRequested));
     }
     
     private void CastCollect()

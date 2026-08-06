@@ -34,7 +34,66 @@ public partial class FishingManager : IDisposable
     private SpectralCurrentStatus _spectralCurrentStatus = SpectralCurrentStatus.NotActive;
 
     private bool _isMooching;
+
+    /// <summary>
+    /// 「體型鎖定」旗標（LogMessage 5565／5569 那兩則三驚嘆號訊息）。
+    /// ⚠️ 語意刻意維持原樣：**每拋一竿就在 <see cref="OnBeganFishing"/> 清掉**，
+    ///    而且只有 <see cref="LureTarget.Any"/> 時才會因為鎖定訊息而設起來。
+    ///    要跨竿保留的是魚影，不是鎖定 —— 見 <see cref="_lureShadowFish"/>。
+    /// </summary>
     private bool _lureSuccess;
+
+    /// <summary>
+    /// 目前**已觸發且尚未結束**的魚影（null＝沒有魚影）。
+    ///
+    /// 🔴 這個狀態刻意**跨拋竿**。原本魚影是靠 <see cref="_lureSuccess"/> 表達的，而那個旗標
+    ///    每一竿都會被重設 —— 所以只要在魚影還在的時候釣起了**別的**魚，下一竿就會重新施放引誘，
+    ///    把已經觸發的魚影最高咬餌權重毀掉（再次使用引誘會失去最高機率）。
+    ///
+    /// 🔑 **清除時機三個都要，缺一會卡死在「永遠不再引誘」**：
+    ///    ①收到魚影消失訊息（<c>Unknown_70_2</c>）②收到釣起訊息（<c>Unknown_70_3</c>）
+    ///    ③離開釣魚（<see cref="FishingState.Quit"/> ／ <see cref="FishingState.NotFishing"/>）當兜底。
+    ///
+    /// ⚠️ 「魚影跨竿持續」這件事來自第三方文件、**我們沒有實機驗證**。就算它是錯的（魚影只活一竿），
+    ///    ①仍會在那一竿結束前發、加上③的兜底 —— 行為退回等同修改前，不會卡死。
+    ///    設定／清除各寫一行 <c>Information</c> 級 log，實機跑一次就能從 log 判斷 ① 到底會不會發。
+    /// </summary>
+    private BaitFishClass? _lureShadowFish;
+
+    /// <summary>
+    /// 「引誘的目的已經達成，不要再放引誘」＝ 體型鎖定（每竿）**或** 魚影已觸發（跨竿）。
+    /// </summary>
+    private bool LureStopRequested => _lureSuccess || _lureShadowFish != null;
+
+    /// <summary>記下魚影已觸發。<paramref name="source"/> 會進 log，用來事後判斷是哪條路徑設起來的。</summary>
+    private void SetLureShadow(BaitFishClass fish, string source)
+    {
+        var previous = _lureShadowFish;
+        _lureShadowFish = fish;
+
+        if (previous != null && previous.Id == fish.Id)
+        {
+            Service.PrintInfo(
+                @$"[魚影] 重複收到出現訊息：{fish.Name} (id {fish.Id})｜來源＝{source}（狀態不變，仍暫停引誘）");
+            return;
+        }
+
+        var replaced = previous == null ? @"無" : @$"{previous.Name} (id {previous.Id})";
+        Service.PrintInfo(
+            @$"[魚影] 設定：{fish.Name} (id {fish.Id})｜來源＝{source}｜原本的魚影＝{replaced}" +
+            @"｜在消失/釣起/離開釣魚之前都會暫停施放引誘（跨拋竿）");
+    }
+
+    /// <summary>清除魚影狀態。已經是 null 時完全不做事，所以放在每幀路徑上也不會洗版。</summary>
+    private void ClearLureShadow(string source)
+    {
+        var previous = _lureShadowFish;
+        if (previous == null)
+            return;
+
+        _lureShadowFish = null;
+        Service.PrintInfo(@$"[魚影] 清除：{previous.Name} (id {previous.Id})｜來源＝{source}｜恢復施放引誘");
+    }
 
     /// <summary>
     /// 上一次咬鉤的力道，**純量測用**（<see cref="CosmicCatchLog"/>），不參與任何決策。
@@ -212,7 +271,15 @@ public partial class FishingManager : IDisposable
         var currentState = Service.BaitManager.FishingState;
 
         if (!Service.Configuration.PluginEnabled || currentState == FishingState.NotFishing)
+        {
+            // 🔴 魚影是跨拋竿的狀態，只靠聊天訊息清除會有漏網（訊息被別的外掛吃掉、玩家直接收竿、
+            //    切區、外掛中途被關掉…）。這裡是**兜底**：只要人不在釣魚就一定清掉，
+            //    否則會永遠停在「不再施放引誘」。已經是 null 時 ClearLureShadow 直接返回，不會洗版。
+            if (currentState == FishingState.NotFishing)
+                ClearLureShadow(@"離開釣魚 (NotFishing)");
+
             return;
+        }
 
         if (currentState != FishingState.Quit && _lastStep.HasFlag(FishingSteps.Quitting))
         {
@@ -479,6 +546,9 @@ public partial class FishingManager : IDisposable
     private void OnFishingStop()
     {
         _lastStep = FishingSteps.None;
+
+        // 魚影跨拋竿，但**不跨釣魚**：收竿就清（三個清除時機的第③個）。
+        ClearLureShadow(@"離開釣魚 (Quit)");
 
         if (_fishingTimer.IsRunning)
             _fishingTimer.Reset();

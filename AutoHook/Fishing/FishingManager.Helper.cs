@@ -61,16 +61,37 @@ public partial class FishingManager
                 var logId = Service.DataManager.GetExcelSheet<LogMessage>()
                     ?.FirstOrDefault(x => x.Text.ToString() == text).RowId;
 
-                // Check if a special fish is found
-                _lureSuccess = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
+                // ── 魚影（跨拋竿）────────────────────────────────────────────────
+                // 三則訊息都來自 FishParameter：_1 出現、_2 消失、_3 釣起。
+                // ⚠️ LureFishes 是每次存取都重算的屬性（Where + ToList），這裡只取一次快照。
+                var lureFishes = GameRes.LureFishes;
 
-                if (_lureSuccess)
-                    return;
-
-                if (GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any)
+                var shadowAppeared = lureFishes.FirstOrDefault(f => f.LureMessage == text);
+                if (shadowAppeared != null)
                 {
-                    _lureSuccess = logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess;
+                    SetLureShadow(shadowAppeared, @"魚影出現訊息 (FishParameter._1)");
+                    _lureSuccess = true;
+                    return;
                 }
+
+                var shadowGone = lureFishes.FirstOrDefault(f => f.LureGoneMessage == text);
+                if (shadowGone != null)
+                {
+                    ClearLureShadow(@$"魚影消失訊息 (FishParameter._2)：{shadowGone.Name}");
+                }
+                else
+                {
+                    var shadowCaught = lureFishes.FirstOrDefault(f => f.LureCaughtMessage == text);
+                    if (shadowCaught != null)
+                        ClearLureShadow(@$"釣起訊息 (FishParameter._3)：{shadowCaught.Name}");
+                }
+
+                // ── 體型鎖定（每竿）─────────────────────────────────────────────
+                // ⚠️ 這一行與修改前**完全等價**：原本是「先無條件寫入魚影比對結果，命中就 return，
+                //    沒命中再看鎖定訊息」。魚影那一支已經在上面 return 掉了，剩下的就是這個。
+                //    LureTarget != Any 時不因鎖定訊息停手是刻意取捨（追特定魚影時不停），不要動。
+                _lureSuccess = GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any &&
+                               logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess;
             }
             else if (type is SystemAlert)
             {

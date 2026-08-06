@@ -21,8 +21,19 @@ public class BaitFishClass : IComparable<BaitFishClass>
 
     public int Id;
 
+    /// <summary>魚影**出現**的訊息（<c>FishParameter.Unknown_70_1</c>）。非魚影魚為空字串。</summary>
     [JsonIgnore] public string LureMessage = "";
-    
+
+    /// <summary>
+    /// 魚影**消失**的訊息（<c>FishParameter.Unknown_70_2</c>）。非魚影魚為空字串。
+    /// 台服 7.20 的 12 條魚影魚三則訊息都齊全（離線查 <c>FishParameter.csv</c> 確認）。
+    /// </summary>
+    [JsonIgnore] public string LureGoneMessage = "";
+
+    /// <summary>魚影魚被**釣起**的訊息（<c>FishParameter.Unknown_70_3</c>）。非魚影魚為空字串。</summary>
+    [JsonIgnore] public string LureCaughtMessage = "";
+
+
     // check the bait type
     [JsonIgnore]
     public BaitType BaitType
@@ -43,6 +54,8 @@ public class BaitFishClass : IComparable<BaitFishClass>
     {
         var itemData = fishRow.Item.GetValueOrDefault<ItemRow>() ?? new ItemRow();
         LureMessage = fishRow.Unknown_70_1.ToString();
+        LureGoneMessage = fishRow.Unknown_70_2.ToString();
+        LureCaughtMessage = fishRow.Unknown_70_3.ToString();
         Id = (int)itemData.RowId;
     }
 
