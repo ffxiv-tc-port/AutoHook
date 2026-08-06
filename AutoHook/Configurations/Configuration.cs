@@ -290,13 +290,41 @@ public class Configuration : IPluginConfiguration
     [NonSerialized] private const string ExportPrefixV2 = "AH_";
     [NonSerialized] private const string ExportPrefixV3 = "AH3_";
     [NonSerialized] private const string ExportPrefixV4 = "AH4_";
+
+    /// <summary>
+    /// 上游較新版本匯出的 preset 前綴。**只收不發** —— <see cref="ExportPreset"/> 仍然輸出
+    /// <see cref="ExportPrefixV4"/>，所以既有使用者的匯出字串一個字都沒變。
+    ///
+    /// 之所以不需要專屬的反序列化分支：AH6_ 的酬載跟 AH4_ 一樣是 base64(gzip(utf8 json))
+    /// （已離線驗證 14 段真實字串：gzip magic 1f8b 正確、末四位元組的 ISIZE 與實際解壓長度相符），
+    /// 對應的 C# 型別同樣是 <see cref="CustomPresetConfig"/>，所以走
+    /// <see cref="ImportPreset"/> 末尾那條共用路徑即可。
+    ///
+    /// ⚠️ **但 AH6_ 的 schema 比 AH4_ 大一圈，多出來的欄位會被靜默丟掉。**
+    /// 離線比對 14 段 AH6_ 與我們出貨的 94 段 AH4_，AH6_ 多出的第二層鍵包含
+    /// <c>NamedConditions</c>、<c>*.ConditionSet</c>、<c>AutoCastsCfg.TimeWindowConditionSet</c>、
+    /// <c>ExtraCfg.Triggers</c>、<c>ExtraCfg.AutoOceanFish*</c>、<c>ListOfFish[*].Multihook</c> 等；
+    /// 這些屬性我們的設定類別根本沒有宣告，Newtonsoft 預設 MissingMemberHandling.Ignore 會直接忽略
+    /// —— **不會丟例外，但那些條件式行為等於沒有生效**。
+    /// 反過來 AH4_ 才有的計數式欄位（<c>StopAfterCaught</c>／<c>SwapBaitCount</c> 等）在 AH6_ 已被
+    /// ConditionSet 取代，所以匯入 AH6_ 時那些欄位會落在型別預設值上。
+    ///
+    /// 共用鍵路徑 217 條裡只有 <c>ListOfFish[*].SparefulHand.FishIdToCheck</c> 型別對不上
+    /// （AH6_ 會出現 null），而該屬性我們的模型沒有宣告 ⇒ 同樣被忽略，不構成反序列化例外。
+    /// </summary>
+    [NonSerialized] private const string ExportPrefixV6 = "AH6_";
+
     [NonSerialized] private const string ExportPrefixSf = "AHSF1_";
     [NonSerialized] private const string ExportPrefixFolder = "AHFOLDER_";
 
 
+    // ⚠️ 順序有意義：DecompressString 用 First(s.StartsWith) 取前綴。
+    // 目前沒有任何一個前綴是另一個的前綴（"AH_" 的第三個字元是 '_'，
+    // 而 AH3_/AH4_/AH6_ 的第三個字元是數字），所以怎麼排都不會誤判；
+    // 之後要加新前綴時請重新確認這一點。
     [NonSerialized] private static readonly List<string> ExportPrefixes =
     [
-        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixSf, ExportPrefixFolder
+        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixV6, ExportPrefixSf, ExportPrefixFolder
     ];
 
     public static string CompressString(string s)
