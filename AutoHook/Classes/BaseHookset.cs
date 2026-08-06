@@ -207,36 +207,71 @@ public class BaseHookset
 
     private void DrawStellarHook()
     {
-        if (ImGui.TreeNodeEx(UIStrings.StellarHookset,
+        // 🔴 每一個交給 ImGui 的在地化字串都要過 Loc.Safe。
+        //    2026-08-06 實機崩潰就是 UIStrings.StellarHookset 在 zh 語系是**空字串**，
+        //    空字串在原生邊界會變成空指標，igFindRenderedTextEnd 從位址 0 開始掃 → 遊戲當場結束。
+        //
+        // ⚠️ TreeNodeEx 的 id 用固定英文再接 ### ——
+        //    id 跟著語系跑會讓展開狀態在換語言時整個丟失，而且一旦那個語系的值是空的，
+        //    連 id 都會是空字串。可見文字放 ### 後面。
+        var title = Loc.Safe(UIStrings.StellarHookset, nameof(UIStrings.StellarHookset), @"Stellar Hookset");
+        if (ImGui.TreeNodeEx($"{title}###StellarHookSection",
                 ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap))
         {
-            ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.StellarHookCosmicOnly);
+            ImGui.TextColored(ImGuiColors.DalamudGrey,
+                Loc.Safe(UIStrings.StellarHookCosmicOnly, nameof(UIStrings.StellarHookCosmicOnly),
+                    @"Cosmic Exploration only. 60s cooldown, no GP cost."));
 
-            DrawUtil.Checkbox(UIStrings.UseStellarHook, ref UseStellarHook, UIStrings.UseStellarHookHelpText);
+            DrawUtil.Checkbox(
+                Loc.Safe(UIStrings.UseStellarHook, nameof(UIStrings.UseStellarHook),
+                    @"Use Stellar Hookset when available"),
+                ref UseStellarHook,
+                Loc.Safe(UIStrings.UseStellarHookHelpText, nameof(UIStrings.UseStellarHookHelpText),
+                    @"Uses Stellar Hookset whenever the game says it is usable."));
 
             ImGui.Spacing();
-            ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.StellarPriorityLabel);
+            ImGui.TextColored(ImGuiColors.DalamudYellow,
+                Loc.Safe(UIStrings.StellarPriorityLabel, nameof(UIStrings.StellarPriorityLabel),
+                    @"Stellar Hookset priority"));
             ImGui.SameLine();
-            ImGuiComponents.HelpMarker(UIStrings.StellarPriorityHelpText);
+            ImGuiComponents.HelpMarker(
+                Loc.Safe(UIStrings.StellarPriorityHelpText, nameof(UIStrings.StellarPriorityHelpText),
+                    @"Auto follows the current mission's scoring method."));
 
             ImGui.Indent();
-            DrawPriorityRadio(UIStrings.StellarPriorityAuto, StellarPriorityMode.Auto);
-            DrawPriorityRadio(UIStrings.StellarPriorityEvaluation, StellarPriorityMode.Evaluation);
-            DrawPriorityRadio(UIStrings.StellarPriorityQuantity, StellarPriorityMode.Quantity);
+            DrawPriorityRadio(
+                Loc.Safe(UIStrings.StellarPriorityAuto, nameof(UIStrings.StellarPriorityAuto), @"Auto"),
+                StellarPriorityMode.Auto);
+            DrawPriorityRadio(
+                Loc.Safe(UIStrings.StellarPriorityEvaluation, nameof(UIStrings.StellarPriorityEvaluation),
+                    @"Evaluation first"), StellarPriorityMode.Evaluation);
+            DrawPriorityRadio(
+                Loc.Safe(UIStrings.StellarPriorityQuantity, nameof(UIStrings.StellarPriorityQuantity),
+                    @"Quantity first"), StellarPriorityMode.Quantity);
 
             // 這一格只有「自動」才有意義 —— 它是判不出型別時的退路，不是獨立開關。
             if (StellarPriority == StellarPriorityMode.Auto)
             {
-                DrawUtil.Checkbox(UIStrings.StellarHookBeforeMultiHook, ref StellarBeforeMultiHook,
-                    UIStrings.StellarHookBeforeMultiHookHelpText);
+                DrawUtil.Checkbox(
+                    Loc.Safe(UIStrings.StellarHookBeforeMultiHook, nameof(UIStrings.StellarHookBeforeMultiHook),
+                        @"When the mission type cannot be detected, favour evaluation"),
+                    ref StellarBeforeMultiHook,
+                    Loc.Safe(UIStrings.StellarHookBeforeMultiHookHelpText,
+                        nameof(UIStrings.StellarHookBeforeMultiHookHelpText),
+                        @"Which way Auto goes when the mission type is unknown."));
             }
 
             ImGui.Unindent();
 
             ImGui.Separator();
-            StellarWeak.DrawOptions(UIStrings.HookWeakExclamation);
-            StellarStrong.DrawOptions(UIStrings.HookStrongExclamation);
-            StellarLegendary.DrawOptions(UIStrings.HookLegendaryExclamation);
+            StellarWeak.DrawOptions(
+                Loc.Safe(UIStrings.HookWeakExclamation, nameof(UIStrings.HookWeakExclamation), @"Weak Bite (!)"));
+            StellarStrong.DrawOptions(
+                Loc.Safe(UIStrings.HookStrongExclamation, nameof(UIStrings.HookStrongExclamation),
+                    @"Strong Bite (!!)"));
+            StellarLegendary.DrawOptions(
+                Loc.Safe(UIStrings.HookLegendaryExclamation, nameof(UIStrings.HookLegendaryExclamation),
+                    @"Legendary Bite (!!!)"));
             ImGui.TreePop();
         }
     }

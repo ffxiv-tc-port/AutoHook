@@ -73,6 +73,12 @@ public class AutoHook : IDalamudPlugin
 
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
+
+        // 資源檔裡「鍵存在但值是空字串」的條目，在被畫出來的那一刻會讓遊戲當場崩潰
+        // （空字串 → ImU8String 零長度 → 原生邊界拿到空指標 → igFindRenderedTextEnd 從位址 0 開始掃）。
+        // 在被踩到之前先列出來，寫 Information 讓使用者回報得出來。
+        Loc.ReportEmptyResourceKeys();
+
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
 
