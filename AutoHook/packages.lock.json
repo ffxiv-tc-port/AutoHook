@@ -14,10 +14,8 @@
         "resolved": "1.11.61",
         "contentHash": "hqZASeEFHS9quHvfZSwaULoAJLWkOYVPiQjc3P9J4pQS8vSYzrP3bxe04Vm7vYYuxwbQhq9hCSVvZVLTyRaNaQ=="
       },
-      "ECommons": {
-        "type": "Transitive",
-        "resolved": "3.0.1.10",
-        "contentHash": "EHFFs6YlI+DQemaGCyVvcLSYbkDFXds4yndVhS6V96TJ02bFrUiERx6C4erYiYZ25V9C3JblDHcRIhGLfAivuQ=="
+      "ecommons": {
+        "type": "Project"
       },
       "punishlib": {
         "type": "Project",
