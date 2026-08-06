@@ -1,5 +1,7 @@
 ﻿using System;
+using AutoHook.Classes;
 using AutoHook.Configurations;
+using System.Collections.Generic;
 using System.Linq;
 using ECommons.EzIpcManager;
 
@@ -9,10 +11,31 @@ public class AutoHookIPC
 {
     private Configuration _cfg = Service.Configuration;
 
+    /// <summary>
+    /// 匿名 preset／資料夾的名稱前綴。<see cref="DeleteAllAnonymousPresets"/> 靠它辨識該清掉誰，
+    /// 所以**凡是由 IPC 建出來的東西都必須帶上它**，否則會永遠留在使用者的設定檔裡。
+    /// </summary>
+    private const string AnonPrefix = "anon_";
+
+    /// <summary>
+    /// <see cref="CreateAndSelectAnonymousFolder"/> 的合約版本，給呼叫端做能力探測用
+    /// （形狀比照 AutoRetainer 的 <c>GetRetainerItemRetrieveApiVersion</c>）。
+    /// <br/>🔴 <b>改變回傳語意或參數時一定要加號</b>——呼叫端是拿它決定「這個功能能不能用」的。
+    /// </summary>
+    private const int FolderImportApiVersion = 1;
+
     public AutoHookIPC()
     {
         EzIPC.Init(this, "AutoHook");
     }
+
+    /// <summary>
+    /// 資料夾匯入 IPC 的合約版本。**沒有這個 IPC 的舊版 AutoHook**：呼叫端帶
+    /// <c>SafeWrapper.AnyException</c> 時例外會被吞掉並回傳 <c>default(int)</c> ＝ <b>0</b>，
+    /// 所以 <b>0 一律代表「這版沒有這個功能」</b>，版本號從 1 起跳刻意不使用 0。
+    /// </summary>
+    [EzIPC]
+    public int GetFolderImportApiVersion() => FolderImportApiVersion;
 
     [EzIPC]
     public void SetPluginState(bool state)
@@ -66,6 +89,171 @@ public class AutoHookIPC
         Service.Save();
     }
 
+    /// <summary>
+    /// 匯入一整包 <c>AHFOLDER_</c>／<c>AHFOLDER2_</c> 資料夾匯出，全部掛成匿名 preset，
+    /// 並選取<b>第一筆</b>當進入點。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>這不是「把資料夾裡的 preset 逐筆丟給 <see cref="CreateAndSelectAnonymousPreset"/>」。</b>
+    /// 那個函式每一筆都會重設 <c>SelectedPreset</c>，迴圈送 N 筆的結果是<b>只有最後一筆生效</b>。
+    /// 資料夾裡的多筆 preset 是一台<b>狀態機</b>：彼此用 <c>PresetToSwap</c>（<b>比對名稱字串</b>，
+    /// 見 <c>FishingManager.FishCaught.CheckFishCaughtSwap</c>）互指，所以正確語意是
+    /// 「全部裝進去、只選進入點，之後由 AutoHook 自己換」。
+    /// <br/><br/>
+    /// 🔴 <b>改名與轉指必須成對做。</b>匿名 preset 一律加 <see cref="AnonPrefix"/> 前綴，
+    /// 否則 <see cref="DeleteAllAnonymousPresets"/> 清不掉、每接一次任務就多留一份；
+    /// 但 <c>PresetToSwap</c> 存的是<b>改名前</b>的字串，只改名不轉指的話每次換 preset 都會
+    /// 變成「Preset X not found」。所以這裡先轉指、再改名。
+    /// <br/><br/>
+    /// ⚠️ 指向資料夾<b>以外</b>的名稱一律不動——那可能是使用者自己既有的 preset。
+    /// <br/><br/>
+    /// ⚠️ preset 是用 <c>CustomPresets.Add</c> 直接掛上去的，<b>不走
+    /// <see cref="Fishing.FishingPresets.AddNewPreset(BasePresetConfig)"/></b>：後者會做一次
+    /// JSON 深拷貝並<b>重新配發 <c>UniqueId</c></b>，那會讓 <c>ImportFolder</c> 收好的
+    /// <c>PresetFolder.PresetIds</c> 全部對不上。UI 的匯入路徑（<c>TabFishingPresets</c>）
+    /// 也是直接 Add，作法一致。
+    /// </remarks>
+    /// <returns>
+    /// 實際掛上去的 preset 名稱（改名後），順序同資料夾；<b>第一筆就是被選取的那筆</b>。
+    /// 匯入失敗（字串不是資料夾格式／解不開／空資料夾）回傳<b>空清單</b>。
+    /// <br/>📌 呼叫端若收到 <c>null</c>，那不是這個函式回的——代表這版 AutoHook 根本沒有這個
+    /// IPC，例外被呼叫端的 SafeWrapper 吞掉了。兩者要分開處理。
+    /// </returns>
+    [EzIPC]
+    public List<string> CreateAndSelectAnonymousFolder(string folderExport)
+    {
+        var empty = new List<string>();
+
+        var imported = Configuration.ImportFolder(folderExport);
+        if (imported == null)
+        {
+            // 使用者回報用，寫 Information（使用者跑 LogLevel 2，Debug 收不到）。
+            Service.PluginLog.Information(
+                "[IPC] CreateAndSelectAnonymousFolder：傳進來的字串不是可用的資料夾匯出" +
+                "（需要 AHFOLDER_ 或 AHFOLDER2_ 前綴），沒有匯入任何 preset。");
+            return empty;
+        }
+
+        var folder = imported.Value.Folder;
+        var presets = imported.Value.Presets;
+
+        if (presets.Count == 0)
+        {
+            Service.PluginLog.Information(
+                $"[IPC] CreateAndSelectAnonymousFolder：資料夾「{folder.FolderName}」解得開，但裡面沒有任何 preset。");
+            return empty;
+        }
+
+        // ① 先建立「原名 → 匿名」對照表（改名前）。
+        var renames = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var preset in presets)
+        {
+            if (preset.PresetName != null)
+                renames[preset.PresetName] = AnonPrefix + preset.PresetName;
+        }
+
+        // ② 先轉指、再改名。順序反過來的話對照表就查不到原名了。
+        foreach (var preset in presets)
+        {
+            RemapSwapTargets(preset, renames);
+
+            if (preset.PresetName != null && renames.TryGetValue(preset.PresetName, out var anonName))
+                preset.PresetName = anonName;
+        }
+
+        // ③ 掛上去。folder.PresetIds 是 ImportFolder 依這些 UniqueId 收好的，這裡不能重配發。
+        foreach (var preset in presets)
+            _cfg.HookPresets.CustomPresets.Add(preset);
+
+        folder.FolderName = AnonPrefix + folder.FolderName;
+        _cfg.HookPresets.Folders.Add(folder);
+
+        // ④ 選取進入點。必須在 Add 之後——SelectedPreset 的 getter 是去 PresetList 裡查 GUID 的。
+        _cfg.HookPresets.SelectedPreset = presets[0];
+        Service.Save();
+
+        var names = presets.Select(p => p.PresetName).ToList();
+
+        // 進入點判定的旁證：正常的資料夾狀態機裡，進入點是「沒有任何人指向它」的那一筆。
+        // 這裡不拿它去改選擇（順序才是上游的意圖），只在對不上時把事實寫進 log，
+        // 免得日後換了一份 preset 順序不同的資料夾時，症狀變成「就是不動」而查不出所以然。
+        var pointedAt = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var preset in presets)
+            foreach (var target in EnumerateSwapTargets(preset))
+                if (target != null)
+                    pointedAt.Add(target);
+
+        if (pointedAt.Contains(names[0]))
+        {
+            Service.PluginLog.Information(
+                $"[IPC] 資料夾「{folder.FolderName}」選取的進入點「{names[0]}」被其他 preset 指向，" +
+                "代表它可能不是這台狀態機的起點（本函式一律選第一筆）。若釣魚行為不如預期，這是第一個該看的地方。");
+        }
+
+        Service.PluginLog.Information(
+            $"[IPC] 資料夾「{folder.FolderName}」已匯入 {names.Count} 個匿名 preset，選取「{names[0]}」為進入點。" +
+            $"（其餘 {names.Count - 1} 筆等 PresetToSwap 條件成立時才會換過去。）");
+
+        return names;
+    }
+
+    /// <summary>
+    /// 把 preset 裡所有指向<b>同一個資料夾內</b>其他 preset 的名稱換成改名後的新名。
+    /// 查不到的目標（指向資料夾外、或就是預設值 <c>"-"</c>）原樣保留。
+    /// </summary>
+    private static void RemapSwapTargets(CustomPresetConfig preset, Dictionary<string, string> renames)
+    {
+        if (preset.ListOfFish != null)
+        {
+            foreach (var fish in preset.ListOfFish)
+            {
+                if (fish != null)
+                    fish.PresetToSwap = Remap(fish.PresetToSwap, renames);
+            }
+        }
+
+        var extra = preset.ExtraCfg;
+        if (extra != null)
+        {
+            extra.PresetToSwapIntuitionGain = Remap(extra.PresetToSwapIntuitionGain, renames);
+            extra.PresetToSwapIntuitionLost = Remap(extra.PresetToSwapIntuitionLost, renames);
+            extra.PresetToSwapSpectralCurrentGain = Remap(extra.PresetToSwapSpectralCurrentGain, renames);
+            extra.PresetToSwapSpectralCurrentLost = Remap(extra.PresetToSwapSpectralCurrentLost, renames);
+            extra.PresetToSwapAnglersArt = Remap(extra.PresetToSwapAnglersArt, renames);
+        }
+    }
+
+    /// <summary>列出 preset 裡所有的換 preset 目標名稱（僅供診斷用，不改任何狀態）。</summary>
+    private static IEnumerable<string?> EnumerateSwapTargets(CustomPresetConfig preset)
+    {
+        if (preset.ListOfFish != null)
+        {
+            foreach (var fish in preset.ListOfFish)
+            {
+                if (fish != null)
+                    yield return fish.PresetToSwap;
+            }
+        }
+
+        var extra = preset.ExtraCfg;
+        if (extra == null)
+            yield break;
+
+        yield return extra.PresetToSwapIntuitionGain;
+        yield return extra.PresetToSwapIntuitionLost;
+        yield return extra.PresetToSwapSpectralCurrentGain;
+        yield return extra.PresetToSwapSpectralCurrentLost;
+        yield return extra.PresetToSwapAnglersArt;
+    }
+
+    private static string Remap(string? target, Dictionary<string, string> renames)
+    {
+        if (target == null)
+            return "-";
+
+        return renames.TryGetValue(target, out var renamed) ? renamed : target;
+    }
+
     [EzIPC]
     public void ImportAndSelectPreset(string preset)
     {
@@ -95,7 +283,14 @@ public class AutoHookIPC
     [EzIPC]
     public void DeleteAllAnonymousPresets()
     {
-        _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith("anon_"));
+        _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith(AnonPrefix));
+
+        // 🔴 資料夾也要收。<see cref="CreateAndSelectAnonymousFolder"/> 會建一個 anon_ 前綴的資料夾，
+        //    只刪 preset 的話那個（已經空掉的）資料夾會永遠留在使用者的設定檔裡，
+        //    而 ICE 是**每接一次釣魚任務就呼叫一次**匯入 —— 那是會累積的。
+        //    ⚠️ 只刪 anon_ 前綴的：使用者自己建的資料夾一個都不能碰。
+        _cfg.HookPresets.Folders.RemoveAll(f => f.FolderName != null && f.FolderName.StartsWith(AnonPrefix));
+
         Service.Save();
     }
 }
