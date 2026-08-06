@@ -76,27 +76,14 @@ public unsafe class BaitManager
     public uint CurrentBaitSwimBait => CurrentSwimBait ?? Current;
 
     /// <summary>
-    /// 台服目前唯一的宇宙探索地區（渴望灣，TerritoryType 1237）。
-    /// 只當成「<see cref="WKSManager.TerritoryId"/> 讀不到時的退路」使用 ——
-    /// 寫死地區 ID 在下一個探索地開放時會靜默失效，所以不能是唯一判準。
-    /// </summary>
-    private const ushort CosmicTerritoryFallback = 1237;
-
-    /// <summary>
-    /// 目前是不是站在宇宙探索地區。優先信 <see cref="WKSManager"/> 自己記的地區 ID
-    /// （這樣新探索地開放時不必改碼），對不上再退回寫死的 <see cref="CosmicTerritoryFallback"/>。
+    /// 目前是不是站在宇宙探索地區。
+    /// 判定本體搬到 <see cref="CosmicMissionInfo.IsInCosmicZone(WKSManager*)"/>（邏輯逐字相同，
+    /// 只是不想讓寫死的地區 ID 出現在兩個地方 —— 那種東西一旦分岔就是靜默失效）。
+    /// 這裡刻意保留「傳入呼叫端已取得的指標」這個形狀，避免多一次 <c>Instance()</c>
+    /// 而讓 null 檢查跟後面實際使用的指標變成兩個不同的值。
     /// </summary>
     private bool IsInCosmicZone(WKSManager* cosmicManager)
-    {
-        if (cosmicManager == null)
-            return false;
-
-        var territory = Service.ClientState.TerritoryType;
-        if (territory == 0)
-            return false;
-
-        return territory == cosmicManager->TerritoryId || territory == CosmicTerritoryFallback;
-    }
+        => CosmicMissionInfo.IsInCosmicZone(cosmicManager);
 
     public uint Current
     {

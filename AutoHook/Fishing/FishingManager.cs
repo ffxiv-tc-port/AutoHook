@@ -36,6 +36,13 @@ public partial class FishingManager : IDisposable
     private bool _isMooching;
     private bool _lureSuccess;
 
+    /// <summary>
+    /// 上一次咬鉤的力道，**純量測用**（<see cref="CosmicCatchLog"/>），不參與任何決策。
+    /// ⚠️ 一定要在咬鉤當下存起來：<c>UpdateCatch</c> 觸發時魚已經上岸，
+    ///    <see cref="SeTugType"/> 那個位址讀到的早就不是這一竿的值了。
+    /// </summary>
+    private BiteType _lastBiteType = BiteType.Unknown;
+
     private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, ulong targetId,
         uint a4, uint a5,
         uint a6, IntPtr a7);
@@ -349,8 +356,11 @@ public partial class FishingManager : IDisposable
 
         _lastCatch = null;
         _lastStep = FishingSteps.FishBit;
-        HookFish(Service.TugType?.Bite ?? BiteType.Unknown, currentHook);
-        
+
+        // 跟原本一樣只讀一次 TugType，只是順手留一份給量測用（見 _lastBiteType）。
+        _lastBiteType = Service.TugType?.Bite ?? BiteType.Unknown;
+        HookFish(_lastBiteType, currentHook);
+
     }
 
     private void HookFish(BiteType bite, HookConfig currentHook)
@@ -383,8 +393,20 @@ public partial class FishingManager : IDisposable
         Service.Status = (@$"Using {hook.ToString()} hook. (Bite: {bite})");
     }
 
-    private void OnCatch(uint fishId, uint amount)
+    /// <param name="large">遊戲傳來的「大型」旗標。目前只給量測用，不影響任何決策。</param>
+    /// <param name="size">遊戲傳來的尺寸。同上。</param>
+    /// <param name="collectible">這一竿是不是以收藏品形式入手。同上。</param>
+    private void OnCatch(uint fishId, uint amount, bool large, ushort size, bool collectible)
     {
+        // 🔴 純量測，零行為變化：只寫 log。放在最前面是為了「就算下面的既有邏輯出事也已經量到了」。
+        //    這裡刻意不讀任何任務分數 —— 那是 ICE 的職權，見 CosmicCatchLog 的權威邊界說明。
+        // ⚠️ 咬鉤力道**用完就清**：OnBite 不見得每一竿都跑得到（例如外掛在拋竿後才被開啟），
+        //    不清的話這一竿會被貼上「上一竿的力道」——那正好會污染我們要量的那個相關性，
+        //    而且完全看不出來。清成 Unknown 至少讓「不知道」在 log 裡看得見。
+        var biteType = _lastBiteType;
+        _lastBiteType = BiteType.Unknown;
+        CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType);
+
         _lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         var lastFishCatchCfg = GetLastCatchConfig();
 
@@ -509,9 +531,10 @@ public partial class FishingManager : IDisposable
         UpdateCatch!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
 
         // Check against collectibles.
-        if (fishId > 500000)
+        var collectible = fishId > 500000;
+        if (collectible)
             fishId -= 500000;
 
-        OnCatch(fishId, amount);
+        OnCatch(fishId, amount, large, size, collectible);
     }
 }

@@ -88,6 +88,46 @@ public static class CosmicMissionInfo
     private static ushort _lastLoggedMission;
 
     /// <summary>
+    /// 台服目前唯一的宇宙探索地區（渴望灣，TerritoryType 1237）。
+    /// 只當成「<see cref="WKSManager.TerritoryId"/> 讀不到時的退路」使用 ——
+    /// 寫死地區 ID 在下一個探索地開放時會靜默失效，所以不能是唯一判準。
+    /// </summary>
+    public const ushort CosmicTerritoryFallback = 1237;
+
+    /// <summary>
+    /// 目前是不是站在宇宙探索地區。優先信 <see cref="WKSManager"/> 自己記的地區 ID
+    /// （這樣新探索地開放時不必改碼），對不上再退回寫死的 <see cref="CosmicTerritoryFallback"/>。
+    /// </summary>
+    /// <param name="cosmicManager">
+    /// 呼叫端已經拿到的 <see cref="WKSManager"/> 指標。
+    /// ⚠️ 指標由呼叫端當幀取得、當幀用完，**不要存起來跨幀**。
+    /// </param>
+    public static unsafe bool IsInCosmicZone(WKSManager* cosmicManager)
+    {
+        if (cosmicManager == null)
+            return false;
+
+        var territory = Service.ClientState.TerritoryType;
+        if (territory == 0)
+            return false;
+
+        return territory == cosmicManager->TerritoryId || territory == CosmicTerritoryFallback;
+    }
+
+    /// <summary>手上還沒有 <see cref="WKSManager"/> 指標時的版本。</summary>
+    public static unsafe bool IsInCosmicZone() => IsInCosmicZone(WKSManager.Instance());
+
+    /// <summary>
+    /// 目前進行中的宇宙探索任務 row id（<c>WKSMissionUnit</c>）。沒有進行中的任務 → 0。
+    /// 🔴 這裡只拿 id，**不讀任務進度／分數** —— 那是 ICE 的職權，跨過去就會變成兩套互相打架的狀態機。
+    /// </summary>
+    public static unsafe ushort GetCurrentMissionId()
+    {
+        var wks = WKSManager.Instance();
+        return wks == null ? (ushort)0 : wks->CurrentMissionUnitRowId;
+    }
+
+    /// <summary>
     /// 目前進行中的宇宙探索任務靠什麼拿分。
     /// 不在宇宙探索、沒有進行中的任務、或型別判不出來 → <see cref="CosmicScoreFocus.Unknown"/>。
     /// </summary>
