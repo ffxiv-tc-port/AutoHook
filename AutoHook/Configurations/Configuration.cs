@@ -201,6 +201,14 @@ public class Configuration : IPluginConfiguration
         public string FolderName { get; set; }
         public List<CustomPresetConfig> Presets { get; set; } = new();
 
+        /// <summary>
+        /// AHFOLDER2_ 才有的巢狀子資料夾。AHFOLDER_（我們自己匯出的那版）的 JSON 裡沒有這個鍵，
+        /// 反序列化後就是空清單 ⇒ 舊格式的匯入行為完全沒變。
+        /// ⚠️ 我們的 <see cref="PresetFolder"/> 沒有 ParentFolderId，**表達不了階層**，
+        /// 所以匯入時是攤平的，見 <see cref="CollectFolderPresets"/>。
+        /// </summary>
+        public List<FolderExport> ChildFolders { get; set; } = new();
+
         public FolderExport(string name)
         {
             FolderName = name;
@@ -228,7 +236,9 @@ public class Configuration : IPluginConfiguration
 
     public static (PresetFolder Folder, List<CustomPresetConfig> Presets)? ImportFolder(string import)
     {
-        if (!import.StartsWith(ExportPrefixFolder))
+        import = import.Trim();
+
+        if (!import.StartsWith(ExportPrefixFolder) && !import.StartsWith(ExportPrefixFolderV2))
             return null;
 
         try
@@ -240,15 +250,18 @@ public class Configuration : IPluginConfiguration
                 return null;
 
             var folder = new PresetFolder(folderData.FolderName);
+            var presets = new List<CustomPresetConfig>();
+            var nestedFolders = 0;
 
-            // Generate new GUIDs for all presets to avoid conflicts
-            foreach (var preset in folderData.Presets)
-            {
-                preset.UniqueId = Guid.NewGuid();
-                folder.AddPreset(preset.UniqueId);
-            }
+            CollectFolderPresets(folderData, folder, presets, ref nestedFolders, string.Empty, 0);
 
-            return (folder, folderData.Presets);
+            // 使用者回報用，寫 Information（使用者跑 LogLevel 2，Debug 收不到）。
+            if (nestedFolders > 0)
+                Service.PluginLog.Information(
+                    $"[ImportFolder] 這份匯入含 {nestedFolders} 個子資料夾。本外掛的資料夾沒有階層，" +
+                    $"已攤平成單一資料夾（共 {presets.Count} 個 preset）；子資料夾裡的 preset 名稱前面補上了來源路徑。");
+
+            return (folder, presets);
         }
         catch (Exception e)
         {
@@ -257,8 +270,63 @@ public class Configuration : IPluginConfiguration
         }
     }
 
+    /// <summary>
+    /// 上限只是為了擋掉手工捏出來的病態巢狀 —— 遞迴爆掉是 StackOverflowException，
+    /// 那是**攔不到**的、直接把行程帶走。正常匯出不可能接近這個深度。
+    /// </summary>
+    private const int MaxFolderImportDepth = 16;
+
+    /// <summary>
+    /// 把 <see cref="FolderExport"/> 這棵樹上的 preset 全部收進單一資料夾（攤平）。
+    /// 階層資訊改用「子資料夾名/」前綴留在 preset 名稱上 —— 匯入對話框本來就每個 preset
+    /// 都有可編輯的名稱欄，使用者看得到也改得掉。
+    /// 🔑 攤平只損失「分組」，**不會少匯任何一個 preset**。
+    /// </summary>
+    private static void CollectFolderPresets(FolderExport data, PresetFolder target,
+        List<CustomPresetConfig> presets, ref int nestedFolders, string namePrefix, int depth)
+    {
+        foreach (var preset in data.Presets ?? new List<CustomPresetConfig>())
+        {
+            if (preset == null)
+                continue;
+
+            // Generate new GUIDs for all presets to avoid conflicts
+            preset.UniqueId = Guid.NewGuid();
+
+            if (namePrefix.Length > 0)
+                preset.PresetName = namePrefix + preset.PresetName;
+
+            target.AddPreset(preset.UniqueId);
+            presets.Add(preset);
+        }
+
+        if (data.ChildFolders is not { Count: > 0 })
+            return;
+
+        if (depth >= MaxFolderImportDepth)
+        {
+            Service.PluginLog.Information(
+                $"[ImportFolder] 子資料夾巢狀深度超過 {MaxFolderImportDepth} 層，更深的部分沒有匯入。");
+            return;
+        }
+
+        foreach (var child in data.ChildFolders)
+        {
+            if (child == null)
+                continue;
+
+            nestedFolders++;
+            CollectFolderPresets(child, target, presets, ref nestedFolders,
+                $"{namePrefix}{child.FolderName}/", depth + 1);
+        }
+    }
+
     public static BasePresetConfig? ImportPreset(string import)
     {
+        // 一定要跟 DecompressString 用同一個字串：那邊已經 Trim 過，這邊的 StartsWith
+        // 若拿沒 Trim 的原字串去比，開頭帶空白時會選錯分支（例如 " AH_" 會漏掉舊版轉換）。
+        import = import.Trim();
+
         if (import.StartsWith(ExportPrefixV2))
         {
             var old = JsonConvert.DeserializeObject<BaitPresetConfig>(DecompressString(import),
@@ -274,7 +342,9 @@ public class Configuration : IPluginConfiguration
             return ConvertOldPresetV3(old);
         }
 
-        if (import.StartsWith(ExportPrefixSf))
+        // AHSF2_ 是 AHSF1_ 的 Brotli 版，對應的 C# 型別一樣是 AutoGigConfig
+        // （上游 ImportPreset 也是把兩個前綴併在同一條分支）。
+        if (import.StartsWith(ExportPrefixSf) || import.StartsWith(ExportPrefixSf2))
         {
             var autogig = JsonConvert.DeserializeObject<AutoGigConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
@@ -314,17 +384,59 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     [NonSerialized] private const string ExportPrefixV6 = "AH6_";
 
+    /// <summary>
+    /// 上游 2026-08 起改用的匯出前綴，酬載是 <b>base64(brotli(utf8 json))</b>，不是 gzip。
+    /// 同樣**只收不發** —— <see cref="ExportPreset"/>／<see cref="ExportFolder"/> 仍舊輸出
+    /// <see cref="ExportPrefixV4"/>／<see cref="ExportPrefixFolder"/>（gzip），既有使用者手上的
+    /// 匯出字串與 ICE 內建的 preset 一個字都沒變。
+    ///
+    /// 🔴 **Brotli 沒有 gzip 的 ISIZE trailer** —— 舊的 <see cref="DecompressString"/> 是把
+    /// 「最後四個位元組」當成解壓後長度、拿去 <c>new byte[uncompressedSize]</c> 的。
+    /// 離線量過 65 段真實 Brotli 酬載：那四個位元組解讀成 int32 落在數 MB～數百 MB
+    /// （65 段裡有 35 段超過 50MB），而實際 JSON 只有 3～4KB。也就是說舊路徑會為了一個 3KB 的
+    /// preset 去要一塊上百 MB 的緩衝區 —— 失敗方式是 OutOfMemoryException（int32 為負時則是
+    /// OverflowException），跟「格式不對」完全不像。
+    /// 所以這三個前綴**必須**走不依賴長度的串流路徑，見 <see cref="BrotliExportPrefixes"/>。
+    ///
+    /// ⚠️ schema 落差與 AH6_ 同性質、而且更大：AH7_ 是上游 config v7 的序列化結果，
+    /// 條件式行為已全面改成 ConditionSet／NamedConditions，我們的設定類別沒有宣告那些屬性，
+    /// Newtonsoft 預設 MissingMemberHandling.Ignore 會靜默忽略 —— **不丟例外，但那些條件不會生效**。
+    /// 反過來 AH4_ 才有的計數式欄位在 AH7_ 已不存在，匯入後會落在型別預設值上。
+    /// （離線拿上游 wiki 的 55 段真實 AH7_／6 段 AHSF2_／4 段 AHFOLDER2_ 對過我方 DLL 的型別圖：
+    /// 全數解得開、零型別衝突；55 段 AH7_ 每一段都仍帶著我們綁得住的
+    /// ListOfBaits／ListOfMooch／ListOfFish／ExtraCfg／AutoCastsCfg，不是空殼。）
+    /// </summary>
+    [NonSerialized] private const string ExportPrefixV7 = "AH7_";
+
     [NonSerialized] private const string ExportPrefixSf = "AHSF1_";
+
+    /// <inheritdoc cref="ExportPrefixV7"/>
+    [NonSerialized] private const string ExportPrefixSf2 = "AHSF2_";
+
     [NonSerialized] private const string ExportPrefixFolder = "AHFOLDER_";
+
+    /// <inheritdoc cref="ExportPrefixV7"/>
+    [NonSerialized] private const string ExportPrefixFolderV2 = "AHFOLDER2_";
 
 
     // ⚠️ 順序有意義：DecompressString 用 First(s.StartsWith) 取前綴。
-    // 目前沒有任何一個前綴是另一個的前綴（"AH_" 的第三個字元是 '_'，
-    // 而 AH3_/AH4_/AH6_ 的第三個字元是數字），所以怎麼排都不會誤判；
-    // 之後要加新前綴時請重新確認這一點。
+    // 目前沒有任何一個前綴是另一個的前綴，所以怎麼排都不會誤判：
+    //   "AH_" 的第三個字元是 '_'，而 AH3_/AH4_/AH6_/AH7_ 的第三個字元是數字；
+    //   "AHFOLDER_" 的第九個字元是 '_'，而 "AHFOLDER2_" 的是 '2'；
+    //   "AHSF1_" 與 "AHSF2_" 在第五個字元就分開。
+    // 🔴 之後要加新前綴時請重新確認這一點 —— 前綴互為前綴時，選錯的那個會讓
+    //    BrotliExportPrefixes 的判斷跟著選錯，結果是拿 gzip 去解 brotli（或反之）。
     [NonSerialized] private static readonly List<string> ExportPrefixes =
     [
-        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixV6, ExportPrefixSf, ExportPrefixFolder
+        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixV6, ExportPrefixV7,
+        ExportPrefixSf, ExportPrefixSf2, ExportPrefixFolder, ExportPrefixFolderV2
+    ];
+
+    // 走 Brotli 而非 gzip 的前綴（上游同一份清單叫 BroccoliExportPrefixes，是個雙關，
+    // 跨檔比對上游碼時用那個名字搜）。
+    [NonSerialized] private static readonly List<string> BrotliExportPrefixes =
+    [
+        ExportPrefixV7, ExportPrefixSf2, ExportPrefixFolderV2
     ];
 
     public static string CompressString(string s)
@@ -339,11 +451,29 @@ public class Configuration : IPluginConfiguration
 
     public static string DecompressString(string s)
     {
+        // 使用者是從 wiki／Discord 貼過來的，前後常帶換行。
+        // （尾端空白其實無所謂 —— Convert.FromBase64String 本來就忽略空白字元 ——
+        //  但**開頭**的空白會讓下面的 StartsWith 對不上，變成「無效的匯入資料」。）
+        s = s.Trim();
+
         if (!ExportPrefixes.Any(s.StartsWith))
             throw new ApplicationException(UIStrings.DecompressString_Invalid_Import);
 
         var prefix = ExportPrefixes.First(s.StartsWith);
         var data = Convert.FromBase64String(s[prefix.Length..]);
+
+        // 🔴 Brotli 串流沒有 gzip 的 ISIZE trailer，所以**不能**走下面那條
+        // 「讀末四位元組當解壓後長度」的路徑 —— 對真實 Brotli 酬載那個值實測是數 MB～數百 MB
+        // 的垃圾（見 ExportPrefixV7 的註解）。這裡改用不依賴長度的串流複製。
+        if (BrotliExportPrefixes.Contains(prefix))
+        {
+            using var brotliInput = new MemoryStream(data);
+            using var brotli = new BrotliStream(brotliInput, CompressionMode.Decompress);
+            using var brotliOutput = new MemoryStream();
+            brotli.CopyTo(brotliOutput);
+            return Encoding.UTF8.GetString(brotliOutput.ToArray());
+        }
+
         var lengthBuffer = new byte[4];
         Array.Copy(data, data.Length - 4, lengthBuffer, 0, 4);
         var uncompressedSize = BitConverter.ToInt32(lengthBuffer, 0);
