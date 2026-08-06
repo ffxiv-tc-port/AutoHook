@@ -297,6 +297,11 @@ public partial class FishingManager : IDisposable
 
         if (currentState == FishingState.NormalFishing || currentState == FishingState.LureFishing)
         {
+            // 純蒐證：量狀態列比伺服器階梯訊息慢多少。沒有待量的樣本時 HasPending 是個 bool 判斷，
+            // 連狀態列都不會去讀 —— 不在沒事的時候付每幀成本。
+            if (LureLadderLog.HasPending)
+                LureLadderLog.Poll();
+
             CheckWhileFishingActions();
             CheckTimeout();
         }
@@ -374,6 +379,9 @@ public partial class FishingManager : IDisposable
 
         _isMooching = mooching;
         _lureSuccess = false;
+
+        // 純蒐證：重設「距拋竿／距上一則階梯訊息」的基準。不影響任何行為。
+        LureLadderLog.OnCastStarted();
 
         var baitname = MultiString.GetItemName(GetCurrentBaitMoochId());
         if (!_isMooching)
@@ -549,6 +557,8 @@ public partial class FishingManager : IDisposable
 
         // 魚影跨拋竿，但**不跨釣魚**：收竿就清（三個清除時機的第③個）。
         ClearLureShadow(@"離開釣魚 (Quit)");
+
+        LureLadderLog.OnFishingStopped();
 
         if (_fishingTimer.IsRunning)
             _fishingTimer.Reset();
