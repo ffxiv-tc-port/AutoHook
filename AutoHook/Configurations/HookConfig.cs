@@ -151,7 +151,7 @@ public class HookConfig : BaseOption
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
             // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前，只有使用者主動打開才會走這裡。
-            if (hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, stellar, timePassed))
+            if (hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
                 return HookType.Stellar;
 
             // Triple Hook
@@ -188,7 +188,7 @@ public class HookConfig : BaseOption
 
             // 華麗提鉤（宇宙探索）—— 預設的順位：雙重／三重沒有出手時才補位，
             // 但仍然排在精準／強力提鉤之前（它不耗 GP，而且評價比較高）。
-            if (!hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, stellar, timePassed))
+            if (!hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, hook, stellar, timePassed))
                 return HookType.Stellar;
 
             // Normal - Patience
@@ -218,9 +218,25 @@ public class HookConfig : BaseOption
     ///
     /// 回傳 false 時**不會**降級成普通提鉤，而是讓呼叫端繼續往下走原本設定好的提鉤順序。
     /// </summary>
-    private bool ShouldUseStellarHook(BaseHookset hookset, BaseBiteConfig? stellar, double timePassed)
+    /// <param name="hook">同一個 bite 型別原本的三重／雙重／精準設定，用來判斷這一咬本來要不要提鉤。</param>
+    private bool ShouldUseStellarHook(BaseHookset hookset,
+        (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph) hook,
+        BaseBiteConfig? stellar, double timePassed)
     {
         if (!hookset.UseStellarHook || stellar is not { HooksetEnabled: true })
+            return false;
+
+        // 🔴 這個閘門不能拿掉。preset 把某個 bite 型別的三個提鉤全部關掉，
+        //    意思是「這一咬**故意**放它跑」（例如只要傳說級、小咬一律不理）。
+        //    華麗提鉤預設是開的，少了這道閘門就會把本來該放走的魚也勾起來 ——
+        //    這是回退既有行為，而且對使用者表現成「怎麼一直釣到不要的魚」。
+        //    實測：ICE 內建的 94 份宇宙 preset 裡，光是 Patience 那三格就有
+        //    141 個欄位是刻意關掉的（Weak 60、Legendary 56、Strong 25）。
+        var biteIsHookedAtAll = hook.ph.HooksetEnabled
+                                || (hookset.UseTripleHook && hook.th.HooksetEnabled)
+                                || (hookset.UseDoubleHook && hook.dh.HooksetEnabled);
+
+        if (!biteIsHookedAtAll)
             return false;
 
         // 先問可用性再檢查條件：CheckHookCondition 失敗時會寫 Service.Status，
