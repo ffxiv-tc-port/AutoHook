@@ -1447,4 +1447,25 @@
   <data name="CreatePresetAndClose" xml:space="preserve">
     <value>建立預設並關閉</value>
   </data>
+  <data name="StellarHookCosmicOnly" xml:space="preserve">
+    <value>宇宙探索的探索任務專用。60 秒復唱、不耗 GP，在其他地方一律不會生效。</value>
+  </data>
+  <data name="UseStellarHook" xml:space="preserve">
+    <value>華麗提鉤可用時就使用</value>
+  </data>
+  <data name="UseStellarHookHelpText" xml:space="preserve">
+    <value>只要遊戲判定華麗提鉤「不在復唱中且可以施放」，這一咬就改用華麗提鉤。
+
+可用與否是直接讀遊戲自己的動作狀態與復唱時間，不是用計時或地區 ID 去猜，所以在宇宙探索的探索任務以外，這個選項不會改變任何行為。
+
+華麗提鉤用不了的時候，AutoHook 會直接往下走你原本設定的提鉤，不會降級成普通提鉤。</value>
+  </data>
+  <data name="StellarHookBeforeMultiHook" xml:space="preserve">
+    <value>順位排在雙重／三重提鉤之前</value>
+  </data>
+  <data name="StellarHookBeforeMultiHookHelpText" xml:space="preserve">
+    <value>關閉（預設）：只有在雙重／三重提鉤沒有出手時才用華麗提鉤。雙重／三重提鉤一次能起 2～3 條魚，華麗提鉤只起 1 條，所以「要數量」的任務維持原本的效率。
+
+開啟：華麗提鉤優先。適合分數型任務 —— 用華麗提鉤釣起的魚完好無損，評價比較高。</value>
+  </data>
 </root>

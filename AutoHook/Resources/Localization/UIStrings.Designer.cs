@@ -3312,7 +3312,52 @@ namespace AutoHook.Resources.Localization {
                 return ResourceManager.GetString("StellarHookset", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cosmic Exploration only. 60s cooldown, no GP cost. Ignored everywhere else.
+        /// </summary>
+        internal static string StellarHookCosmicOnly {
+            get {
+                return ResourceManager.GetString("StellarHookCosmicOnly", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Use Stellar Hookset when available.
+        /// </summary>
+        internal static string UseStellarHook {
+            get {
+                return ResourceManager.GetString("UseStellarHook", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Uses Stellar Hookset whenever the game says it is off cooldown and usable.
+        /// </summary>
+        internal static string UseStellarHookHelpText {
+            get {
+                return ResourceManager.GetString("UseStellarHookHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Prioritise over Double/Triple Hook.
+        /// </summary>
+        internal static string StellarHookBeforeMultiHook {
+            get {
+                return ResourceManager.GetString("StellarHookBeforeMultiHook", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Off (default): Stellar Hookset is only used when Double/Triple Hook did not fire.
+        /// </summary>
+        internal static string StellarHookBeforeMultiHookHelpText {
+            get {
+                return ResourceManager.GetString("StellarHookBeforeMultiHookHelpText", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Stop After Caught.
         /// </summary>

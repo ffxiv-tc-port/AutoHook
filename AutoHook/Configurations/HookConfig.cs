@@ -137,10 +137,23 @@ public class HookConfig : BaseOption
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
         
+        var stellarDictionary = new Dictionary<BiteType, BaseBiteConfig>
+        {
+            { BiteType.Weak, hookset.StellarWeak },
+            { BiteType.Strong, hookset.StellarStrong },
+            { BiteType.Legendary, hookset.StellarLegendary },
+        };
+
+        stellarDictionary.TryGetValue(bite, out var stellar);
+
         Service.Status = "";
 
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
+            // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前，只有使用者主動打開才會走這裡。
+            if (hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, stellar, timePassed))
+                return HookType.Stellar;
+
             // Triple Hook
             if (hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
@@ -173,6 +186,11 @@ public class HookConfig : BaseOption
                 Service.Status = $"(Triple Hook) {Service.Status}";
             }
 
+            // 華麗提鉤（宇宙探索）—— 預設的順位：雙重／三重沒有出手時才補位，
+            // 但仍然排在精準／強力提鉤之前（它不耗 GP，而且評價比較高）。
+            if (!hookset.StellarBeforeMultiHook && ShouldUseStellarHook(hookset, stellar, timePassed))
+                return HookType.Stellar;
+
             // Normal - Patience
             if (hook.ph.HooksetEnabled)
             {
@@ -187,6 +205,40 @@ public class HookConfig : BaseOption
 
         //Service.Status = "Skipping bite - No hook for this bite is enabled";
         return HookType.None;
+    }
+
+    /// <summary>
+    /// 這一咬要不要改用華麗提鉤（動作 ID 41278，宇宙探索的探索任務專用）。
+    ///
+    /// 🔑「可不可以用」完全交給遊戲自己判斷（<c>GetActionStatus</c> + 復唱時間），
+    ///    不用地區 ID、也不用計時去猜。所以：
+    ///    * 在宇宙探索以外，這個判斷永遠是 false → 這個功能不會改變任何既有行為。
+    ///    * 假設不成立時（例如某天它變成別的地方也能用），最壞情況是「多放了一次提鉤動作」，
+    ///      不會亂放到別的技能，也不會有指標相關的風險。
+    ///
+    /// 回傳 false 時**不會**降級成普通提鉤，而是讓呼叫端繼續往下走原本設定好的提鉤順序。
+    /// </summary>
+    private bool ShouldUseStellarHook(BaseHookset hookset, BaseBiteConfig? stellar, double timePassed)
+    {
+        if (!hookset.UseStellarHook || stellar is not { HooksetEnabled: true })
+            return false;
+
+        // 先問可用性再檢查條件：CheckHookCondition 失敗時會寫 Service.Status，
+        // 而「華麗提鉤只是還在 CD」不該把使用者看得到的狀態文字洗掉。
+        if (!PlayerRes.ActionTypeAvailable((uint)HookType.Stellar))
+            return false;
+
+        var statusBefore = Service.Status;
+        if (!CheckHookCondition(stellar, timePassed))
+        {
+            Service.Status = statusBefore;
+            return false;
+        }
+
+        // Information 等級：使用者跑 LogLevel 2，Debug 收不到。
+        // 華麗提鉤有 60 秒 CD，所以這行最多每分鐘一次，不需要另外節流。
+        Service.PrintInfo(@$"[HookManager] 華麗提鉤可用且條件符合，本次改用華麗提鉤（動作 ID {(uint)HookType.Stellar}）。");
+        return true;
     }
 
     private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)

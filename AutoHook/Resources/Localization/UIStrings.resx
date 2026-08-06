@@ -1507,4 +1507,25 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="CreatePresetAndClose" xml:space="preserve">
     <value>Create Preset and Close</value>
   </data>
+  <data name="StellarHookCosmicOnly" xml:space="preserve">
+    <value>Cosmic Exploration only. 60s cooldown, no GP cost. Ignored everywhere else.</value>
+  </data>
+  <data name="UseStellarHook" xml:space="preserve">
+    <value>Use Stellar Hookset when available</value>
+  </data>
+  <data name="UseStellarHookHelpText" xml:space="preserve">
+    <value>Uses Stellar Hookset whenever the game says it is off cooldown and usable.
+
+Availability is read straight from the game (action status + recast), never guessed from a timer or zone id, so this option does nothing outside Cosmic Exploration missions.
+
+When Stellar Hookset cannot be used, AutoHook simply falls through to your normal hookset settings - it will NOT downgrade to a plain Hook.</value>
+  </data>
+  <data name="StellarHookBeforeMultiHook" xml:space="preserve">
+    <value>Prioritise over Double/Triple Hook</value>
+  </data>
+  <data name="StellarHookBeforeMultiHookHelpText" xml:space="preserve">
+    <value>Off (default): Stellar Hookset is only used when Double/Triple Hook did not fire. Double/Triple Hook land 2-3 fish while Stellar lands 1, so this keeps throughput on quantity missions.
+
+On: Stellar Hookset takes priority. Better for score-based missions, since fish caught with it are undamaged and rated higher.</value>
+  </data>
 </root>
