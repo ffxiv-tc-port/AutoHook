@@ -45,7 +45,7 @@ public class TabDebug : BaseTab
     {
         
         Service.PluginLog.Debug($"ExecuteCommandDetour: {id} {unk1} {baitId} {unk2} {unk3}");
-        return _executeCommandHook!.Original(id, unk1, baitId, unk2, unk3);
+        return _executeCommandHook!.OriginalDisposeSafe(id, unk1, baitId, unk2, unk3);
     }
     
     private TaskManager _taskManager = new TaskManager()

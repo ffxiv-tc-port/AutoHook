@@ -607,14 +607,14 @@ public partial class FishingManager : IDisposable
             Service.PrintDebug(@$"[HookManager] Error: {e.Message}");
         }
 
-        return _useActionHook!.Original(manager, actionType, actionId, targetId, a4, a5, a6, a7);
+        return _useActionHook!.OriginalDisposeSafe(manager, actionType, actionId, targetId, a4, a5, a6, a7);
     }
 
     private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
         byte unk7,
         byte unk8, byte unk9, byte unk10, byte unk11, byte unk12)
     {
-        UpdateCatch!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
+        UpdateCatch!.OriginalDisposeSafe(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
 
         // Check against collectibles.
         var collectible = fishId > 500000;
