@@ -278,7 +278,7 @@ internal class AutoGig : Window, IDisposable
         if (tm.Target.ObjectKind != ObjectKind.GatheringPoint)
             return;
 
-        currentNode = (int)tm.Target.DataId;
+        currentNode = (int)tm.Target.BaseId;
     }
 
     public override unsafe void PreDraw()

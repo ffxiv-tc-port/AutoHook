@@ -23,10 +23,10 @@ public static class PlayerRes
 
     public static bool HasStatus(uint statusID)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusID)
                 return true;
@@ -37,10 +37,10 @@ public static class PlayerRes
     
     public static bool HasAnyStatus(uint[] statusIDs)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        return Service.ClientState.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
+        return Service.Objects.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
     }
 
     public static unsafe bool IsInActiveSpectralCurrent()
@@ -53,26 +53,26 @@ public static class PlayerRes
 
     public static uint GetCurrentGp()
     {
-        if (Service.ClientState.LocalPlayer?.CurrentGp == null)
+        if (Service.Objects.LocalPlayer?.CurrentGp == null)
             return 0;
 
-        return Service.ClientState.LocalPlayer.CurrentGp;
+        return Service.Objects.LocalPlayer.CurrentGp;
     }
 
     public static uint GetMaxGp()
     {
-        if (Service.ClientState.LocalPlayer?.MaxGp == null)
+        if (Service.Objects.LocalPlayer?.MaxGp == null)
             return 0;
 
-        return Service.ClientState.LocalPlayer.MaxGp;
+        return Service.Objects.LocalPlayer.MaxGp;
     }
     
     public static int GetStatusStacks(uint status)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == status)
                 return buff.Param;
@@ -83,10 +83,10 @@ public static class PlayerRes
 
     public static bool HasAnglersArtStacks(int amount)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == IDs.Status.AnglersArt)
                 return buff.Param >= amount;
@@ -97,10 +97,10 @@ public static class PlayerRes
 
     public static float GetStatusTime(uint statusId)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusId)
                 return buff.RemainingTime;
