@@ -45,10 +45,22 @@ public static class PlayerRes
 
     public static unsafe bool IsInActiveSpectralCurrent()
     {
-        if (EventFramework.Instance()->GetInstanceContentOceanFishing() is null)
+        // EventFramework.Instance() 是 [StaticAddress(..., isPointer: true)] —— 讀的是一個
+        // **指標變數**,遊戲還沒把框架建起來時它就是 null,執行期為 null 是合法狀態不是例外。
+        // 原本兩行都直接解參考它(而且各呼叫一次 Instance() 與一次 GetInstanceContentOceanFishing(),
+        // 第一行判過的東西第二行再重取一次)。同 repo 的 SeFunctions/BaitManager.cs FishingMan
+        // 有這個修法的完整說明。⚠️ AVE 是 corrupted-state exception,try/catch 攔不到。
+        var eventFramework = EventFramework.Instance();
+
+        if (eventFramework == null)
             return false;
 
-        return EventFramework.Instance()->GetInstanceContentOceanFishing()->SpectralCurrentActive;
+        var oceanFishing = eventFramework->GetInstanceContentOceanFishing();
+
+        if (oceanFishing is null)
+            return false;
+
+        return oceanFishing->SpectralCurrentActive;
     }
 
     public static uint GetCurrentGp()
