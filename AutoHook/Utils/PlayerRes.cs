@@ -163,9 +163,41 @@ public static class PlayerRes
     public static unsafe int HasItem(uint itemId)
         => InventoryManager.Instance()->GetInventoryItemCount(itemId);
 
+    /// <summary>
+    /// 🔴 <c>AgentInventoryContext.Instance()</c> 由
+    /// <c>[Agent(AgentId.InventoryContext)]</c> 產生:內部鏈 AgentModule → UIModule →
+    /// Framework,任一層回 null 整條就回 null(登入前、切場景、登出後都是常態),而底層
+    /// <c>[StaticAddress]</c>／<c>[MemberFunction]</c> 特徵碼失配時改為擲
+    /// <c>InvalidOperationException</c>——兩種失效模式並存,只擋一種等於假防護。
+    /// 裸解參考 null 原生指標是 AccessViolationException,在 .NET Core 屬 corrupted-state
+    /// exception,<c>try/catch</c> 完全攔不到 ⇒ 只能事前判空。
+    /// ⚠️ 呼叫端之一(<c>CastActionNoDelay</c>)完全沒有 try,原本連特徵碼失配的擲出都會
+    /// 直接往上逸出;另一個呼叫端雖然有 try,但那對 AVE 一樣無效。
+    /// fail-closed:取不到 agent 就不用道具,寫 Information 讓使用者回報得出來
+    /// (這條路徑由釣魚流程觸發,不是每幀)。
+    /// </summary>
     public static unsafe void UseItems(uint id)
     {
-        AgentInventoryContext.Instance()->UseItem(id);
+        AgentInventoryContext* agent;
+        try
+        {
+            agent = AgentInventoryContext.Instance();
+        }
+        catch (Exception e)
+        {
+            Service.PluginLog.Information(
+                $"[AutoHook] 取得 AgentInventoryContext 失敗(特徵碼可能失配),道具 {id} 未使用:{e.Message}");
+            return;
+        }
+
+        if (agent == null)
+        {
+            Service.PluginLog.Information(
+                $"[AutoHook] AgentInventoryContext 尚未就緒,道具 {id} 未使用。");
+            return;
+        }
+
+        agent->UseItem(id);
     }
 
     // RecastGroup 68 = Cordial pots
