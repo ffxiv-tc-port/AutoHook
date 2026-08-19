@@ -140,7 +140,19 @@ public static class PlayerRes
         if (group == -1) // Im assuming -1 recast group has no CD
             return false;
 
+        // 🔴 GetRecastGroupDetail **會回 null**,不是只有 group==-1 那一種失效。
+        //    台服 7.20 執行檔離線反組譯(ffxiv_dx11.exe+0x89F250)逐字證實有三條 return-null 路徑:
+        //      test edx,edx / js  -> 0x14089F2C8 (xor eax,eax; ret)   ← group < 0
+        //      cmp ebx,0x57 / jge -> 0x14089F2C8                      ← group >= 87
+        //      group 0x50..0x56 走模組查詢(call ...B6D780 / ...B6D830),兩次都拿不到 -> je 0x14089F2C8
+        //    只有 group 0..79 走 `lea rax,[rcx+rax*4]` 的純指標算術,那一段才保證非 null。
+        //    也就是說:上面擋掉 -1 之後**仍然**可能拿到 null,而解參考 null 是
+        //    AccessViolationException —— corrupted-state exception,try/catch 完全攔不到。
+        // 失敗方向沿用上面 group==-1 的既有語意(「當作沒有冷卻」),不新增行為。
+        // 這是每幀輪詢路徑 ⇒ 不寫 log。
         var recastDetail = ActionManager.Instance()->GetRecastGroupDetail(group);
+        if (recastDetail == null)
+            return false;
 
         return recastDetail->Total - recastDetail->Elapsed > 0;
     }
@@ -203,7 +215,14 @@ public static class PlayerRes
     // RecastGroup 68 = Cordial pots
     public static unsafe bool IsPotOffCooldown()
     {
+        // 68 落在 0..79 的純指標算術區段(見 ActionOnCoolDown 的反組譯註解),離線證據顯示
+        // 這個常數不會走到 return-null 的分支。仍然判空:成本是一個 test,而萬一台服日後把
+        // 冷卻組上限改到 68 以下,失敗形式就是攔不到的 AVE 而不是一則錯誤訊息。
+        // fail-closed:取不到就當作「還沒好」——寧可不喝強心劑,也不要在未知狀態下送出動作。
         var recast = ActionManager.Instance()->GetRecastGroupDetail(68);
+        if (recast == null)
+            return false;
+
         return recast->Total - recast->Elapsed == 0;
     }
 
@@ -219,7 +238,12 @@ public static class PlayerRes
         if (group == -1) // Im assuming -1 recast group has no CD
             return 0;
 
+        // 同 ActionOnCoolDown:擋掉 -1 之後 GetRecastGroupDetail 仍可能回 null(group >= 87、
+        // 或 80..86 那段模組查詢失敗),裸解參考是攔不到的 AVE。
+        // 失敗方向沿用上面 group==-1 的既有語意(回 0 ＝沒有冷卻),不新增行為。
         var recast = ActionManager.Instance()->GetRecastGroupDetail(group);
+        if (recast == null)
+            return 0;
 
         return recast->Total - recast->Elapsed;
     }
