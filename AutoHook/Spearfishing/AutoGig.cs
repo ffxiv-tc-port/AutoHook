@@ -119,13 +119,22 @@ internal class AutoGig : Window, IDisposable
 
         if (!checkForNullAddon && (_addon == null || _addon->Base.WindowNode == null))
         {
+            // 🔴 上面的條件是 (_addon == null || _addon->Base.WindowNode == null)：
+            //    _addon 為 null 時 || 會短路，照樣進到這個區塊，而第二個 if 原本無條件
+            //    寫 _addon->Base.WindowNode —— 對 null 解參考是 AccessViolationException，
+            //    在 .NET Core 屬於 corrupted-state exception，try/catch 完全攔不到。
+            //    改成 else if：兩種情況各自報自己的訊息（本來就是互斥的兩件事），
+            //    checkForNullAddon 的「只報一次、下次開始叉魚才重置」語意不變。
             if (_addon == null)
+            {
                 Service.Chat.PrintError(
                     $"AutoHook has detected a null addon whilst spearfishing. Please let us know in the Discord this happened.");
-
-            if (_addon->Base.WindowNode == null)
+            }
+            else if (_addon->Base.WindowNode == null)
+            {
                 Service.Chat.PrintError(
                     $"AutoHook has detected a null window whilst spearfishing. Please let us know in the Discord this happened.");
+            }
 
             checkForNullAddon = true;
             return;
