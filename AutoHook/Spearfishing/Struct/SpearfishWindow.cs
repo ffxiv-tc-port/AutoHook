@@ -39,20 +39,38 @@ public struct SpearfishWindow
     public Info Fish3;
 
 
+    /// <summary>
+    /// 取節點清單裡的第 index 個節點,取不到就回 <c>null</c>。
+    /// 🔴 原本每個存取子都直接寫 <c>Base.UldManager.NodeList[n]</c>,裡面有兩個沒被驗證過的假設:
+    /// ①節點清單已經配置好 —— 視窗剛開的那幾幀 <c>NodeList</c> 是 null,對 null 做索引再解參考
+    /// 是 AccessViolationException,在 .NET Core 屬 corrupted-state exception,try/catch 攔不到;
+    /// ②清單長度大於這裡寫死的索引 —— 索引是照 addon 版面數出來的,台服的版面沒有逐版驗證過,
+    /// 越界讀到的是一個垃圾指標,拿去解參考比 null 更難查,而且失敗方式是靜默的。
+    /// ⇒ 兩個假設都在這裡擋掉,取不到就回 null,由呼叫端決定這一幀要怎麼辦。
+    /// </summary>
+    private unsafe AtkResNode* GetNode(int index)
+    {
+        var nodeList = Base.UldManager.NodeList;
+        if (nodeList == null || index < 0 || index >= Base.UldManager.NodeListCount)
+            return null;
+
+        return nodeList[index];
+    }
+
     public unsafe AtkResNode* FishLines
-        => Base.UldManager.NodeList[3];
+        => GetNode(3);
 
     public unsafe AtkResNode* Fish1Node
-        => Base.UldManager.NodeList[15];
+        => GetNode(15);
 
     public unsafe AtkResNode* Fish2Node
-        => Base.UldManager.NodeList[16];
+        => GetNode(16);
 
     public unsafe AtkResNode* Fish3Node
-        => Base.UldManager.NodeList[17];
+        => GetNode(17);
 
     public unsafe AtkComponentGaugeBar* GaugeBar
-        => (AtkComponentGaugeBar*)Base.UldManager.NodeList[35];
+        => (AtkComponentGaugeBar*)GetNode(35);
 
 
 }

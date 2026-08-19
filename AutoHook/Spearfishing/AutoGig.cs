@@ -187,6 +187,13 @@ internal class AutoGig : Window, IDisposable
         if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
+        // 🔴 node 來自 _addon->FishNNode,也就是同一份 UldManager 節點清單,同樣可能是 null。
+        //    底下 node->X / node->Width / node->ScaleX 三個解參考原本一個防護都沒有。
+        //    ⚠️ 判斷刻意放在這裡而不是函式開頭:上面那些施法(塔利亞克斯的恩惠、自然的恩惠)
+        //    與節點無關,提早返回會把它們一起停掉 —— 那是回退既有行為。
+        if (node == null)
+            return;
+
         var centerX = (_uiSize.X / 2);
 
         float fishHitbox = 0;
@@ -230,12 +237,22 @@ internal class AutoGig : Window, IDisposable
         if (!_gigCfg.AutoGigDrawGigHitbox)
             return;
 
+        // 🔴 _addon 到這裡已經被 Draw() 的 isOpen 閘門守住,但 FishLines 是 UldManager 節點清單
+        //    裡的一格,它自己還是可能是 null(視窗剛開、節點清單還沒配置好的那幾幀)。解參考 null
+        //    是 AccessViolationException —— 在 .NET Core 屬 corrupted-state exception,
+        //    try/catch 與 HookSafety 都攔不到,會直接把遊戲帶走。
+        //    取不到就這一幀不畫,下一幀再試;疊加層少畫一幀使用者看不出來。
+        //    ⚠️ 解析一次存進區域變數就好,原本同一個函式裡解參考了兩次。
+        var fishLines = _addon->FishLines;
+        if (fishLines == null)
+            return;
+
         int space = gigHitbox;
 
         float startX = _uiSize.X / 2;
-        float centerY = _addon->FishLines->Y * _uiScale;
-        float endY = _addon->FishLines->Height * _uiScale;
-        
+        float centerY = fishLines->Y * _uiScale;
+        float endY = fishLines->Height * _uiScale;
+
         //Hitbox left
         var lineStart = _uiPos + new Vector2(startX - space, centerY);
         var lineEnd = lineStart + new Vector2(0, endY);
@@ -252,8 +269,13 @@ internal class AutoGig : Window, IDisposable
         if (!_gigCfg.AutoGigDrawFishHitbox)
             return;
 
-        var lineStart = _uiPos + new Vector2(fishHitbox, _addon->FishLines->Y * _uiScale);
-        var lineEnd = lineStart + new Vector2(0, _addon->FishLines->Height * _uiScale);
+        // 同 DrawGigHitbox:FishLines 可能是 null,解參考它是攔不到的 AccessViolation。
+        var fishLines = _addon->FishLines;
+        if (fishLines == null)
+            return;
+
+        var lineStart = _uiPos + new Vector2(fishHitbox, fishLines->Y * _uiScale);
+        var lineEnd = lineStart + new Vector2(0, fishLines->Height * _uiScale);
         drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1 * ImGuiHelpers.GlobalScale);
     }
 
