@@ -155,7 +155,7 @@
     <value>採集力配置</value>
   </data>
   <data name="TabGPConfig_TabDescription" xml:space="preserve">
-    <value>您可以在這裡自定義 AutoCast 提供的的技能和道具的採集力門檻值。</value>
+    <value>您可以在這裡自定義 AutoCast 提供的技能和道具的採集力門檻值。</value>
   </data>
   <data name="GP" xml:space="preserve">
     <value>GP</value>
@@ -375,16 +375,16 @@
     <value>速度</value>
   </data>
   <data name="AutoCastCordialPriority" xml:space="preserve">
-    <value>更改優先順序：輕型強心劑 &gt; 強心劑 &gt; 高階強心劑</value>
+    <value>更改優先順序：輕型強心劑 &gt; 強心劑 &gt; 高級強心劑</value>
   </data>
   <data name="AutoCastCordialPriorityHelpMarker" xml:space="preserve">
-    <value>如果沒有強心劑，使用高階強心劑</value>
+    <value>如果沒有強心劑，使用高級強心劑</value>
   </data>
   <data name="AutoCastUseCordial" xml:space="preserve">
-    <value>使用強心劑(優先使用高階強心劑)</value>
+    <value>使用強心劑(優先使用高級強心劑)</value>
   </data>
   <data name="AutoCastUseCordialHelpMarker" xml:space="preserve">
-    <value>如果沒有高階強心劑，使用強心劑</value>
+    <value>如果沒有高級強心劑，使用強心劑</value>
   </data>
   <data name="AutoCastUseFishEyes" xml:space="preserve">
     <value>使用魚眼</value>
@@ -396,10 +396,10 @@
     <value>使用撒鉺</value>
   </data>
   <data name="AutoCastExtraOptionPrizeCatch" xml:space="preserve">
-    <value>僅當以小釣大 II 不可用時使用 - 閱讀說明 &gt;&gt;&gt;</value>
+    <value>僅當以小釣大II 不可用時使用 - 閱讀說明 &gt;&gt;&gt;</value>
   </data>
   <data name="ExtraOptionPrizeCatchHelpMarker" xml:space="preserve">
-    <value>&gt;請確保啟用了'使用以小釣大 II'，否則它將無法正常工作&lt;
+    <value>&gt;請確保啟用了'使用以小釣大II'，否則它將無法正常工作&lt;
  如果只是為了以小釣大這將為您省下100GP</value>
   </data>
   <data name="Test" xml:space="preserve">
@@ -472,7 +472,7 @@
     <value>耐心II</value>
   </data>
   <data name="Hi_Cordial" xml:space="preserve">
-    <value>高階強心劑</value>
+    <value>高級強心劑</value>
   </data>
   <data name="Patience_I" xml:space="preserve">
     <value>耐心I</value>
@@ -484,7 +484,7 @@
     <value>拍擊水面</value>
   </data>
   <data name="Surface_Slap_Options" xml:space="preserve">
-    <value>拍打水面選項</value>
+    <value>拍擊水面選項</value>
   </data>
   <data name="Identical_Cast_Options" xml:space="preserve">
     <value>專一垂釣選項</value>
@@ -529,7 +529,7 @@
     <value>使用沙利亞克的恩寵</value>
   </data>
   <data name="Use_Natures_Bounty" xml:space="preserve">
-    <value>使用嘉慧</value>
+    <value>使用嘉惠</value>
   </data>
   <data name="Enable_AutoGig" xml:space="preserve">
     <value>啟用自動刺魚</value>
@@ -711,11 +711,11 @@
     <value>描述</value>
   </data>
   <data name="TabDefaultPreset_Description" xml:space="preserve">
-    <value>當未檢測到自定義的魚餌/以小到大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的提鉤行為，除非建立了自定義預設。 
+    <value>當未檢測到自定義的魚餌/以小釣大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的提鉤行為，除非建立了自定義預設。 
 請檢查指南選項卡。</value>
   </data>
   <data name="TabGlobalPreset_Description" xml:space="preserve">
-    <value>當未檢測到自定義的魚餌/以小到大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的提鉤行為，除非建立了自定義預設。 請檢查指南選項卡。</value>
+    <value>當未檢測到自定義的魚餌/以小釣大/魚/自動拋竿時，將使用預設預設。 在這裡您可以設定用於所有魚餌和以小釣大的提鉤行為，除非建立了自定義預設。 請檢查指南選項卡。</value>
   </data>
   <data name="Old_Preset_Warning" xml:space="preserve">
     <value>這是一箇舊的配置，可能缺少一些設定。</value>
@@ -860,10 +860,10 @@
     <value>魚識剩餘時間超過(秒)</value>
   </data>
   <data name="OnlyUseWhenActiveSurfaceSlap" xml:space="preserve">
-    <value>僅當拍打水面啟用時使用</value>
+    <value>僅當拍擊水面啟用時使用</value>
   </data>
   <data name="OnlyUseWhenNOTActiveSurfaceSlap" xml:space="preserve">
-    <value>僅當拍打水面未啟用時使用</value>
+    <value>僅當拍擊水面未啟用時使用</value>
   </data>
   <data name="OnlyHookWhenActiveSurfaceSlap" xml:space="preserve">
     <value>僅在拍水時提鉤</value>
@@ -1053,7 +1053,7 @@
     <value>關於</value>
   </data>
   <data name="UseNaturesBounty" xml:space="preserve">
-    <value>使用嘉慧</value>
+    <value>使用嘉惠</value>
   </data>
   <data name="Settings" xml:space="preserve">
     <value>設定</value>
@@ -1118,7 +1118,7 @@
     <value>忽略預設</value>
   </data>
   <data name="CatchAllNotice" xml:space="preserve">
-    <value>獲取全部已啟用。叉魚時將忽略以下設定...</value>
+    <value>獲取全部已啟用。刺魚時將忽略以下設定...</value>
   </data>
   <data name="CatchAllNaturesBountyHelpText" xml:space="preserve">
     <value>僅當釣全部啟用時</value>
@@ -1127,7 +1127,7 @@
     <value>當釣全部已啟用。預設將被忽略。</value>
   </data>
   <data name="Intuition" xml:space="preserve">
-    <value>感知</value>
+    <value>魚識</value>
   </data>
   <data name="DelaySettings" xml:space="preserve">
     <value>延時設定</value>
@@ -1298,10 +1298,10 @@
     <value>在提竿動作中不可用</value>
   </data>
   <data name="TurnCollectOff" xml:space="preserve">
-    <value>在下方“收集”選項未勾選時，在拋竿後取消收藏品收集</value>
+    <value>在下方“收集”選項未勾選時，在拋竿後取消收藏品採集</value>
   </data>
   <data name="TurnCollectOffHelp" xml:space="preserve">
-    <value>取消後搖需要使用“收藏品收集”，這個選項能讓你在拋竿後退出收藏品收集狀態</value>
+    <value>取消後搖需要使用“收藏品採集”，這個選項能讓你在拋竿後退出收藏品採集狀態</value>
   </data>
   <data name="EnableChumCancel" xml:space="preserve">
     <value>取消撒餌後搖</value>
@@ -1334,10 +1334,10 @@
     <value>無預設執行中，將使用全域預設</value>
   </data>
   <data name="LureSSActive" xml:space="preserve">
-    <value>僅當拍打水面啟用時使用擬餌技能</value>
+    <value>僅當拍擊水面啟用時使用擬餌技能</value>
   </data>
   <data name="LureSSNotActive" xml:space="preserve">
-    <value>不在拍打水面啟用時使用擬餌技能</value>
+    <value>不在拍擊水面啟用時使用擬餌技能</value>
   </data>
   <data name="LureICActive" xml:space="preserve">
     <value>僅當專一垂釣啟用時使用擬餌技能</value>
