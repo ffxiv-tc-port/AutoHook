@@ -134,7 +134,7 @@ public unsafe class BaitManager
 
     /// <summary>
     /// 宇宙探索的餌 ID 只在「換餌」那一刻寫一行 Information。
-    /// 刻意不用 Debug：使用者的記錄等級是 2，Debug 收不到，
+    /// 刻意不用 Debug：使用者的記錄等級是 1，Debug 收得到但單檔數十萬行會淹沒，
     /// 而這個值一旦讀錯，症狀是「preset 選錯」這種完全沒有錯誤訊息的形狀。
     /// </summary>
     private void LogCosmicBait(uint baitId)

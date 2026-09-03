@@ -127,7 +127,7 @@ public class AutoHookIPC
         var imported = Configuration.ImportFolder(folderExport);
         if (imported == null)
         {
-            // 使用者回報用，寫 Information（使用者跑 LogLevel 2，Debug 收不到）。
+            // 使用者回報用，寫 Information（使用者跑 LogLevel 1，Debug 收得到但單檔數十萬行會淹沒）。
             Service.PluginLog.Information(
                 "[IPC] CreateAndSelectAnonymousFolder：傳進來的字串不是可用的資料夾匯出" +
                 "（需要 AHFOLDER_ 或 AHFOLDER2_ 前綴），沒有匯入任何 preset。");

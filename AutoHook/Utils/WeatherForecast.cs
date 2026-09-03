@@ -160,7 +160,7 @@ public static class WeatherForecast
 
     /// <summary>
     /// 特徵碼掃不到的時候寫一行 Information。
-    /// <b>刻意用 Information 不用 Debug</b> —— 使用者的記錄等級是 2，Debug 他們一行都收不到，
+    /// <b>刻意用 Information 不用 Debug</b> —— 使用者的記錄等級是 1，Debug 收得到但單檔數十萬行會淹沒，
     /// 而這個故障的表現形式是「天氣欄永遠空白」，沒有這行 log 根本查不出原因。
     /// </summary>
     private static void ReportUnavailableOnce()

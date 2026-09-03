@@ -15,7 +15,7 @@
 //      * <see cref="Passes"/>：呼叫端自己指定「不支援時要回什麼」（unsupportedResult）。
 //    ⇒ 換 preset 傳 false（不切換），提鉤閘門傳 true（不擋）。兩邊的失敗形式都是「維持現況」。
 //
-// 另外：不認得的型別會寫一行 Information（使用者跑 LogLevel 2，Debug 收不到），
+// 另外：不認得的型別會寫一行 Information（使用者跑 LogLevel 1，Debug 收得到但單檔數十萬行會淹沒），
 // 而且每個型別只寫一次，避免每一咬洗版。
 
 using System;

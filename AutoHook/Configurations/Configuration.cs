@@ -255,7 +255,7 @@ public class Configuration : IPluginConfiguration
 
             CollectFolderPresets(folderData, folder, presets, ref nestedFolders, string.Empty, 0);
 
-            // 使用者回報用，寫 Information（使用者跑 LogLevel 2，Debug 收不到）。
+            // 使用者回報用，寫 Information（使用者跑 LogLevel 1，Debug 收得到但單檔數十萬行會淹沒）。
             if (nestedFolders > 0)
                 Service.PluginLog.Information(
                     $"[ImportFolder] 這份匯入含 {nestedFolders} 個子資料夾。本外掛的資料夾沒有階層，" +

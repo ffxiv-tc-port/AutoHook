@@ -277,7 +277,7 @@ public class HookConfig : BaseOption
             return false;
         }
 
-        // Information 等級：使用者跑 LogLevel 2，Debug 收不到。
+        // Information 等級：使用者跑 LogLevel 1，Debug 收得到但單檔數十萬行會淹沒。
         // 華麗提鉤有 60 秒 CD，所以這行最多每分鐘一次，不需要另外節流。
         Service.PrintInfo(@$"[HookManager] 華麗提鉤可用且條件符合，本次改用華麗提鉤（動作 ID {(uint)HookType.Stellar}）。");
         return true;

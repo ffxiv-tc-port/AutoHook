@@ -193,7 +193,7 @@ public static class CosmicMissionInfo
     }
 
     /// <summary>
-    /// 換任務的時候寫一行 Information。使用者跑 LogLevel 2，Debug 收不到，
+    /// 換任務的時候寫一行 Information。使用者跑 LogLevel 1，Debug 收得到但單檔數十萬行會淹沒，
     /// 而「自動模式選錯順位」這種事在遊戲裡完全看不出來 —— 沒有這行就無從查證。
     /// </summary>
     private static void LogOnMissionChange(ushort missionId, CosmicMissionProfile profile)
