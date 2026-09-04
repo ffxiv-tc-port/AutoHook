@@ -37,6 +37,20 @@ public class AutoHookIPC
     [EzIPC]
     public int GetFolderImportApiVersion() => FolderImportApiVersion;
 
+    /// <summary>
+    /// 讀取目前的啟用狀態。與 <see cref="SetPluginState"/> 讀寫同一個欄位（<c>Configuration.PluginEnabled</c>）。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>回傳型別必須維持 <c>bool</c></b>——消費端（Questionable 的 <c>External/AutoHookIpc.cs</c>）
+    /// 宣告的是 <c>Func&lt;bool&gt;</c>。端點型別對不上時 Dalamud 擲的是 <c>IpcTypeMismatchError</c>，
+    /// 而消費端常帶的 <c>SafeWrapper.IPCException</c> <b>只攔 <c>IpcNotReadyError</c></b>，攔不住型別不合，
+    /// 會變成每次呼叫都擲例外。要改形狀請<b>開新端點名</b>，不要同名改型別。
+    /// <br/>⚠️ 這個端點在本檔是<b>後補</b>的：呼叫端早就宣告了訂閱，缺它時對方的
+    /// <c>IsAvailable()</c> 探測會被 SafeWrapper 吞成「可用」，於是任務鏈卡在等釣魚。
+    /// </remarks>
+    [EzIPC]
+    public bool GetPluginState() => _cfg.PluginEnabled;
+
     [EzIPC]
     public void SetPluginState(bool state)
     {
