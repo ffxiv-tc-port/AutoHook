@@ -56,6 +56,32 @@ public class Configuration : IPluginConfiguration
 
     [DefaultValue(true)] public bool ResetAfkTimer = true;
 
+    // ── 塔塔露誇獎（TataruPraise）通知 ────────────────────────────────────────
+    // 掛機釣魚時被「有聲音」叫回電腦前用的。純通知：不換餌、不換 preset、不停手，
+    // 對方沒安裝時整條路徑是 no-op。判準的取捨寫在 FishingManager.Praise.cs。
+    // ⚠️ 新欄位對既有使用者是「設定檔裡沒有這個鍵」⇒ 吃這裡的初值，不必寫遷移。
+
+    /// <summary>總開關。關掉之後連判準都不會算。</summary>
+    [DefaultValue(true)] public bool TataruPraiseEnabled = true;
+
+    /// <summary>
+    /// 大魚（需要漁人的直覺／需要天氣轉換／魚影魚）。<b>唯一預設開的判準</b>——
+    /// 離線量測非魚叉魚 1869 條裡只有 135 條（7.2%）符合。
+    /// </summary>
+    [DefaultValue(true)] public bool TataruPraiseBigFish = true;
+
+    /// <summary>遊戲自己的「大物」旗標。頻率沒有實機數據，預設關。</summary>
+    public bool TataruPraiseLargeFlag = false;
+
+    /// <summary>傳說咬「!!!」。某些餌／釣場是常態，預設關。</summary>
+    public bool TataruPraiseLegendaryBite = false;
+
+    /// <summary>收藏品。收藏品釣魚時每一條都是，預設關。</summary>
+    public bool TataruPraiseCollectible = false;
+
+    /// <summary>兩次出聲之間的本機最短間隔（秒）。判準寫壞時的保險絲，不是功能本身。</summary>
+    public int TataruPraiseMinIntervalSeconds = 60;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 

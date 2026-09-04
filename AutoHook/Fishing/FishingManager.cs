@@ -508,6 +508,11 @@ public partial class FishingManager : IDisposable
         var hook = GetHookCfg();
         if (hook.Enabled)
             FishingHelper.AddFishCount(hook.UniqueId);
+
+        // 🔴 刻意放在最後：上面每一行都是既有邏輯，先讓它們原封不動跑完，
+        //    通知這一步就算整個爛掉也已經不可能影響換餌／換 preset／停手判斷。
+        //    方法本身還有自己的 try/catch，這裡不需要再包一層。
+        NotifyRareCatch(fishId, large, collectible, biteType);
     }
 
     private void CheckStopCondition()
