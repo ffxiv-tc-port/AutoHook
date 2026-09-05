@@ -1,3 +1,4 @@
+using AutoHook.Configurations;
 using AutoHook.Ui;
 using AutoHook.Utils;
 using Dalamud.Interface.Colors;
@@ -95,7 +96,8 @@ public class PluginUi : Window, IDisposable
 
         ImGui.SameLine();
 
-        DrawUtil.Checkbox("###PluginEnable", ref Service.Configuration.PluginEnabled);
+        DrawUtil.Checkbox("###PluginEnable", ref Service.Configuration.PluginEnabled,
+            ipcOverrideKey: IpcConfigOverrides.PluginEnabledKey);
 
         ImGui.SameLine(0, 1);
 
@@ -211,7 +213,11 @@ public class PluginUi : Window, IDisposable
                                 ImGui.Image(logo.Handle, new(125f.Scale(), 125f.Scale()));
 
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                                {
+                                    // 使用者自己動了這個設定 ⇒ 他的選擇重新成為權威。
+                                    IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                                     Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+                                }
 
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                                     Service.OpenConsole = !Service.OpenConsole;

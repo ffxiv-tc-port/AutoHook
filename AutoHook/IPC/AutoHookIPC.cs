@@ -51,19 +51,59 @@ public class AutoHookIPC
     [EzIPC]
     public bool GetPluginState() => _cfg.PluginEnabled;
 
+    /// <summary>
+    /// 借走使用者的「啟用 AutoHook」開關：<b>只改執行期的值，不寫進使用者的設定檔</b>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>改動前這裡是「改欄位 ＋ 立刻 <c>Service.Save()</c>」</b>，而三個借用端
+    /// （Questionable／GBR／ICE）各自拍快照、各自還原，互相覆蓋之後留在磁碟上的是
+    /// <b>最後一個還原者的快照</b>，不是使用者本來的選擇——全程零訊息。
+    /// 完整序列與修法見 <see cref="IpcConfigOverrides"/>。
+    /// <br/>⚠️ <b>讀取端與呼叫端一行都不必改</b>：改的仍然是同一個欄位，只是存檔時會換回
+    /// 使用者自己的值。行為差異只有一個——<b>借來的值不再留到下次開遊戲</b>。
+    /// <br/>📌 真的需要「永久寫進設定檔」的舊語意，請改用
+    /// <see cref="SetPluginStatePersistent"/>（<b>新名字</b>，不是同名改語意：
+    /// 端點不存在時呼叫端攔得住 <c>IpcNotReadyError</c>，會乾淨落回 fail-safe）。
+    /// </remarks>
     [EzIPC]
     public void SetPluginState(bool state)
     {
         
+        IpcConfigOverrides.Set(ref _cfg.PluginEnabled, state, IpcConfigOverrides.PluginEnabledKey);
+    }
+
+    /// <summary>
+    /// 寫入使用者的「啟用 AutoHook」開關並<b>存進設定檔</b>（<see cref="SetPluginState"/> 的舊語意）。
+    /// </summary>
+    /// <remarks>
+    /// 📌 存在的理由：SomethingNeedDoing 的 Lua 巨集可以呼叫
+    /// <c>IPC.AutoHook.SetPluginState(true)</c>，而使用者寫巨集時可能就是要它留到下次開遊戲。
+    /// <see cref="SetPluginState"/> 改成不持久之後，那個語意需要一個逃生口。
+    /// <br/>🔴 <b>刻意用新名字，不是同名改語意</b>：舊名字改語意的話呼叫端完全看不出差別；
+    /// 新名字在舊版 AutoHook 上不存在，呼叫端會收到 <c>IpcNotReadyError</c> 並落回 fail-safe。
+    /// <br/>⚠️ <b>不要拿它做「借用」</b>——借用端請一律用 <see cref="SetPluginState"/>，
+    /// 否則又會回到「互相覆蓋、把別人的快照寫死在使用者設定檔裡」的老問題。
+    /// <br/>⚠️ 目前這支<b>還沒有任何呼叫端</b>：SND 的 Lua 橋接只暴露它
+    /// <c>External/AutoHook.cs</c> 裡宣告過的成員，要讓巨集用得到需要在 SND 那邊補一行宣告。
+    /// </remarks>
+    [EzIPC]
+    public void SetPluginStatePersistent(bool state)
+    {
+        // 明確要求持久化 ⇒ 這就是新的權威值，丟掉任何借用中的覆寫。
+        IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
         _cfg.PluginEnabled = state;
         Service.Save();
     }
 
+    /// <summary>
+    /// 借走「啟用自動魚叉」開關：<b>只改執行期的值，不寫進使用者的設定檔</b>。
+    /// </summary>
+    /// <remarks>與 <see cref="SetPluginState"/> 完全同一個形狀與理由。</remarks>
     [EzIPC]
     public void SetAutoGigState(bool state)
     {
-        _cfg.AutoGigConfig.AutoGigEnabled = state;
-        Service.Save();
+        IpcConfigOverrides.Set(ref _cfg.AutoGigConfig.AutoGigEnabled, state,
+            IpcConfigOverrides.AutoGigEnabledKey);
     }
 
     [EzIPC]

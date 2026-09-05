@@ -4264,5 +4264,50 @@ namespace AutoHook.Resources.Localization {
                 return ResourceManager.GetString("WillBeUsedWhenYourGPIsEqualOr", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Another plugin is temporarily changing this setting..
+        /// </summary>
+        internal static string IpcOverrideTitle {
+            get {
+                return ResourceManager.GetString("IpcOverrideTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The change applies to this game session only and is not written to your config file..
+        /// </summary>
+        internal static string IpcOverrideSessionOnly {
+            get {
+                return ResourceManager.GetString("IpcOverrideSessionOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your own setting: ON.
+        /// </summary>
+        internal static string IpcOverrideYourValueOn {
+            get {
+                return ResourceManager.GetString("IpcOverrideYourValueOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your own setting: OFF.
+        /// </summary>
+        internal static string IpcOverrideYourValueOff {
+            get {
+                return ResourceManager.GetString("IpcOverrideYourValueOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change it here yourself to make your own value authoritative again..
+        /// </summary>
+        internal static string IpcOverrideReclaim {
+            get {
+                return ResourceManager.GetString("IpcOverrideReclaim", resourceCulture);
+            }
+        }
     }
 }

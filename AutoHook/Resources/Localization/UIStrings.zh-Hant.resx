@@ -1512,4 +1512,19 @@
 
 要求「特定／目標水產品」的任務不會套用，判不出任務型別時也不會套用 —— 那些情況下時間窗正是拿來選魚的。</value>
   </data>
+  <data name="IpcOverrideTitle" xml:space="preserve">
+    <value>另一個外掛正在暫時改這個設定。</value>
+  </data>
+  <data name="IpcOverrideSessionOnly" xml:space="preserve">
+    <value>這次改動只在本次遊戲期間有效，不會寫進你的設定檔。</value>
+  </data>
+  <data name="IpcOverrideYourValueOn" xml:space="preserve">
+    <value>你自己設定的值：開啟</value>
+  </data>
+  <data name="IpcOverrideYourValueOff" xml:space="preserve">
+    <value>你自己設定的值：關閉</value>
+  </data>
+  <data name="IpcOverrideReclaim" xml:space="preserve">
+    <value>在這裡自己改一次，你的值就會重新成為權威。</value>
+  </data>
 </root>

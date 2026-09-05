@@ -63,7 +63,7 @@ internal class TabAutoGig : BaseTab
                 Service.Save();
             
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoCordialPandoras);
-        });
+        }, ipcOverrideKey: IpcConfigOverrides.AutoGigEnabledKey);
 
         ImGui.Spacing();
         ImGui.TextWrapped(UIStrings.Current_Selected_Preset);

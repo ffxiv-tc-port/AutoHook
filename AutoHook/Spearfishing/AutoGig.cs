@@ -78,7 +78,13 @@ internal class AutoGig : Window, IDisposable
     public unsafe void DrawSettings()
     {
         if (ImGui.Checkbox(UIStrings.Enable_AutoGig, ref _gigCfg.AutoGigEnabled))
+        {
+            // 使用者自己動了這個設定 ⇒ 他的選擇重新成為權威。
+            IpcConfigOverrides.Clear(IpcConfigOverrides.AutoGigEnabledKey);
             Service.Save();
+        }
+
+        DrawUtil.DrawIpcOverrideMarker(IpcConfigOverrides.AutoGigEnabledKey);
         
         var selectedPreset = _gigCfg.SelectedPreset;
         

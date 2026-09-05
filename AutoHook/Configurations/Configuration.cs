@@ -25,7 +25,32 @@ public class Configuration : IPluginConfiguration
 
     public bool HideLocButtonn = true;
 
+    /// <summary>
+    /// 使用者的「啟用 AutoHook」開關。<b>執行期真值</b>——所有讀取端都讀這個欄位。
+    /// </summary>
+    /// <remarks>
+    /// ⚠️ 這個欄位<b>不直接序列化</b>；寫進設定檔的是 <see cref="PluginEnabledPersisted"/>。
+    /// 別的外掛用 <c>AutoHook.SetPluginState</c> 借走這個開關時，磁碟上要保留<b>使用者自己的值</b>
+    /// ——理由與機制見 <see cref="IpcConfigOverrides"/>。
+    /// </remarks>
+    [JsonIgnore]
     [DefaultValue(true)] public bool PluginEnabled = true;
+
+    /// <summary>
+    /// <see cref="PluginEnabled"/> 的序列化替身。JSON 鍵名維持 <c>PluginEnabled</c> 不變，
+    /// 既有設定檔照樣讀得回來、寫出去也還是同一個鍵。
+    /// </summary>
+    /// <remarks>
+    /// 🔑 這裡刻意<b>不</b>用「存檔前把欄位換成使用者的值、存完再換回來」：那會留下一段
+    /// 欄位值不對的時間窗，而 <c>FishingManager</c> 每幀都在讀它（<c>Service.Save()</c> 又可能
+    /// 從非 Framework 執行緒進來）。改成序列化替身之後，執行期欄位<b>完全不被碰</b>。
+    /// </remarks>
+    [JsonProperty(nameof(PluginEnabled))]
+    public bool PluginEnabledPersisted
+    {
+        get => IpcConfigOverrides.ValueForSave(IpcConfigOverrides.PluginEnabledKey, PluginEnabled);
+        set => PluginEnabled = value;
+    }
 
     public FishingPresets HookPresets = new();
 
@@ -175,6 +200,9 @@ public class Configuration : IPluginConfiguration
 
     public static Configuration Load()
     {
+        // 載入設定檔＝重新確立「使用者的值」，任何殘留的 IPC 覆寫都作廢。
+        IpcConfigOverrides.ClearAll();
+
         try
         {
             if (Service.PluginInterface.GetPluginConfig() is Configuration config)

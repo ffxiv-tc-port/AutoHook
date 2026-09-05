@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using AutoHook.Configurations;
 using AutoHook.Enums;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
@@ -55,7 +56,8 @@ public class TabSettings : BaseTab
 
     private void DrawConfigs()
     {
-        DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp);
+        DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp,
+            ipcOverrideKey: IpcConfigOverrides.PluginEnabledKey);
         
         if (ImGui.TreeNodeEx(UIStrings.DelaySettings, ImGuiTreeNodeFlags.FramePadding))
         {

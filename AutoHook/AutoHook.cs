@@ -113,20 +113,26 @@ public class AutoHook : IDalamudPlugin
             case CmdAh:
                 OnOpenConfigUi();
                 break;
+            // 這四個 case 都是使用者親自下的指令 ⇒ 丟掉別的外掛借走開關時記下的 IPC 覆寫，
+            // 他的值重新成為權威（見 IpcConfigOverrides）。
             case CmdAhOn:
                 Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhOff:
                 Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg when Service.Configuration.PluginEnabled:
                 Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg:
                 Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhPreset:

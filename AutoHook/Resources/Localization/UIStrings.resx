@@ -1569,4 +1569,19 @@ When this is on and such a mission is detected, the hook timers are ignored and 
 
 It never applies to missions that ask for a specific or target fish, nor when the mission type cannot be detected - there the timing window is the fish-selection mechanism.</value>
   </data>
+  <data name="IpcOverrideTitle" xml:space="preserve">
+    <value>Another plugin is temporarily changing this setting.</value>
+  </data>
+  <data name="IpcOverrideSessionOnly" xml:space="preserve">
+    <value>The change applies to this game session only and is not written to your config file.</value>
+  </data>
+  <data name="IpcOverrideYourValueOn" xml:space="preserve">
+    <value>Your own setting: ON</value>
+  </data>
+  <data name="IpcOverrideYourValueOff" xml:space="preserve">
+    <value>Your own setting: OFF</value>
+  </data>
+  <data name="IpcOverrideReclaim" xml:space="preserve">
+    <value>Change it here yourself to make your own value authoritative again.</value>
+  </data>
 </root>
