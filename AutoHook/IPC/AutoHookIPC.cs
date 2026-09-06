@@ -478,4 +478,75 @@ public class AutoHookIPC
 
         return false;
     }
+
+    // -- 暫停租約（見 Configurations/PluginEnabledLeases.cs）-------------------------
+    // 🔴 這一組是<b>純新增</b>：上面的 SetPluginState／SetPluginStatePersistent／
+    //    SetAutoGigState 一個字都沒改，舊消費端完全不受影響。要改端點的形狀時
+    //    正解是「換新名字」而不是「同名改型別」——端點不存在時兩邊都攔得住
+    //    IpcNotReadyError 並乾淨落回 fail-safe，而同名改型別會讓舊消費端撞上
+    //    IpcTypeMismatchError（SafeWrapper.IPCException 攔不住它）。
+    // 🔑 用法：AcquireSuppression 拿一把 Guid 憑證 → SetLeasedPluginState(憑證, false) 壓住 →
+    //    每 30 秒 RenewSuppression(憑證) 心跳 → 做完 ReleaseSuppression(憑證)。
+    // 🔴 Acquire 本身就開始壓制（與 YesAlready／AutoRetainer 同形狀），
+    //    SetLeasedPluginState 是選配。
+    //    ⚠️ 租期上限 5 分鐘，續約間隔必須明顯短於租期（建議 30 秒）；
+    //       間隔接近租期時第一次心跳必定回 false（那把已經被掃掉了，不是競態）。
+    // 🔑 不用記得還：租用者當掉／被卸載／忘了放開，逾時就自動還原成使用者的值，
+    //    並在使用者的 log 寫一行 Information 指名是誰。
+    // 📌 全部端點回的都是不可為 null 的值型別，失敗回 Guid.Empty / false，永不回 null
+    //    （回 null 時 CallGateChannel 對值型別擲的是看起來與 IPC 無關的 NullReferenceException）。
+
+    /// <summary>拿一把預設長度（5 分鐘）的暫停租約。<see cref="Guid.Empty"/>＝沒拿到。</summary>
+    /// <param name="owner">租用者名字（慣例是自己的 InternalName）。空白會被拒絕。</param>
+    /// <remarks>
+    /// 🔴 <b>拿到租約就已經開始壓制</b>（refcount），不需要再呼叫別的端點——
+    /// 與 <c>YesAlready.AcquireSuppression</c>／<c>AutoRetainer.AcquireSuppressionFor</c> 同一個形狀。
+    /// <see cref="SetLeasedPluginState"/> 是選配（不交回租約但暫時不壓制）。
+    /// </remarks>
+    [EzIPC]
+    public Guid AcquireSuppression(string owner)
+        => PluginEnabledLeases.Acquire(owner, PluginEnabledLeases.DefaultLeaseMilliseconds);
+
+    /// <summary>拿一把指定長度的暫停租約（毫秒，夾在 1～300000）。</summary>
+    /// <remarks>⚠️ 被夾時會對同一個租用者寫一次 Information，<b>不要假設拿到了要求的時長</b>。</remarks>
+    [EzIPC]
+    public Guid AcquireSuppressionFor(string owner, int milliseconds)
+        => PluginEnabledLeases.Acquire(owner, milliseconds);
+
+    /// <summary>交回一把租約。回 <see langword="false"/>＝這把不存在（已放開或已逾時）。</summary>
+    [EzIPC]
+    public bool ReleaseSuppression(Guid lease) => PluginEnabledLeases.Release(lease);
+
+    /// <summary>續約（心跳）。回 <see langword="false"/>＝這把已經不在了，<b>必須重新 Acquire</b>。</summary>
+    [EzIPC]
+    public bool RenewSuppression(Guid lease) => PluginEnabledLeases.Renew(lease);
+
+    /// <summary>續約並換一個時長。</summary>
+    [EzIPC]
+    public bool RenewSuppressionFor(Guid lease, int milliseconds) => PluginEnabledLeases.Renew(lease, milliseconds);
+
+    /// <summary>
+    /// 用這把租約押住啟用開關。<paramref name="enabled"/> 傳 <see langword="false"/>＝
+    /// 「我這把要求 AutoHook 停手」；傳 <see langword="true"/>＝「我這把不再要求停手」。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 傳 <see langword="true"/> <b>不是「我要求啟用」</b>——使用者自己在設定頁取消勾選的
+    /// 「Enable AutoHook」不會被 IPC 蓋掉。要真的幫使用者打開請用 <see cref="SetPluginState"/>。
+    /// </remarks>
+    [EzIPC]
+    public bool SetLeasedPluginState(Guid lease, bool enabled) => PluginEnabledLeases.SetPluginEnabled(lease, enabled);
+
+    /// <summary>
+    /// <b>實際生效</b>的啟用狀態（使用者的值疊上目前的租約）。
+    /// 問「AutoHook 現在會不會動」的人要問這支，不是 <see cref="GetPluginState"/>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>刻意另開新名字而不是改 <see cref="GetPluginState"/> 的語意。</b>
+    /// Questionable 的 <c>DoFish</c> 是拿 <c>GetPluginState</c> 當「事後要還原成什麼」的快照
+    /// （<c>_wasAutoHookEnabled</c>）；若那支改成回疊加後的值，它在有租約壓著的瞬間拍到 false，
+    /// 之後就會把 false 「還」給使用者。這是本檔與 vnavmesh
+    /// （那邊 <c>Path.GetMovementAllowed</c> 刻意回疊加後的值）的刻意的差異，<b>不是疏漏</b>。
+    /// </remarks>
+    [EzIPC]
+    public bool GetEffectivePluginState() => _cfg.EffectivePluginEnabled;
 }

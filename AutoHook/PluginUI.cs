@@ -202,7 +202,8 @@ public class PluginUi : Window, IDisposable
                     if (ImGui.Selectable(UIStrings.StartActions))
                         AutoHook.Plugin.HookManager.StartFishing();
 
-                    var image = Service.Configuration.PluginEnabled ? "images/Fishy.png" : "images/Fishy_g.png";
+                    // 診斷用途：被租約壓著時 logo 也要變灰，使用者才看得出「現在不會動」。
+                    var image = Service.Configuration.EffectivePluginEnabled ? "images/Fishy.png" : "images/Fishy_g.png";
                     var imagePath = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, image);
                     using (var c = ImRaii.Child("logo", new(0, 125f.Scale())))
                     {
@@ -298,9 +299,13 @@ public class PluginUi : Window, IDisposable
     {
         ImGuiEx.LineCentered("###AhStatus", () =>
         {
-            if (!Service.Configuration.PluginEnabled)
+            if (!Service.Configuration.EffectivePluginEnabled)
             {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
+
+                // 🔑 使用者自己勾著、卻顯示 Disabled 的時候，差別就在這個標記上。
+                //    沒有它的話 UI 會讓人以為是自己把外掛關掉了。
+                DrawUtil.DrawSuppressionLeaseMarker();
             }
             else if (Service.BaitManager.FishingState == FishingState.NotFishing)
             {

@@ -58,6 +58,7 @@ public class TabSettings : BaseTab
     {
         DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp,
             ipcOverrideKey: IpcConfigOverrides.PluginEnabledKey);
+        DrawUtil.DrawSuppressionLeaseMarker();
         
         if (ImGui.TreeNodeEx(UIStrings.DelaySettings, ImGuiTreeNodeFlags.FramePadding))
         {

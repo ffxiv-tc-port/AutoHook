@@ -5,6 +5,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
@@ -186,6 +187,43 @@ public static class DrawUtil
     /// 非空時：使用者按下這個 checkbox 就丟掉該設定的 IPC 覆寫（他的值重新成為權威），
     /// 並在列上畫出 <c>(IPC)</c> 標記。見 <see cref="IpcConfigOverrides"/>。
     /// </param>
+    /// <summary>
+    /// 有暫停租約壓著時，在該列右邊放一個 <c>(已暫停)</c> 標記。
+    /// </summary>
+    /// <remarks>
+    /// 🔑 「另一個外掛正讓 AutoHook 停手」本身要<b>在列上看得見</b>；
+    /// tooltip 藏的是「是誰、還剩多久」，不是「有沒有問題」。
+    /// 把它藏起來就退回這整套改動要修掉的那個靜默失效。
+    /// <br/>🔴 只有取值那一步進鎖（<c>PluginEnabledLeases.Snapshot</c>），
+    /// 底下的 ImGui 呼叫全部在鎖外。
+    /// <br/>⚠️ 字串刻意寫成字面繁中而不走 <c>UIStrings</c>：這是台服 fork 專屬的功能，
+    /// 而 resx 那條路要同時動 11 份語言檔＋ Designer，且「鍵存在但值為空」不會退回英文。
+    /// </remarks>
+    public static void DrawSuppressionLeaseMarker()
+    {
+        if (!PluginEnabledLeases.AnySuppressing)
+            return;
+
+        var snapshot = PluginEnabledLeases.Snapshot();
+        var denying = snapshot.Where(x => x.Suppressing).ToArray();
+        if (denying.Length == 0)
+            return;
+
+        ImGui.SameLine();
+        ImGui.TextColored(ImGuiColors.DalamudOrange, @"(已暫停)");
+
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.BeginTooltip();
+        ImGui.TextUnformatted(@"另一個外掛正透過暫停租約要求 AutoHook 暫時停手。");
+        foreach (var (owner, remainingMs, _) in denying)
+            ImGui.TextUnformatted($"  {owner}：還有 {remainingMs / 1000.0:f0} 秒自動解除");
+        ImGui.TextUnformatted(@"租約逾時或被放開之後會自動恢復，不需要重載外掛。");
+        ImGui.TextUnformatted(@"你自己的設定沒被改掉，也不會被寫進設定檔。");
+        ImGui.EndTooltip();
+    }
+
     public static bool Checkbox(string label, ref bool refValue, string helpText = "", bool hoverHelpText = false,
         string ipcOverrideKey = "")
     {

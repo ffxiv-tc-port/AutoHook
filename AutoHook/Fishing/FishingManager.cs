@@ -270,7 +270,9 @@ public partial class FishingManager : IDisposable
     {
         var currentState = Service.BaitManager.FishingState;
 
-        var enabled = Service.Configuration.PluginEnabled;
+        // 🔴 讀的是<b>疊加後</b>的值：別的外掛可以用暫停租約要求 AutoHook 先停手。
+        //    見 Configurations/PluginEnabledLeases.cs。
+        var enabled = Service.Configuration.EffectivePluginEnabled;
 
         if (!enabled || currentState == FishingState.NotFishing)
         {
@@ -640,7 +642,11 @@ public partial class FishingManager : IDisposable
     {
         try
         {
-            if (actionType == ActionType.Action && Service.Configuration.PluginEnabled &&
+            // 🔴 這是第二個<b>行為驅動</b>的讀取點（UseAction 的 hook detour，跑在遊戲自己的
+            //    執行緒上）。漏掉它的話，租約壓制期間 OnBeganFishing 仍然會跑，
+            //    _lastStep／_isMooching 被改掉 ⇒ 租約一放開 AutoHook 從錯的狀態接下去，
+            //    而且完全靜默。兩個讀取點必須一起換。
+            if (actionType == ActionType.Action && Service.Configuration.EffectivePluginEnabled &&
                 PlayerRes.ActionTypeAvailable(actionId))
             {
                 switch (actionId)

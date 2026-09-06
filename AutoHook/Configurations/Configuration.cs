@@ -76,6 +76,20 @@ public class Configuration : IPluginConfiguration
         set => AutoStartFishing = value;
     }
 
+    /// <summary>
+    /// <b>實際生效</b>的啟用狀態：使用者的值疊上目前的暫停租約。
+    /// <b>所有「要不要動作」的判斷都讀這個</b>，不要直接讀 <see cref="PluginEnabled"/>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 談「使用者自己的意思」的地方（勾選框、<c>/ahtg</c> 反向切換、序列化、
+    /// <c>AutoHook.GetPluginState</c>）<b>必須繼續讀 <see cref="PluginEnabled"/></b>：
+    /// 那些地方拿到被壓制過的值會把別人的值寫回使用者身上。
+    /// <br/>⚠️ <c>[JsonIgnore]</c> 是必要的：<c>SavePluginConfig</c> 會序列化所有公開屬性，
+    /// 不標的話設定檔裡會多一個沒人讀的鍵。
+    /// </remarks>
+    [JsonIgnore]
+    public bool EffectivePluginEnabled => PluginEnabledLeases.ResolveEnabled(PluginEnabled);
+
     public FishingPresets HookPresets = new();
 
     public SpearFishingPresets AutoGigConfig = new();

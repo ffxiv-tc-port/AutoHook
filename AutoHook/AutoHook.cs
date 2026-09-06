@@ -203,6 +203,10 @@ public class AutoHook : IDalamudPlugin
             Service.Commands.RemoveHandler(command);
         }
 
+        // 🔴 租約表是靜態的，外掛重載後不清掉的話舊租約會活到逾時為止，
+        //    而新的實例根本不知道那些持有者是誰。
+        PluginEnabledLeases.ReleaseAll(@"AutoHook 正在卸載");
+
         ECommonsMain.Dispose();
     }
 
