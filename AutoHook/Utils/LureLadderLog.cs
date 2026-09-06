@@ -96,14 +96,20 @@ public static class LureLadderLog
     /// <summary>拋竿時呼叫：重設「距拋竿」與「距上一則」的基準。</summary>
     public static void OnCastStarted()
     {
+        List<string>? pending = null;
+
         try
         {
             lock (Gate)
             {
-                FlushPendingLocked(@"換竿前狀態列還沒追上");
+                FlushPendingLocked(ref pending, @"換竿前狀態列還沒追上");
                 _castStartTick = Environment.TickCount64;
                 _lastLadderTick = 0;
             }
+
+            // 出鎖之後才真的送出去。留在 try 裡面，所以送出時萬一出錯，
+            // 接住它的仍然是下面那個 catch，與改動前一致。
+            EmitQueued(pending);
         }
         catch (Exception e)
         {
@@ -114,14 +120,20 @@ public static class LureLadderLog
     /// <summary>離開釣魚時呼叫：把還沒收尾的暫存倒出來，別留到下一次釣魚才記錯時間。</summary>
     public static void OnFishingStopped()
     {
+        List<string>? pending = null;
+
         try
         {
             lock (Gate)
             {
-                FlushPendingLocked(@"離開釣魚前狀態列還沒追上");
+                FlushPendingLocked(ref pending, @"離開釣魚前狀態列還沒追上");
                 _castStartTick = 0;
                 _lastLadderTick = 0;
             }
+
+            // 出鎖之後才真的送出去。留在 try 裡面，所以送出時萬一出錯，
+            // 接住它的仍然是下面那個 catch，與改動前一致。
+            EmitQueued(pending);
         }
         catch (Exception e)
         {
@@ -136,6 +148,8 @@ public static class LureLadderLog
     /// <returns>這則訊息是不是階梯訊息。純資訊用，呼叫端目前不依賴它做決策。</returns>
     public static bool Record(uint? logId)
     {
+        List<string>? pending = null;
+
         try
         {
             if (logId is not { } id || !TryResolve(id, out var lure, out var statusId, out var stacks))
@@ -145,7 +159,7 @@ public static class LureLadderLog
 
             lock (Gate)
             {
-                FlushPendingLocked(@"被下一則階梯訊息取代，狀態列沒追上");
+                FlushPendingLocked(ref pending, @"被下一則階梯訊息取代，狀態列沒追上");
 
                 var bucket = GetBucketLocked(lure, stacks);
                 bucket.Count++;
@@ -190,15 +204,19 @@ public static class LureLadderLog
                     var sinceLast = gap is { } gv ? $@"{gv}ms" : @"?（本竿第一則）";
                     var listedText = listed == 0 ? @"狀態列上還沒有這個狀態" : $@"{listed}層";
 
-                    Service.PrintInfo(
+                    QueueLine(ref pending,
                         $@"[引誘階梯] {lure} 第{stacks}層（伺服器訊息#{id}）" +
                         $@"｜距拋竿 {sinceCast}｜距上一則階梯 {sinceLast}" +
                         $@"｜此刻狀態列＝{listedText}{(listed >= stacks ? @"（已同步）" : @"（落後中）")}");
                 }
 
                 if (Environment.TickCount64 - _lastSummaryTick >= SummaryIntervalMs)
-                    FlushSummaryLocked();
+                    FlushSummaryLocked(ref pending);
             }
+
+            // 出鎖之後才真的送出去。留在 try 裡面，所以送出時萬一出錯，
+            // 接住它的仍然是下面那個 catch，與改動前一致。
+            EmitQueued(pending);
 
             return true;
         }
@@ -216,6 +234,8 @@ public static class LureLadderLog
     /// </summary>
     public static void Poll()
     {
+        List<string>? pending = null;
+
         try
         {
             if (!_pending)
@@ -240,17 +260,19 @@ public static class LureLadderLog
                     if (_detailLines < MaxDetailLines)
                     {
                         _detailLines++;
-                        Service.PrintInfo(
+                        QueueLine(ref pending,
                             $@"[引誘階梯] 狀態列追上：{_pendingLure} 第{_pendingStacks}層｜落後 {elapsed}ms");
                     }
 
                     _pending = false;
-                    return;
                 }
-
-                if (elapsed >= CatchUpTimeoutMs)
-                    FlushPendingLocked($@"{CatchUpTimeoutMs}ms 內狀態列沒追上");
+                else if (elapsed >= CatchUpTimeoutMs)
+                    FlushPendingLocked(ref pending, $@"{CatchUpTimeoutMs}ms 內狀態列沒追上");
             }
+
+            // 出鎖之後才真的送出去。留在 try 裡面，所以送出時萬一出錯，
+            // 接住它的仍然是下面那個 catch，與改動前一致。
+            EmitQueued(pending);
         }
         catch (Exception e)
         {
@@ -260,7 +282,8 @@ public static class LureLadderLog
     }
 
     /// <summary>把「沒追上」的暫存收掉。呼叫端必須已經持有 <see cref="Gate"/>。</summary>
-    private static void FlushPendingLocked(string reason)
+    /// <remarks>訊息只排進 <paramref name="pending"/>，實際送出由呼叫端在鎖外做。</remarks>
+    private static void FlushPendingLocked(ref List<string>? pending, string reason)
     {
         if (!_pending)
             return;
@@ -273,7 +296,7 @@ public static class LureLadderLog
         if (_detailLines < MaxDetailLines)
         {
             _detailLines++;
-            Service.PrintInfo(
+            QueueLine(ref pending,
                 $@"[引誘階梯] 狀態列沒追上：{_pendingLure} 第{_pendingStacks}層｜等了 {elapsed}ms｜原因＝{reason}");
         }
 
@@ -292,7 +315,8 @@ public static class LureLadderLog
     }
 
     /// <summary>每個「引誘種類 × 層數」印一行彙總。呼叫端必須已經持有 <see cref="Gate"/>。</summary>
-    private static void FlushSummaryLocked()
+    /// <remarks>訊息只排進 <paramref name="pending"/>，實際送出由呼叫端在鎖外做。</remarks>
+    private static void FlushSummaryLocked(ref List<string>? pending)
     {
         _lastSummaryTick = Environment.TickCount64;
 
@@ -309,8 +333,30 @@ public static class LureLadderLog
             sb.Append($@"（沒追上 {stats.LagTimeouts}）");
             sb.Append($@"｜距上一則階梯 {Range(stats.GapSamples, stats.GapMin, stats.GapMax, stats.GapSum)}");
 
-            Service.PrintInfo(sb.ToString());
+            QueueLine(ref pending, sb.ToString());
         }
+    }
+
+    /// <summary>
+    /// 把一行排進佇列，**不送出**。
+    /// <see cref="Service.PrintInfo"/> 會先推進 <c>Service</c> 自己的環形緩衝區（那是另一把鎖），
+    /// 再寫 <c>PluginLog</c>（Dalamud 的 Serilog sink，最後會落地成檔案）——
+    /// 巢狀鎖加檔案 I/O，都不該在持有 <see cref="Gate"/> 的時候做。
+    /// </summary>
+    private static void QueueLine(ref List<string>? pending, string line)
+        => (pending ??= new List<string>()).Add(line);
+
+    /// <summary>
+    /// 送出 <see cref="QueueLine"/> 排好的訊息。**必須在鎖外呼叫。**
+    /// 頻道、等級、內容、觸發條件都沒變，只有寫出去的那一刻挪到了鎖外。
+    /// </summary>
+    private static void EmitQueued(List<string>? pending)
+    {
+        if (pending is null)
+            return;
+
+        foreach (var line in pending)
+            Service.PrintInfo(line);
     }
 
     /// <summary>樣本數 0 時印 <c>?</c>，不要印成 0 —— 那會被讀成「量到了，值是 0」。</summary>

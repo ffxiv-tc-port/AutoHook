@@ -83,6 +83,8 @@ public static class CosmicCatchLog
     /// <param name="bite">咬鉤力道。⚠️ 必須是**咬鉤當下**存下來的值，不能在這裡現讀。</param>
     public static void Record(uint fishId, uint amount, bool large, ushort size, bool collectible, BiteType bite)
     {
+        List<string>? pending = null;
+
         try
         {
             if (!CosmicMissionInfo.IsInCosmicZone())
@@ -96,7 +98,7 @@ public static class CosmicCatchLog
                 if (mission != _currentMission)
                 {
                     // 換任務：先把上一個任務的統計倒出來，再清掉（key 帶任務 id，不清會無限長大）。
-                    FlushLocked();
+                    FlushLocked(ref pending);
                     Buckets.Clear();
                     _currentMission = mission;
                 }
@@ -128,15 +130,19 @@ public static class CosmicCatchLog
                 if (novelCombo && fish.DetailLines < MaxDetailLinesPerFish)
                 {
                     fish.DetailLines++;
-                    Service.PrintInfo(
+                    QueueLine(ref pending,
                         $"[宇宙釣魚量測] 任務#{mission} 計分={FocusLabel(focus)}" +
                         $" ｜ 魚#{fishId} {MultiString.GetItemName(fishId)}" +
                         $" ｜ 咬鉤={BiteLabel(bite)} 尺寸={size} 大型={YesNo(large)} 收藏={YesNo(collectible)} 起獲={amount}");
                 }
 
                 if (Environment.TickCount64 - _lastSummaryTick >= SummaryIntervalMs)
-                    FlushLocked();
+                    FlushLocked(ref pending);
             }
+
+            // 出鎖之後才真的送出去。留在 try 裡面，所以送出時萬一出錯，
+            // 接住它的仍然是下面那個 catch，與改動前一致。
+            EmitQueued(pending);
         }
         catch (Exception e)
         {
@@ -146,7 +152,8 @@ public static class CosmicCatchLog
     }
 
     /// <summary>把有變動的魚各印一行彙總。呼叫端必須已經持有 <see cref="Gate"/>。</summary>
-    private static void FlushLocked()
+    /// <remarks>訊息只排進 <paramref name="pending"/>，實際送出由呼叫端在鎖外做。</remarks>
+    private static void FlushLocked(ref List<string>? pending)
     {
         _lastSummaryTick = Environment.TickCount64;
 
@@ -168,8 +175,30 @@ public static class CosmicCatchLog
                           $" 大型{tug.LargeCount} 收藏{tug.CollectibleCount}");
             }
 
-            Service.PrintInfo(sb.ToString());
+            QueueLine(ref pending, sb.ToString());
         }
+    }
+
+    /// <summary>
+    /// 把一行排進佇列，**不送出**。
+    /// <see cref="Service.PrintInfo"/> 會先推進 <c>Service</c> 自己的環形緩衝區（那是另一把鎖），
+    /// 再寫 <c>PluginLog</c>（Dalamud 的 Serilog sink，最後會落地成檔案）——
+    /// 巢狀鎖加檔案 I/O，都不該在持有 <see cref="Gate"/> 的時候做。
+    /// </summary>
+    private static void QueueLine(ref List<string>? pending, string line)
+        => (pending ??= new List<string>()).Add(line);
+
+    /// <summary>
+    /// 送出 <see cref="QueueLine"/> 排好的訊息。**必須在鎖外呼叫。**
+    /// 頻道、等級、內容、觸發條件都沒變，只有寫出去的那一刻挪到了鎖外。
+    /// </summary>
+    private static void EmitQueued(List<string>? pending)
+    {
+        if (pending is null)
+            return;
+
+        foreach (var line in pending)
+            Service.PrintInfo(line);
     }
 
     private static int TugRank(BiteType bite) => bite switch
