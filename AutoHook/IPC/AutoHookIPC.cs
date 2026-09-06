@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoHook.SeFunctions;
 using AutoHook.Utils;
+using System.Threading.Tasks;
 using ECommons.EzIpcManager;
 
 namespace AutoHook.IPC;
@@ -90,6 +91,13 @@ public class AutoHookIPC
     /// </remarks>
     [EzIPC]
     public void SetPluginStatePersistent(bool state)
+        => ForwardToFramework(nameof(SetPluginStatePersistent), () => SetPluginStatePersistentCore(state));
+
+    /// <summary>
+    /// <see cref="SetPluginStatePersistent"/> 的實體。<b>只在 Framework 執行緒上呼叫</b>
+    /// （<c>Service.Save()</c> 會把整份設定序列化一次，等於從頭到尾走訪每一個 <c>List</c>）。
+    /// </summary>
+    private void SetPluginStatePersistentCore(bool state)
     {
         // 明確要求持久化 ⇒ 這就是新的權威值，丟掉任何借用中的覆寫。
         IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
@@ -134,6 +142,10 @@ public class AutoHookIPC
 
     [EzIPC]
     public void SetPreset(string preset)
+        => ForwardToFramework(nameof(SetPreset), () => SetPresetCore(preset));
+
+    /// <summary><see cref="SetPreset"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
+    private void SetPresetCore(string preset)
     {
         Service.Save();
         _cfg.HookPresets.SelectedPreset =
@@ -148,6 +160,10 @@ public class AutoHookIPC
     // 它只做「在既有的魚叉 preset 清單裡挑一個」，沒有任何危險行為，補上屬性即可。
     [EzIPC]
     public void SetPresetAutogig(string preset)
+        => ForwardToFramework(nameof(SetPresetAutogig), () => SetPresetAutogigCore(preset));
+
+    /// <summary><see cref="SetPresetAutogig"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
+    private void SetPresetAutogigCore(string preset)
     {
         Service.Save();
         _cfg.AutoGigConfig.SelectedPreset =
@@ -157,6 +173,11 @@ public class AutoHookIPC
 
     [EzIPC]
     public void CreateAndSelectAnonymousPreset(string preset)
+        => ForwardToFramework(nameof(CreateAndSelectAnonymousPreset),
+            () => CreateAndSelectAnonymousPresetCore(preset));
+
+    /// <summary><see cref="CreateAndSelectAnonymousPreset"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
+    private void CreateAndSelectAnonymousPresetCore(string preset)
     {
         var _import = Configuration.ImportPreset(preset);
         if (_import == null) return;
@@ -201,6 +222,19 @@ public class AutoHookIPC
     /// </returns>
     [EzIPC]
     public List<string> CreateAndSelectAnonymousFolder(string folderExport)
+        => ForwardToFramework(
+            nameof(CreateAndSelectAnonymousFolder),
+            () => CreateAndSelectAnonymousFolderCore(folderExport),
+            new List<string>());
+
+    /// <summary>
+    /// <see cref="CreateAndSelectAnonymousFolder"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b>
+    /// </summary>
+    /// <remarks>
+    /// 📌 轉送逾時的回傳值刻意用<b>空清單</b>，與「匯入失敗」同一個值——呼叫端本來就要處理它，
+    /// 不必為了逾時再多認一種回傳。
+    /// </remarks>
+    private List<string> CreateAndSelectAnonymousFolderCore(string folderExport)
     {
         var empty = new List<string>();
 
@@ -336,6 +370,10 @@ public class AutoHookIPC
 
     [EzIPC]
     public void ImportAndSelectPreset(string preset)
+        => ForwardToFramework(nameof(ImportAndSelectPreset), () => ImportAndSelectPresetCore(preset));
+
+    /// <summary><see cref="ImportAndSelectPreset"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
+    private void ImportAndSelectPresetCore(string preset)
     {
         var _import = Configuration.ImportPreset(preset);
         if (_import == null) return;
@@ -352,6 +390,10 @@ public class AutoHookIPC
 
     [EzIPC]
     public void DeleteSelectedPreset()
+        => ForwardToFramework(nameof(DeleteSelectedPreset), DeleteSelectedPresetCore);
+
+    /// <summary><see cref="DeleteSelectedPreset"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
+    private void DeleteSelectedPresetCore()
     {
         var selected = _cfg.HookPresets.SelectedPreset;
         if (selected == null) return;
@@ -362,6 +404,10 @@ public class AutoHookIPC
 
     [EzIPC]
     public void DeleteAllAnonymousPresets()
+        => ForwardToFramework(nameof(DeleteAllAnonymousPresets), DeleteAllAnonymousPresetsCore);
+
+    /// <summary><see cref="DeleteAllAnonymousPresets"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
+    private void DeleteAllAnonymousPresetsCore()
     {
         _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith(AnonPrefix));
 
@@ -549,4 +595,102 @@ public class AutoHookIPC
     /// </remarks>
     [EzIPC]
     public bool GetEffectivePluginState() => _cfg.EffectivePluginEnabled;
+
+    // -- 把「會改動設定」的工作轉送到 Framework 執行緒 ------------------------------
+
+    /// <summary>轉送到 Framework 執行緒時，呼叫端最多等多久（毫秒）。</summary>
+    /// <remarks>
+    /// 🔴 <b>一定要有逾時。</b>無限等待在「Framework 執行緒正好被這個呼叫端擋住」的情況下就是死結，
+    /// 而死結的表現是<b>整個遊戲凍結</b>。寧可讓這一次匯入失敗——呼叫端的合約本來就允許失敗。
+    /// </remarks>
+    private const int ForwardTimeoutMs = 5000;
+
+    /// <summary>
+    /// 把「會改動設定」的工作轉送到 Framework 執行緒上執行，並<b>同步等它做完</b>再回傳。
+    /// </summary>
+    /// <remarks>
+    /// 🔴🔴 <b>為什麼需要它</b>：<c>[EzIPC]</c> 端點跑在<b>呼叫端外掛的執行緒</b>上，
+    /// 沒有任何「一定在 Framework 執行緒」的保證。而
+    /// <c>Configuration.HookPresets.CustomPresets</c>／<c>Folders</c>／
+    /// <c>SpearFishingPresets.Presets</c> 都是裸的 <c>List&lt;T&gt;</c>（零同步），同時被三種執行緒碰：
+    /// <list type="bullet">
+    /// <item>繪製執行緒——<c>TabFishingPresets</c>／<c>SubTabFish</c>／<c>SubTabExtra</c> 每幀迭代它們；</item>
+    /// <item>Framework 執行緒與遊戲自己的執行緒——<c>FishingManager</c> 的換 preset 判斷每幀在查；</item>
+    /// <item><b>呼叫端的執行緒</b>——就是本檔這些端點。</item>
+    /// </list>
+    /// 並行 <c>Add</c>／<c>RemoveAll</c> 時迭代端擲的是 <c>InvalidOperationException</c>，
+    /// resize 途中讀到的是撕裂的內容——<b>失敗形式不是「少一筆」而是清單本身壞掉</b>，
+    /// 跟 <c>ECommons.Throttlers.EzThrottler</c>／裸 <c>Dictionary</c> 那條紅線完全同形狀。
+    /// <br/>🔴 <c>Service.Save()</c> 也算在內：它是<b>整份設定序列化一次</b>，
+    /// 等於從頭到尾走訪每一個 <c>List</c>——並行改動時 <c>foreach</c> 會擲例外，
+    /// 而那個例外常被吞成「存檔失敗」，使用者的設定就這樣沒存到。
+    /// <para>
+    /// 🔑 <b>這裡刻意不用鎖。</b>要保護的清單散在整個外掛（UI、FishingManager、序列化），
+    /// 加鎖等於要在每一個讀取點都上鎖，而其中一部分讀取點就在 ImGui 繪製迴圈裡
+    /// ——鎖內呼叫 ImGui 是另一條紅線。<b>把寫入端搬到既有的讀取執行緒上</b>才是零改動的解。
+    /// </para>
+    /// <para>
+    /// 📌 <b>已經在 Framework 執行緒上就直接做</b>，語意與改動前逐字相同。這一條涵蓋的比想像中多：
+    /// Dalamud 的繪製（<c>Present</c> hook）與 <c>Framework::Update</c> 是<b>同一條遊戲主執行緒</b>
+    /// （<c>Framework.HandleFrameworkUpdate</c> 把 <c>BoundThread</c> 綁成當下這條，
+    /// 而 <c>IsInFrameworkUpdateThread</c> 就是 <c>Thread.CurrentThread == BoundThread</c>），
+    /// 所以從別的外掛的 UI 或它的 <c>Framework.Update</c> 處理器裡呼叫進來的，一律走就地執行這條。
+    /// </para>
+    /// <para>
+    /// 🔴 <b>死結面已經逐行查過本 pin 的碼</b>：
+    /// <c>Dalamud/Game/Framework.cs:167-168</c> 是
+    /// <c>IsInFrameworkUpdateThread || IsFrameworkUnloading ? Task.FromResult(func()) : RunOnTick(func)</c>
+    /// ——<b><c>RunOnFrameworkThread</c> 自己就會就地執行</b>，無條件排隊的是 <c>RunOnTick</c>（<c>:200-224</c>）。
+    /// 所以「在 Framework 執行緒上同步等 <c>RunOnFrameworkThread</c>」不會自我死結。
+    /// 上面那個 <c>IsInFrameworkUpdateThread</c> 檢查是<b>刻意的重複</b>：它讓「就地執行」
+    /// 不依賴 Dalamud 內部的實作細節，日後那一行改掉也不會變成凍結遊戲。
+    /// </para>
+    /// <para>
+    /// ⚠️ <b>逾時之後那份工作不會被取消</b>，它仍會在之後某一幀的 Framework 執行緒上跑完
+    /// （那是安全的執行緒，不會弄壞任何東西，只是<b>晚了</b>）⇒ 呼叫端收到失敗就立刻重試，
+    /// 有可能匯入兩份。這是刻意的取捨：可取消的寫法要換成 <c>RunOnTick</c> 加
+    /// <c>CancellationToken</c>，而那條路在「工作已經開始跑」時一樣取消不掉，
+    /// 卻多出一整組要維護的狀態。
+    /// </para>
+    /// </remarks>
+    /// <param name="endpoint">端點名，只用在逾時訊息上。</param>
+    /// <param name="work">實際要做的事。<b>整段都會在 Framework 執行緒上跑。</b></param>
+    /// <param name="onTimeout">逾時或工作被取消時要回傳的值。</param>
+    private static T ForwardToFramework<T>(string endpoint, Func<T> work, T onTimeout)
+    {
+        if (Service.Framework.IsInFrameworkUpdateThread)
+            return work();
+
+        var task = Service.Framework.RunOnFrameworkThread(work);
+
+        // 🔴 刻意用 Task.WaitAny 而不是 task.Wait(逾時)：後者在工作擲例外時會就地把例外包成
+        //    AggregateException 丟出來，呼叫端看到的例外型別就跟改動前不一樣了。
+        //    WaitAny 只等「完成」、不看結果，例外統一交給下面的 GetAwaiter().GetResult() 原樣重擲。
+        if (Task.WaitAny(new Task[] { task }, ForwardTimeoutMs) < 0)
+        {
+            Service.PluginLog.Information(
+                $"[IPC] {endpoint}：等 Framework 執行緒超過 {ForwardTimeoutMs} 毫秒，這一次放棄。" +
+                @"通常代表遊戲主執行緒正被擋住；請把呼叫改到 Framework 執行緒上做。" +
+                @"這份工作沒有被取消，之後某一幀仍會跑完，所以直接重試有可能匯入兩份。");
+            return onTimeout;
+        }
+
+        if (task.IsCanceled)
+        {
+            Service.PluginLog.Information(
+                $"[IPC] {endpoint}：轉送到 Framework 執行緒的工作被取消（通常是外掛正在卸載），這一次什麼都沒做。");
+            return onTimeout;
+        }
+
+        // 例外原樣往上拋給呼叫端（不包成 AggregateException），與改動前逐字相同。
+        return task.GetAwaiter().GetResult();
+    }
+
+    /// <summary>回傳型別是 <c>void</c> 的版本。逾時／取消時什麼都不做。</summary>
+    private static void ForwardToFramework(string endpoint, Action work)
+        => ForwardToFramework(endpoint, () =>
+        {
+            work();
+            return true;
+        }, false);
 }
