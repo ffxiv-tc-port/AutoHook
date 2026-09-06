@@ -3,6 +3,8 @@ using AutoHook.Classes;
 using AutoHook.Configurations;
 using System.Collections.Generic;
 using System.Linq;
+using AutoHook.SeFunctions;
+using AutoHook.Utils;
 using ECommons.EzIpcManager;
 
 namespace AutoHook.IPC;
@@ -104,6 +106,30 @@ public class AutoHookIPC
     {
         IpcConfigOverrides.Set(ref _cfg.AutoGigConfig.AutoGigEnabled, state,
             IpcConfigOverrides.AutoGigEnabledKey);
+    }
+
+    /// <summary>
+    /// 讀取「沒在釣魚時自動拋竿」的開關（<see cref="Configuration.AutoStartFishing"/>）。
+    /// </summary>
+    /// <remarks>
+    /// ⚠️ 這是<b>後補</b>的端點：消費端（Questionable 的 <c>External/AutoHookIpc.cs</c>）
+    /// 早就宣告了 <c>Func&lt;bool&gt;</c> 訂閱，而本 fork 分岔自上游 2025-05-08，
+    /// 這個設定與它的自動拋竿路徑當時還不存在 ⇒ 呼叫下去只會被吞掉、每次回 <c>false</c>。
+    /// <br/>🔴 回傳型別必須維持 <c>bool</c>，理由同 <see cref="GetPluginState"/>。
+    /// <br/>📌 這裡回的是<b>使用者自己的值</b>（欄位本身），與 <see cref="GetPluginState"/> 一致：
+    /// 呼叫端拿它當「事後要還原成什麼」的快照，回別人覆寫過的值會讓它把別人的值還給使用者。
+    /// </remarks>
+    [EzIPC]
+    public bool GetAutoStartFishing() => _cfg.AutoStartFishing;
+
+    /// <summary>
+    /// 借走「沒在釣魚時自動拋竿」的開關：<b>只改執行期的值，不寫進使用者的設定檔</b>。
+    /// </summary>
+    /// <remarks>與 <see cref="SetPluginState"/> 完全同一個形狀與理由（見 <see cref="IpcConfigOverrides"/>）。</remarks>
+    [EzIPC]
+    public void SetAutoStartFishing(bool state)
+    {
+        IpcConfigOverrides.Set(ref _cfg.AutoStartFishing, state, IpcConfigOverrides.AutoStartFishingKey);
     }
 
     [EzIPC]
@@ -346,5 +372,110 @@ public class AutoHookIPC
         _cfg.HookPresets.Folders.RemoveAll(f => f.FolderName != null && f.FolderName.StartsWith(AnonPrefix));
 
         Service.Save();
+    }
+
+    /// <summary>
+    /// 換餌（依道具 ID）。<b>已經掛著同一個餌時也算成功</b>——呼叫端要的是
+    /// 「餌對了沒」，不是「這一次有沒有真的送出換餌指令」。
+    /// </summary>
+    /// <remarks>
+    /// 🔴🔴 <b>只在 Framework 執行緒上做事，不在的話直接回 <see langword="false"/>。</b>
+    /// IPC 端點跑在<b>呼叫端的執行緒</b>上（沒有任何「一定在 Framework 執行緒」的保證），
+    /// 而 <c>BaitManager.ChangeBait</c> 會呼叫遊戲的原生函式，且沿路裸解參考
+    /// <c>EventFramework</c>／<c>PlayerState</c>／<c>WKSManager</c> 的實例指標。
+    /// 那些指標在遊戲自己的執行緒上隨時會變，跨執行緒踩下去是 AccessViolationException
+    /// ——它是 corrupted-state exception，<c>try/catch</c> 完全攔不到，直接把遊戲帶走。
+    /// <br/>🔑 刻意<b>不</b>用 <c>RunOnFrameworkThread(...).GetAwaiter().GetResult()</c> 阻塞等下一幀：
+    /// 那在「Framework 執行緒正好在等這個呼叫端」時是死鎖。回 <see langword="false"/> 是安全方向
+    /// （呼叫端的合約本來就允許失敗），而且會留下一行 Information 說明為什麼。
+    /// </remarks>
+    /// <returns>餌已經是（或已成功要求換成）<paramref name="baitId"/>。</returns>
+    [EzIPC]
+    public bool SwapBaitById(uint baitId)
+    {
+        if (!EnsureFrameworkThread(nameof(SwapBaitById)))
+            return false;
+
+        return Service.BaitManager.ChangeBait(baitId)
+            is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
+    }
+
+    /// <summary>換餌（依名稱或道具 ID 字串）。</summary>
+    /// <remarks>
+    /// ⚠️ 名稱比對用 <c>OrdinalIgnoreCase</c>，而 <c>BaitFishClass.Name</c> 是從遊戲資料表
+    /// 拿的<b>當前語言</b>名稱 ⇒ 台服上要傳繁中名字才會命中。呼叫端手上有 ID 的話，
+    /// <b>傳 ID 字串或直接用 <see cref="SwapBaitById"/> 才是可靠的</b>。
+    /// <br/>📌 與上游一致：先試著把字串當成 <c>uint</c> ID 解，解得開就走 ID 路徑。
+    /// </remarks>
+    [EzIPC]
+    public bool SwapBait(string baitNameOrId)
+    {
+        if (string.IsNullOrWhiteSpace(baitNameOrId))
+            return false;
+
+        if (uint.TryParse(baitNameOrId, out var parsedId))
+            return SwapBaitById(parsedId);
+
+        if (!EnsureFrameworkThread(nameof(SwapBait)))
+            return false;
+
+        var bait = GameRes.Baits.FirstOrDefault(
+            b => string.Equals(b.Name, baitNameOrId, StringComparison.OrdinalIgnoreCase));
+
+        if (bait == null || bait.Id <= 0)
+            return false;
+
+        return Service.BaitManager.ChangeBait((uint)bait.Id)
+            is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
+    }
+
+    /// <summary>換泳餌槽位（索引 0、1、2）。</summary>
+    /// <remarks>
+    /// ⚠️ 索引大於 2 時 <c>BaitManager.ChangeSwimbait</c> 會回 <c>InvalidBait</c> ⇒ 本函式回
+    /// <see langword="false"/>，不會送任何指令。執行緒閘門的理由同 <see cref="SwapBaitById"/>。
+    /// </remarks>
+    [EzIPC]
+    public bool SwapSwimbaitByIndex(byte index)
+    {
+        if (!EnsureFrameworkThread(nameof(SwapSwimbaitByIndex)))
+            return false;
+
+        return Service.BaitManager.ChangeSwimbait(index)
+            is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
+    }
+
+    /// <summary>已經回報過「不在 Framework 執行緒」的端點名。同一支只寫一次。</summary>
+    private static readonly HashSet<string> OffThreadReported = new(StringComparer.Ordinal);
+
+    /// <summary>只保護 <see cref="OffThreadReported"/>。</summary>
+    private static readonly object OffThreadGate = new();
+
+    /// <summary>
+    /// 本次呼叫是不是在 Framework 執行緒上。不是的話寫一行 Information 並回 <see langword="false"/>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 訊息寫 <c>Information</c>：使用者的記錄等級收得到，而這種失敗完全沒有其他徵兆
+    /// （呼叫端只會看到「換餌一直不成功」）。同一支端點只寫一次，不洗版。
+    /// <br/>🔴 直接用 <c>Service.PluginLog</c>，<b>不要用 <c>Service.PrintInfo</c></b>——
+    /// 後者會塞進 <c>Service.LogMessages</c> 這個沒有同步的 <c>Queue</c>，
+    /// 而這裡本來就可能在別的執行緒上（跟 EzThrottler 那條紅線完全同形狀）。
+    /// </remarks>
+    private static bool EnsureFrameworkThread(string endpoint)
+    {
+        if (Service.Framework.IsInFrameworkUpdateThread)
+            return true;
+
+        bool first;
+        lock (OffThreadGate)
+            first = OffThreadReported.Add(endpoint);
+
+        if (first)
+            Service.PluginLog.Information(
+                $"[IPC] {endpoint} 是從 Framework 以外的執行緒呼叫的，已拒絕並回傳 false。" +
+                @"換餌會呼叫遊戲的原生函式，跨執行緒踩下去是 try/catch 攔不到的 AccessViolation。" +
+                @"請在 Framework 執行緒（例如 IFramework.RunOnFrameworkThread）上呼叫。" +
+                @"這行訊息每支端點只會出現一次。");
+
+        return false;
     }
 }

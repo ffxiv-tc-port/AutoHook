@@ -52,6 +52,30 @@ public class Configuration : IPluginConfiguration
         set => PluginEnabled = value;
     }
 
+    /// <summary>
+    /// 「沒在釣魚時自動拋竿」。<b>執行期真值</b>——讀取端讀這個欄位。
+    /// </summary>
+    /// <remarks>
+    /// 📌 這是把上游的 <c>AutoStartFishing</c> 行為補回本 fork（本 fork 分岔自上游 2025-05-08，
+    /// 當時還沒有這個設定）。<b>預設 <see langword="false"/>，與上游一致</b>：
+    /// 既有使用者的設定檔裡沒有這個鍵 ⇒ 吃這裡的初值 ⇒ <b>行為零改變</b>。
+    /// <br/>⚠️ 這個欄位<b>不直接序列化</b>；寫進設定檔的是 <see cref="AutoStartFishingPersisted"/>。
+    /// 別的外掛用 <c>AutoHook.SetAutoStartFishing</c> 借走這個開關時，磁碟上要保留<b>使用者自己的值</b>
+    /// ——理由與機制見 <see cref="IpcConfigOverrides"/>。
+    /// </remarks>
+    [JsonIgnore]
+    public bool AutoStartFishing = false;
+
+    /// <summary>
+    /// <see cref="AutoStartFishing"/> 的序列化替身。JSON 鍵名維持 <c>AutoStartFishing</c> 不變。
+    /// </summary>
+    [JsonProperty(nameof(AutoStartFishing))]
+    public bool AutoStartFishingPersisted
+    {
+        get => IpcConfigOverrides.ValueForSave(IpcConfigOverrides.AutoStartFishingKey, AutoStartFishing);
+        set => AutoStartFishing = value;
+    }
+
     public FishingPresets HookPresets = new();
 
     public SpearFishingPresets AutoGigConfig = new();

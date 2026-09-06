@@ -270,13 +270,21 @@ public partial class FishingManager : IDisposable
     {
         var currentState = Service.BaitManager.FishingState;
 
-        if (!Service.Configuration.PluginEnabled || currentState == FishingState.NotFishing)
+        var enabled = Service.Configuration.PluginEnabled;
+
+        if (!enabled || currentState == FishingState.NotFishing)
         {
             // 🔴 魚影是跨拋竿的狀態，只靠聊天訊息清除會有漏網（訊息被別的外掛吃掉、玩家直接收竿、
             //    切區、外掛中途被關掉…）。這裡是**兜底**：只要人不在釣魚就一定清掉，
             //    否則會永遠停在「不再施放引誘」。已經是 null 時 ClearLureShadow 直接返回，不會洗版。
             if (currentState == FishingState.NotFishing)
+            {
                 ClearLureShadow(@"離開釣魚 (NotFishing)");
+
+                // 自動拋竿只在「外掛啟用中」時考慮（上面那個 if 有兩個進來的理由）。
+                if (enabled)
+                    TryAutoStartFishing();
+            }
 
             return;
         }
@@ -329,6 +337,51 @@ public partial class FishingManager : IDisposable
                 OnFishingStop();
                 break;
         }
+    }
+
+    /// <summary>一次自動拋竿嘗試與下一次之間的最短間隔（毫秒）。</summary>
+    private const int AutoStartFishingIntervalMs = 1000;
+
+    /// <summary>下一次可以嘗試自動拋竿的時刻（<see cref="Environment.TickCount64"/> 座標）。</summary>
+    /// <remarks>
+    /// 🔑 刻意<b>不</b>用 ECommons 的 <c>EzThrottler</c>：那是整個外掛共用的靜態字典、
+    /// key 全域持久而且首次必放行；這裡只需要一個私有欄位，也不會跟別人撞 key。
+    /// </remarks>
+    private long _nextAutoStartTick;
+
+    /// <summary>
+    /// 「沒在釣魚時自動拋竿」（<see cref="Configuration.AutoStartFishing"/>，<b>預設關</b>）。
+    /// </summary>
+    /// <remarks>
+    /// 📌 補回上游 <c>AutoStartFishing</c> 的行為；本 fork 分岔得早，這條路徑一直不存在，
+    /// 而消費端（Questionable 的 <c>External/AutoHookIpc.cs</c>）早就宣告了對應的 IPC 訂閱。
+    /// <br/>🔴 <b>第一件事就是判旗標</b>：這是每幀都會走到的地方，關著的時候
+    /// 除了一次布林判斷之外零成本。
+    /// <br/>⚠️ 三個前提都要成立才拋竿：遊戲現在真的讓你拋
+    /// （<see cref="Utils.PlayerRes.IsCastAvailable"/> 讀的是遊戲自己的動作狀態，職業不對／
+    /// 不在水邊時它就是 false，所以這裡不必自己判職業）、自動施放的總開關開著、
+    /// 且「自動拋竿」這個動作本身可用（<c>IsAvailableToCast</c> 已經含 <c>Enabled</c> 判斷）。
+    /// <br/>🔑 節流時刻在<b>旗標判完之後、其餘判斷之前</b>就推進：失敗的嘗試也要等，
+    /// 否則站在釣點但條件不成立時會每幀重跑一次完整判斷。
+    /// </remarks>
+    private void TryAutoStartFishing()
+    {
+        if (!Service.Configuration.AutoStartFishing)
+            return;
+
+        var now = Environment.TickCount64;
+        if (now < _nextAutoStartTick)
+            return;
+        _nextAutoStartTick = now + AutoStartFishingIntervalMs;
+
+        if (!PlayerRes.IsCastAvailable())
+            return;
+
+        var autoCastCfg = GetAutoCastCfg();
+        if (!autoCastCfg.EnableAll || !autoCastCfg.CastLine.IsAvailableToCast())
+            return;
+
+        StartFishing();
     }
 
     private void InitFinishing()

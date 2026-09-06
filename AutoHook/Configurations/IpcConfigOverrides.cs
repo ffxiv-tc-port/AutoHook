@@ -41,6 +41,9 @@ internal static class IpcConfigOverrides
     /// <summary>鍵＝<c>SpearFishingPresets.AutoGigEnabled</c>。</summary>
     public const string AutoGigEnabledKey = @"AutoGigEnabled";
 
+    /// <summary>鍵＝<see cref="Configuration.AutoStartFishing"/>。</summary>
+    public const string AutoStartFishingKey = @"AutoStartFishing";
+
     private static readonly Dictionary<string, bool> UserValues = new(StringComparer.Ordinal);
     private static readonly object Gate = new();
 

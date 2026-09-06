@@ -79,6 +79,13 @@ public class TabSettings : BaseTab
 
         DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
 
+        DrawUtil.Checkbox(@"沒在釣魚時自動拋竿", ref Service.Configuration.AutoStartFishing,
+            @"人站在釣點、竿子收著的時候自動幫你拋第一竿。" + "\n" +
+            @"⚠️ 還需要「自動施放」那一頁的總開關也開著，而且那裡的「自動拋竿」要是啟用的；" +
+            @"職業不對或不在水邊時不會有動作。" + "\n" +
+            @"一直開著 AutoHook 的人建議關掉這個 —— 收竿之後它會自己再拋一次。",
+            ipcOverrideKey: IpcConfigOverrides.AutoStartFishingKey);
+
         DrawTataruPraise();
 
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
