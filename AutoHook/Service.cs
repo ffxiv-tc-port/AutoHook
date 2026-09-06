@@ -64,43 +64,94 @@ public class Service
     }
 
     private const int MaxLogSize = 50;
-    public static Queue<string> LogMessages = new();
+
+    /// <summary>
+    /// 只保護 <see cref="LogMessages"/>。<b>鎖內只碰佇列</b>：不呼叫 ImGui、不做檔案 I/O、
+    /// 也不寫 <c>PluginLog</c>（那是 I/O）。
+    /// </summary>
+    private static readonly object LogMessagesGate = new();
+
+    /// <summary>
+    /// 外掛內建除錯主控台的環形緩衝區（最多 <see cref="MaxLogSize"/> 則）。
+    /// </summary>
+    /// <remarks>
+    /// 🔴🔴 <b>這張表被四種執行緒碰</b>：
+    /// <list type="bullet">
+    /// <item>Framework 執行緒（<c>FishingManager.OnFrameworkUpdate</c> 往下的絕大多數呼叫點）；</item>
+    /// <item>遊戲自己的執行緒（<c>UseAction</c> 與 <c>UpdateCatch</c> 的 hook detour）；</item>
+    /// <item><b>呼叫端的執行緒</b>——IPC 端點跑在呼叫者的執行緒上，沒有任何「一定在 Framework
+    ///       執行緒」的保證。<c>CreateAndSelectAnonymousPreset</c> 與 <c>ImportAndSelectPreset</c>
+    ///       會走到 <c>Configuration.ImportPreset</c> → <c>ConvertOldPresetV3</c> →
+    ///       <see cref="PrintDebug"/>（匯入字串帶 <c>AH3_</c> 前綴時），沿路<b>沒有執行緒閘門</b>；</item>
+    /// <item>繪製執行緒（<c>PluginUI.Debug()</c> 把內容畫出來）。</item>
+    /// </list>
+    /// 裸的 <c>Queue&lt;T&gt;</c> 零同步，失敗形式<b>不是「少一行 log」而是佇列本身壞掉</b>——
+    /// <c>Enqueue</c> 與 <c>Dequeue</c>／<c>ToArray</c> 並行時會擲 <c>InvalidOperationException</c>
+    /// 或讀到撕裂的內容，而且會連帶弄壞除錯主控台。跟 <c>ECommons.Throttlers.EzThrottler</c>
+    /// 那條紅線完全同形狀。
+    /// <br/>🔴 外面一律透過 <see cref="SnapshotLogMessages"/> 讀；這個欄位刻意不再公開。
+    /// </remarks>
+    private static readonly Queue<string> LogMessages = new();
+
     public static bool OpenConsole;
+
+    /// <summary>
+    /// 把一則訊息推進環形緩衝區。<b>鎖內只碰佇列</b>，寫 <c>PluginLog</c> 是呼叫端在鎖外做的。
+    /// </summary>
+    /// <remarks>
+    /// 📌 原本這段是「<c>if (Count &gt;= Max) Dequeue();</c> 再 <c>Enqueue</c>」，逐字散在三支
+    /// <c>Print*</c> 裡。收進鎖之後 <c>Count</c> 不可能超過上限，所以 <c>while</c> 與原本的
+    /// <c>if</c> 在任何到得了的狀態下結果相同（改成 <c>while</c> 只是不依賴那個不變式）。
+    /// </remarks>
+    private static void PushLog(string msg)
+    {
+        lock (LogMessagesGate)
+        {
+            while (LogMessages.Count >= MaxLogSize)
+                LogMessages.Dequeue();
+
+            LogMessages.Enqueue(msg);
+        }
+    }
+
+    /// <summary>
+    /// 拍一份緩衝區快照給 UI 畫。<b>鎖內只複製，畫圖一律在鎖外</b>。
+    /// </summary>
+    public static string[] SnapshotLogMessages()
+    {
+        lock (LogMessagesGate)
+            return LogMessages.ToArray();
+    }
+
     public static void PrintDebug(string msg)
     {
-        if (LogMessages.Count >= MaxLogSize)
-        {
-            LogMessages.Dequeue(); 
-        }
-       
-        LogMessages.Enqueue(msg);
+        PushLog(msg);
         PluginLog.Debug(msg);
     }
-    
+
     /// <summary>
-    /// 給「要使用者回報時看得到」的診斷用。使用者的 Dalamud 記錄等級是 2（Information），
-    /// <see cref="PrintDebug"/> 寫出去的東西他們的 log 裡一行都不會有 ——
-    /// 只在「值錯了也不會報錯、只會表現成行為怪怪的」那種地方用這個等級，不要拿來當一般 log。
+    /// 給「要使用者回報時看得到」的診斷用。
     /// </summary>
+    /// <remarks>
+    /// 📌 使用者的 Dalamud <c>LogLevel</c> 是 <b>1</b>（Serilog 的 <c>Debug</c>），門檻放行 Debug、
+    /// <b>只濾掉 Verbose</b> —— 所以 <see cref="PrintDebug"/> 寫出去的東西他們的 log <b>收得到</b>。
+    /// （舊註解寫「等級是 2、Debug 一行都不會有」是錯的；真正的盲區只有 <see cref="PrintVerbose"/>。）
+    /// <br/>⚠️ 但實機單檔的 <c>[DBG]</c> 有十幾萬到數十萬行，寫 Debug 的診斷會被淹沒 ⇒
+    /// 這一級留給「值錯了也不會報錯、只會表現成行為怪怪的」那種地方，不要拿來當一般 log。
+    /// </remarks>
     public static void PrintInfo(string msg)
     {
-        if (LogMessages.Count >= MaxLogSize)
-        {
-            LogMessages.Dequeue();
-        }
-
-        LogMessages.Enqueue(msg);
+        PushLog(msg);
         PluginLog.Information(msg);
     }
 
+    /// <summary>
+    /// ⚠️ 使用者的 <c>LogLevel</c> 是 1，<b>Verbose 是唯一被濾掉的等級</b> ——
+    /// 這一級寫出去的東西在使用者的 log 裡一行都不會有，只有外掛內建的除錯主控台看得到。
+    /// </summary>
     public static void PrintVerbose(string msg)
     {
-        if (LogMessages.Count >= MaxLogSize)
-        {
-            LogMessages.Dequeue(); 
-        }
-       
-        LogMessages.Enqueue(msg);
+        PushLog(msg);
         PluginLog.Verbose(msg);
     }
     

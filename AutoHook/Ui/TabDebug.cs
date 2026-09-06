@@ -262,8 +262,8 @@ public class TabDebug : BaseTab
     /// 現在：上界收到 <c>sizeof(WKSManager) - sizeof(uint)</c>，且以 4 bytes 對齊掃描
     ///    （欄位本來就對齊，逐 byte 掃只是多產生 3 倍的假命中）。
     ///
-    /// 另外把輸出改成 Information：使用者的記錄等級是 2，原本寫 Debug 等於按了按鈕
-    /// 什麼都不會出現，看起來像「掃不到」。開頭先印一行 CS 已知的 FishingBait 欄位當
+    /// 另外把輸出改成 Information：使用者的記錄等級是 1，Debug 收得到但單檔數十萬行會淹沒。
+    /// 開頭先印一行 CS 已知的 FishingBait 欄位當
     /// 校準基準 —— 沒有已知會命中的對照，掃出 0 筆是分不出「真的沒有」還是「掃錯了」的。
     /// </summary>
     public unsafe void Checkoffsets(uint searchValue)

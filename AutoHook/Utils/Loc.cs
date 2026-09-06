@@ -74,7 +74,7 @@ public static class Loc
     /// 啟動時掃一次「目前語系底下有哪些鍵是空的」，寫成 Information。
     ///
     /// 為什麼要做：這一類條目在被畫出來之前完全沒有徵兆，而畫出來的那一刻就是崩潰。
-    /// 使用者的記錄等級是 2，所以刻意用 Information —— 這行的用途就是讓人回報得出來。
+    /// 使用者的記錄等級是 1，所以刻意用 Information —— 這行的用途就是讓人回報得出來。
     /// 這裡<b>只是診斷</b>，真正的防護是 <see cref="Safe"/> 與資源檔本身不留空值。
     /// </summary>
     public static void ReportEmptyResourceKeys()

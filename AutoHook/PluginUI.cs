@@ -150,7 +150,7 @@ public class PluginUi : Window, IDisposable
         if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole))
         {
             // C# 13 (net9 SDK) resolves array.Reverse() to void MemoryExtensions.Reverse; force LINQ
-            var logs = Service.LogMessages.ToArray().AsEnumerable().Reverse().ToList();
+            var logs = Service.SnapshotLogMessages().AsEnumerable().Reverse().ToList();
             for (var i = 0; i < logs.Count; i++)
             {
                 if (i == 0)
