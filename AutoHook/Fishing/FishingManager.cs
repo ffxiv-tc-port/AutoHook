@@ -268,6 +268,11 @@ public partial class FishingManager : IDisposable
 
     private void OnFrameworkUpdate(IFramework _)
     {
+        // 🔴 誇獎的跨外掛 IPC 一律在這裡送出：UpdateCatch 的 detour 只把理由排進佇列。
+        //    放在所有 early return 之前 —— 租約壓制中／人已經離開釣魚，都不該讓已經判定成立的
+        //    那一句卡在佇列裡（判準是在釣獲的當下成立的，跟現在還在不在釣魚無關）。
+        FlushPendingPraises();
+
         var currentState = Service.BaitManager.FishingState;
 
         // 🔴 讀的是<b>疊加後</b>的值：別的外掛可以用暫停租約要求 AutoHook 先停手。

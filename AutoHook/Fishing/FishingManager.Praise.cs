@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using AutoHook.Enums;
 using AutoHook.IPC;
@@ -13,6 +14,53 @@ public partial class FishingManager
     /// 純粹是「就算判準寫壞了也不會變成每竿一句」的保險絲，不是功能本身。
     /// </summary>
     private long _lastPraiseTick;
+
+    /// <summary>
+    /// 待送出的誇獎（只放理由字串）。<b>入列在 <c>UpdateCatch</c> 的 detour 上，
+    /// 出列與真正的 IPC 呼叫都在 Framework 執行緒上</b>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴🔴 <b>為什麼要分兩段</b>：IPC 的實作跑在<b>呼叫端的執行緒</b>上，所以從 detour 直接呼叫
+    /// <c>TataruPraise.Praise</c> 等於把對方的程式碼拉進<b>我們 hook 住遊戲函式的那一格堆疊</b>裡跑。
+    /// 對方在裡面做了什麼（讀原生指標、碰自己的 UI 狀態、再往下呼叫第三個外掛）我們管不到，
+    /// 而 detour 是「遊戲正在處理釣獲」的中途 —— 它慢一點就是整個遊戲卡一下，它擲例外就是
+    /// 從遊戲的呼叫框架裡往上竄。<b>hook detour 裡不做跨外掛呼叫</b>是通則，不是這一個對象的問題。
+    /// <br/>📌 分兩段之後，detour 這一側只剩「判斷 ＋ 把字串放進佇列」，全是本外掛自己的碼。
+    /// </remarks>
+    private readonly ConcurrentQueue<string> _pendingPraises = new();
+
+    /// <summary>
+    /// 待送出上限。正常情況下每幀就排乾，而且判準本身還有 <see cref="_lastPraiseTick"/> 保險絲
+    /// （預設 60 秒一次），所以這個上限只是「排乾那一端死了也不會無上限成長」的兜底。
+    /// </summary>
+    private const int MaxPendingPraises = 4;
+
+    /// <summary>把這一次的誇獎排進佇列。<b>可以從任何執行緒呼叫</b>（實際上是 detour）。</summary>
+    private void QueuePraise(string reason)
+    {
+        _pendingPraises.Enqueue(reason);
+
+        while (_pendingPraises.Count > MaxPendingPraises && _pendingPraises.TryDequeue(out _))
+        {
+        }
+    }
+
+    /// <summary>
+    /// 把 detour 排下的誇獎送出去。<b>只在 Framework 執行緒上呼叫</b>
+    /// （<c>OnFrameworkUpdate</c> 的最開頭，所有 early return 之前）。
+    /// </summary>
+    /// <remarks>
+    /// 📌 觸發次數與改動前相同：判準、保險絲、<see cref="_lastPraiseTick"/> 的更新全部留在
+    /// detour 那一側，這裡只負責「送」。時機從「釣獲那一格堆疊裡」變成「同一幀或下一幀的
+    /// <c>Framework.Update</c>」——最多晚一幀，而且不會再晚，因為排乾放在所有 early return 之前。
+    /// <br/>⚠️ <c>TryPraise</c> 自己吞掉所有例外（含對方沒安裝時的 <c>IpcNotReadyError</c>），
+    /// 所以這裡不再加一層 catch —— 沒裝 TataruPraise 的人在這條路徑上仍然是完全安靜的。
+    /// </remarks>
+    private void FlushPendingPraises()
+    {
+        while (_pendingPraises.TryDequeue(out var reason))
+            TataruPraiseIPC.TryPraise(reason);
+    }
 
     /// <summary>
     /// 釣到「稀有魚」時請 TataruPraise 念一句。
@@ -87,7 +135,7 @@ public partial class FishingManager
             _lastPraiseTick = now;
 
             var fishName = _lastCatch?.Name ?? MultiString.GetItemName(fishId);
-            TataruPraiseIPC.TryPraise(@$"釣到{fishName}（判準：{reason}）");
+            QueuePraise(@$"釣到{fishName}（判準：{reason}）");
         }
         catch (Exception e)
         {
