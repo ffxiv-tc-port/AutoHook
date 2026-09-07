@@ -648,7 +648,7 @@ public class AutoHookIPC
     /// </para>
     /// <para>
     /// 🟢 <b>逾時之後那份工作會被取消</b>：工作開頭有一道取消閘門（<c>claim</c> 的
-    /// <c>Interlocked.CompareExchange</c> 加上 <c>CancellationToken</c>），逾時那一方先拿到取消權的話，
+    /// <c>Interlocked.CompareExchange</c>），逾時那一方先拿到取消權的話，
     /// 排在佇列裡的 lambda 之後跑到時會直接返回，<b>一行都不會執行</b>。
     /// <br/>🔑 <b>為什麼不是「先看旗標再跑」而是 CAS</b>：前者在「檢查」與「執行」之間有空隙，
     /// 逾時剛好落在那個空隙時兩邊會同時認為自己贏了 —— 呼叫端以為已取消而重試，工作卻照樣跑完，
@@ -669,18 +669,13 @@ public class AutoHookIPC
         // 2＝逾時那一方先拿到取消權（工作永遠不會跑）。
         var claim = 0;
 
-        // 🔑 CancellationTokenSource 刻意不 Dispose：它沒有註冊任何 callback、也沒有計時器
-        //    （唯一的取消來源就是下面那一行 Cancel），沒有非受管資源要放；而排在佇列裡的 lambda
-        //    可能在我們回傳之後很久才跑，沒有「一定不會再讀 token」的時點可以安全 Dispose。
-        var cts = new CancellationTokenSource();
-        var token = cts.Token;
-
         var task = Service.Framework.RunOnFrameworkThread(() =>
         {
-            // 🔴 工作開頭的取消檢查。CAS 先跑：它把「宣告開跑」與「檢查有沒有被取消」變成
-            //    同一個不可分割的動作，所以不會出現「兩邊都以為自己贏了」。token 那一半是標準
-            //    寫法的保險 —— 單獨用它有競態，配上 CAS 就沒有。
-            if (Interlocked.CompareExchange(ref claim, 1, 0) != 0 || token.IsCancellationRequested)
+            // 🔴 工作開頭的取消檢查。CAS 把「宣告開跑」與「檢查有沒有被取消」變成同一個
+            //    不可分割的動作 —— 這就是「工作開頭檢查取消旗標」的無競態版本。
+            //    刻意不另外帶 CancellationTokenSource：token 單獨使用時，「看旗標」與「開跑」
+            //    之間仍有空隙，而且排在佇列裡的 lambda 可能很久之後才跑，沒有安全的 Dispose 時點。
+            if (Interlocked.CompareExchange(ref claim, 1, 0) != 0)
                 return onTimeout;
 
             return work();
@@ -694,8 +689,6 @@ public class AutoHookIPC
             // 逾時：先搶下取消權。搶到＝工作一行都還沒跑、之後也永遠不會跑（重試安全）；
             // 搶不到＝它已經在跑了，取消不掉（重試有可能做兩次）。兩種結尾必須分開告訴使用者。
             var cancelled = Interlocked.CompareExchange(ref claim, 2, 0) == 0;
-            if (cancelled)
-                cts.Cancel();
 
             Service.PluginLog.Information(
                 $"[IPC] {endpoint}：等 Framework 執行緒超過 {ForwardTimeoutMs} 毫秒，這一次放棄。" +
