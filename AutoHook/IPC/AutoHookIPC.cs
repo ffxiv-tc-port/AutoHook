@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoHook.SeFunctions;
 using AutoHook.Utils;
+using System.Threading;
 using System.Threading.Tasks;
 using ECommons.EzIpcManager;
 
@@ -646,11 +647,14 @@ public class AutoHookIPC
     /// 不依賴 Dalamud 內部的實作細節，日後那一行改掉也不會變成凍結遊戲。
     /// </para>
     /// <para>
-    /// ⚠️ <b>逾時之後那份工作不會被取消</b>，它仍會在之後某一幀的 Framework 執行緒上跑完
-    /// （那是安全的執行緒，不會弄壞任何東西，只是<b>晚了</b>）⇒ 呼叫端收到失敗就立刻重試，
-    /// 有可能匯入兩份。這是刻意的取捨：可取消的寫法要換成 <c>RunOnTick</c> 加
-    /// <c>CancellationToken</c>，而那條路在「工作已經開始跑」時一樣取消不掉，
-    /// 卻多出一整組要維護的狀態。
+    /// 🟢 <b>逾時之後那份工作會被取消</b>：工作開頭有一道取消閘門（<c>claim</c> 的
+    /// <c>Interlocked.CompareExchange</c> 加上 <c>CancellationToken</c>），逾時那一方先拿到取消權的話，
+    /// 排在佇列裡的 lambda 之後跑到時會直接返回，<b>一行都不會執行</b>。
+    /// <br/>🔑 <b>為什麼不是「先看旗標再跑」而是 CAS</b>：前者在「檢查」與「執行」之間有空隙，
+    /// 逾時剛好落在那個空隙時兩邊會同時認為自己贏了 —— 呼叫端以為已取消而重試，工作卻照樣跑完，
+    /// 於是匯入兩份。CAS 把「宣告開跑」與「檢查有沒有被取消」合成同一個不可分割的動作。
+    /// <br/>⚠️ <b>已經開跑的工作取消不掉</b>（任何取消機制都一樣）。這兩種結尾在逾時訊息裡
+    /// <b>分開寫</b>：取消成功時明說「直接重試是安全的」，取消不掉時明說「重試有可能做兩次」。
     /// </para>
     /// </remarks>
     /// <param name="endpoint">端點名，只用在逾時訊息上。</param>
@@ -661,17 +665,44 @@ public class AutoHookIPC
         if (Service.Framework.IsInFrameworkUpdateThread)
             return work();
 
-        var task = Service.Framework.RunOnFrameworkThread(work);
+        // 取消旗標：0＝還沒開始、1＝已經在 Framework 執行緒上開跑（來不及取消）、
+        // 2＝逾時那一方先拿到取消權（工作永遠不會跑）。
+        var claim = 0;
+
+        // 🔑 CancellationTokenSource 刻意不 Dispose：它沒有註冊任何 callback、也沒有計時器
+        //    （唯一的取消來源就是下面那一行 Cancel），沒有非受管資源要放；而排在佇列裡的 lambda
+        //    可能在我們回傳之後很久才跑，沒有「一定不會再讀 token」的時點可以安全 Dispose。
+        var cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        var task = Service.Framework.RunOnFrameworkThread(() =>
+        {
+            // 🔴 工作開頭的取消檢查。CAS 先跑：它把「宣告開跑」與「檢查有沒有被取消」變成
+            //    同一個不可分割的動作，所以不會出現「兩邊都以為自己贏了」。token 那一半是標準
+            //    寫法的保險 —— 單獨用它有競態，配上 CAS 就沒有。
+            if (Interlocked.CompareExchange(ref claim, 1, 0) != 0 || token.IsCancellationRequested)
+                return onTimeout;
+
+            return work();
+        });
 
         // 🔴 刻意用 Task.WaitAny 而不是 task.Wait(逾時)：後者在工作擲例外時會就地把例外包成
         //    AggregateException 丟出來，呼叫端看到的例外型別就跟改動前不一樣了。
         //    WaitAny 只等「完成」、不看結果，例外統一交給下面的 GetAwaiter().GetResult() 原樣重擲。
         if (Task.WaitAny(new Task[] { task }, ForwardTimeoutMs) < 0)
         {
+            // 逾時：先搶下取消權。搶到＝工作一行都還沒跑、之後也永遠不會跑（重試安全）；
+            // 搶不到＝它已經在跑了，取消不掉（重試有可能做兩次）。兩種結尾必須分開告訴使用者。
+            var cancelled = Interlocked.CompareExchange(ref claim, 2, 0) == 0;
+            if (cancelled)
+                cts.Cancel();
+
             Service.PluginLog.Information(
                 $"[IPC] {endpoint}：等 Framework 執行緒超過 {ForwardTimeoutMs} 毫秒，這一次放棄。" +
                 @"通常代表遊戲主執行緒正被擋住；請把呼叫改到 Framework 執行緒上做。" +
-                @"這份工作沒有被取消，之後某一幀仍會跑完，所以直接重試有可能匯入兩份。");
+                (cancelled
+                    ? @"這份工作已經取消，一行都沒有跑到，直接重試是安全的。"
+                    : @"這份工作已經開始跑了，取消不掉，之後仍會跑完 —— 直接重試有可能做兩次。"));
             return onTimeout;
         }
 
