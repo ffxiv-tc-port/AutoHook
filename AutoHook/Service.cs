@@ -8,6 +8,7 @@ using AutoHook.SeFunctions;
 using Dalamud.Plugin.Services;
 using Dalamud;
 using AutoHook.Configurations;
+using AutoHook.Utils;
 using Dalamud.Game.ClientState.Objects;
 using ECommons.Automation.NeoTaskManager;
 
@@ -155,11 +156,21 @@ public class Service
         PluginLog.Verbose(msg);
     }
     
+    /// <summary>
+    /// 寫狀態列文字，並（在使用者沒關掉聊天輸出時）把同一段文字送到遊戲的聊天視窗。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 聊天那一半走 <see cref="ChatQueue"/>：<b>可以從任何執行緒呼叫</b>。
+    /// 直接呼叫 <c>IChatGui.Print</c> 的話，使用者實機那顆 Dalamud 的待印佇列是裸的
+    /// <c>Queue&lt;T&gt;</c>，從非 Framework 執行緒進去會把<b>全域</b>的那一個弄壞。
+    /// <br/>📌 <see cref="Status"/> 刻意<b>不</b>走佇列——它是 UI 每幀直接讀的欄位，
+    /// 當場寫入才不會讓狀態列慢一幀。
+    /// </remarks>
     public static void PrintChat(string msg)
     {
         Status = msg;
 
         if (Configuration.ShowChatLogs)
-            Chat.Print(msg);
+            ChatQueue.Print(msg);
     }
 }

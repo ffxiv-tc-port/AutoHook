@@ -62,6 +62,11 @@ public class AutoHook : IDalamudPlugin
     {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         Service.Initialize(pluginInterface);
+
+        // 🔴 聊天輸出一律先排進 ChatQueue，由這裡註冊的每幀排乾送出。
+        //    註冊要早於任何一則訊息（本建構子底下的 Loc.ReportEmptyResourceKeys 等等）。
+        ChatQueue.Initialize();
+
         PunishLibMain.Init(pluginInterface, "AutoHook",
             new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
         Plugin = this;
@@ -116,22 +121,22 @@ public class AutoHook : IDalamudPlugin
             // 這四個 case 都是使用者親自下的指令 ⇒ 丟掉別的外掛借走開關時記下的 IPC 覆寫，
             // 他的值重新成為權威（見 IpcConfigOverrides）。
             case CmdAhOn:
-                Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                ChatQueue.Print(UIStrings.AutoHook_Enabled);
                 IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhOff:
-                Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                ChatQueue.Print(UIStrings.AutoHook_Disabled);
                 IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg when Service.Configuration.PluginEnabled:
-                Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                ChatQueue.Print(UIStrings.AutoHook_Disabled);
                 IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg:
-                Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                ChatQueue.Print(UIStrings.AutoHook_Enabled);
                 IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = true;
                 break;
@@ -162,13 +167,13 @@ public class AutoHook : IDalamudPlugin
         var preset = Service.Configuration.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null)
         {
-            Service.Chat.Print(UIStrings.Preset_not_found);
+            ChatQueue.Print(UIStrings.Preset_not_found);
             return;
         }
 
         Service.Save();
         Service.Configuration.HookPresets.SelectedPreset = preset;
-        Service.Chat.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
+        ChatQueue.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
         Service.Save();
     }
 
@@ -177,14 +182,14 @@ public class AutoHook : IDalamudPlugin
         var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null)
         {
-            Service.Chat.Print(UIStrings.Preset_not_found);
-            Service.Chat.Print(presetName);
+            ChatQueue.Print(UIStrings.Preset_not_found);
+            ChatQueue.Print(presetName);
             return;
         }
 
         Service.Save();
         Service.Configuration.AutoGigConfig.SelectedPreset = preset;
-        Service.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
+        ChatQueue.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
         Service.Save();
     }
 
@@ -206,6 +211,10 @@ public class AutoHook : IDalamudPlugin
         // 🔴 租約表是靜態的，外掛重載後不清掉的話舊租約會活到逾時為止，
         //    而新的實例根本不知道那些持有者是誰。
         PluginEnabledLeases.ReleaseAll(@"AutoHook 正在卸載");
+
+        // 停止每幀排乾；還在佇列裡的訊息由 Shutdown 自己決定要送出還是丟掉
+        //（只有確定在 Framework 執行緒上才送）。
+        ChatQueue.Shutdown();
 
         ECommonsMain.Dispose();
     }

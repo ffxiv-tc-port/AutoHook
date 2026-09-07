@@ -133,12 +133,12 @@ internal class AutoGig : Window, IDisposable
             //    checkForNullAddon 的「只報一次、下次開始叉魚才重置」語意不變。
             if (_addon == null)
             {
-                Service.Chat.PrintError(
+                ChatQueue.PrintError(
                     $"AutoHook has detected a null addon whilst spearfishing. Please let us know in the Discord this happened.");
             }
             else if (_addon->Base.WindowNode == null)
             {
-                Service.Chat.PrintError(
+                ChatQueue.PrintError(
                     $"AutoHook has detected a null window whilst spearfishing. Please let us know in the Discord this happened.");
             }
 
