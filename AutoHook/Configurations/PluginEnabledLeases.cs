@@ -59,9 +59,12 @@ namespace AutoHook.Configurations;
 /// 同一外掛內所有模組的節流。
 /// 🔴 <b>鎖內絕不呼叫 ImGui、絕不做檔案 I/O，也不寫 log</b>：逾時訊息在鎖內先收進一個 list，
 /// 出了鎖才 <see cref="Flush"/>。UI 走「鎖內拍快照、鎖外畫」。
-/// 🔴 <b>寫 log 一律直接用 <c>Service.PluginLog</c>，不要用 <c>Service.PrintInfo</c></b>——
-/// 後者會塞進 <c>Service.LogMessages</c> 這個沒有同步的 <c>Queue</c>，
-/// 而這裡本來就會從三種不同的執行緒進來。
+/// 📌 <b>寫 log 走 <c>Service.PluginLog</c></b>。（歷史理由寫的是「<c>Service.PrintInfo</c>
+/// 底下的 <c>Service.LogMessages</c> 是沒有同步的 <c>Queue</c>」——<b>那個前提已經不成立</b>：
+/// 該佇列自「除錯主控台的訊息佇列加鎖」那一顆起已經上鎖，兩者現在都可以從任意執行緒呼叫。
+/// 這裡維持 <c>PluginLog</c> 是因為租約的診斷不需要出現在外掛內建的除錯主控台。）
+/// 🔴 <b>要送到遊戲聊天視窗的訊息一律走 <c>ChatQueue</c></b>——直接呼叫 <c>IChatGui.Print</c>
+/// 會從非 Framework 執行緒碰到 Dalamud <b>全域</b>的待印佇列。
 /// </para>
 /// <para>
 /// 📌 <b>所有端點的回傳型別都是不可為 null 的值型別</b>（<see cref="Guid"/> / <see cref="bool"/>），

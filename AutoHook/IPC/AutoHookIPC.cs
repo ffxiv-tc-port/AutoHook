@@ -503,9 +503,11 @@ public class AutoHookIPC
     /// <remarks>
     /// 🔴 訊息寫 <c>Information</c>：使用者的記錄等級收得到，而這種失敗完全沒有其他徵兆
     /// （呼叫端只會看到「換餌一直不成功」）。同一支端點只寫一次，不洗版。
-    /// <br/>🔴 直接用 <c>Service.PluginLog</c>，<b>不要用 <c>Service.PrintInfo</c></b>——
-    /// 後者會塞進 <c>Service.LogMessages</c> 這個沒有同步的 <c>Queue</c>，
-    /// 而這裡本來就可能在別的執行緒上（跟 EzThrottler 那條紅線完全同形狀）。
+    /// <br/>📌 這裡寫 <c>Service.PluginLog</c>。（原本的理由是「<c>Service.PrintInfo</c> 底下的
+    /// <c>Service.LogMessages</c> 是沒有同步的 <c>Queue</c>」——<b>那個前提已經不成立</b>：該佇列自
+    /// 「除錯主控台的訊息佇列加鎖」那一顆起已經上鎖。維持 <c>PluginLog</c> 只是因為這種
+    /// 一次性的執行緒警告不需要占用除錯主控台的環形緩衝區。）
+    /// <br/>🔴 <b>要送到遊戲聊天視窗的訊息一律走 <c>ChatQueue</c></b>，不要直接呼叫 <c>IChatGui.Print</c>。
     /// </remarks>
     private static bool EnsureFrameworkThread(string endpoint)
     {
