@@ -40,10 +40,10 @@ internal class AutoGig : Window, IDisposable
     
     public static string Gig = "Gig";
     
-    private TaskManager _taskManager = new TaskManager()
+    private TaskManager _taskManager = TaskTimeoutLog.Attach(new TaskManager()
     {
         DefaultConfiguration = { TimeLimitMS = 10000, ShowDebug = false }
-    };
+    }, "AutoGig");
 
     public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true)
     {

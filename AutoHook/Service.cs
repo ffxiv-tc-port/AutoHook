@@ -53,10 +53,12 @@ public class Service
         set => _status = value;
     }
 
-    public static readonly TaskManager TaskManager = new TaskManager()
+    // Attach()：逾時時多印一行「是哪一步逾時」的 Warning，並蓋掉 ECommons 那行完全匿名的。
+    // 理由與限制寫在 TaskTimeoutLog 的註解裡。TimeLimitMS 一個字都沒改。
+    public static readonly TaskManager TaskManager = TaskTimeoutLog.Attach(new TaskManager()
     {
         DefaultConfiguration = { TimeLimitMS = 5000 }
-    };
+    }, "AutoHook");
 
     
     public static void Save()

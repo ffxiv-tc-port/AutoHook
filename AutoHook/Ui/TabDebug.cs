@@ -48,10 +48,10 @@ public class TabDebug : BaseTab
         return _executeCommandHook!.OriginalDisposeSafe(id, unk1, baitId, unk2, unk3);
     }
     
-    private TaskManager _taskManager = new TaskManager()
+    private TaskManager _taskManager = TaskTimeoutLog.Attach(new TaskManager()
     {
         DefaultConfiguration = { TimeLimitMS = 10000 }
-    };
+    }, "AutoHook/Debug");
     
     public override string TabName => "Debug";
     public override bool Enabled => true;
