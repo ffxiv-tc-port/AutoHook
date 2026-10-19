@@ -61,8 +61,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="12.0.0" />
+        <PackageReference Include="DalamudPackager" Version="13.0.0" />
         <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
+        <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
         <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj"/>
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
@@ -80,8 +81,12 @@
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="ImGui.NET">
-            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+        <Reference Include="Dalamud.Bindings.ImGui">
+            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Dalamud.Bindings.ImPlot">
+            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImPlot.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGuiScene">
@@ -112,4 +117,12 @@
             <LastGenOutput>UIStrings.Designer.cs</LastGenOutput>
         </EmbeddedResource>
     </ItemGroup>
+
+    <!-- ECommons 的文件註解檔 ECommons.xml 執行期用不到：不複製進輸出目錄，出貨包也就不帶它（ECommons.pdb 照留，崩潰堆疊行號要用）。 -->
+    <Target Name="ExcludeECommonsXmlDoc" AfterTargets="ResolveAssemblyReferences">
+        <ItemGroup>
+            <_ECommonsXmlDoc Include="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)%(Extension)' == 'ECommons.xml'" />
+            <ReferenceCopyLocalPaths Remove="@(_ECommonsXmlDoc)" />
+        </ItemGroup>
+    </Target>
 </Project>

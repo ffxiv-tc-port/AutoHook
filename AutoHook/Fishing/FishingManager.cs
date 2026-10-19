@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AutoHook.Classes;
@@ -34,7 +35,66 @@ public partial class FishingManager : IDisposable
     private SpectralCurrentStatus _spectralCurrentStatus = SpectralCurrentStatus.NotActive;
 
     private bool _isMooching;
+
+    /// <summary>
+    /// 「體型鎖定」旗標（LogMessage 5565／5569 那兩則三驚嘆號訊息）。
+    /// ⚠️ 語意刻意維持原樣：**每拋一竿就在 <see cref="OnBeganFishing"/> 清掉**，
+    ///    而且只有 <see cref="LureTarget.Any"/> 時才會因為鎖定訊息而設起來。
+    ///    要跨竿保留的是魚影，不是鎖定 —— 見 <see cref="_lureShadowFish"/>。
+    /// </summary>
     private bool _lureSuccess;
+
+    /// <summary>
+    /// 目前**已觸發且尚未結束**的魚影（null＝沒有魚影）。
+    /// 🔴 這個狀態刻意**跨拋竿**：<see cref="_lureSuccess"/> 每一竿都會被重設，只靠它的話魚影還在時釣起
+    ///    **別的**魚，下一竿就會重新施放引誘，把已經觸發的魚影最高咬餌權重毀掉。
+    /// 🔑 清除時機三個都要（缺一會卡死在「永遠不再引誘」）：①魚影消失訊息（<c>Unknown_70_2</c>）
+    ///    ②釣起訊息（<c>Unknown_70_3</c>）③離開釣魚（<see cref="FishingState.Quit"/>／<see cref="FishingState.NotFishing"/>）當兜底。
+    /// ⚠️ 「魚影跨竿持續」無法離線證明；假設不成立時（魚影只活一竿）靠①與③兜底，不會卡死。
+    /// </summary>
+    private BaitFishClass? _lureShadowFish;
+
+    /// <summary>
+    /// 「引誘的目的已經達成，不要再放引誘」＝ 體型鎖定（每竿）**或** 魚影已觸發（跨竿）。
+    /// </summary>
+    private bool LureStopRequested => _lureSuccess || _lureShadowFish != null;
+
+    /// <summary>記下魚影已觸發。<paramref name="source"/> 會進 log，用來事後判斷是哪條路徑設起來的。</summary>
+    private void SetLureShadow(BaitFishClass fish, string source)
+    {
+        var previous = _lureShadowFish;
+        _lureShadowFish = fish;
+
+        if (previous != null && previous.Id == fish.Id)
+        {
+            Service.PrintInfo(
+                @$"[魚影] 重複收到出現訊息：{fish.Name} (id {fish.Id})｜來源＝{source}（狀態不變，仍暫停引誘）");
+            return;
+        }
+
+        var replaced = previous == null ? @"無" : @$"{previous.Name} (id {previous.Id})";
+        Service.PrintInfo(
+            @$"[魚影] 設定：{fish.Name} (id {fish.Id})｜來源＝{source}｜原本的魚影＝{replaced}" +
+            @"｜在消失/釣起/離開釣魚之前都會暫停施放引誘（跨拋竿）");
+    }
+
+    /// <summary>清除魚影狀態。已經是 null 時完全不做事，所以放在每幀路徑上也不會洗版。</summary>
+    private void ClearLureShadow(string source)
+    {
+        var previous = _lureShadowFish;
+        if (previous == null)
+            return;
+
+        _lureShadowFish = null;
+        Service.PrintInfo(@$"[魚影] 清除：{previous.Name} (id {previous.Id})｜來源＝{source}｜恢復施放引誘");
+    }
+
+    /// <summary>
+    /// 上一次咬鉤的力道，**純量測用**（<see cref="CosmicCatchLog"/>），不參與任何決策。
+    /// ⚠️ 一定要在咬鉤當下存起來：<c>UpdateCatch</c> 觸發時魚已經上岸，
+    ///    <see cref="SeTugType"/> 那個位址讀到的早就不是這一竿的值了。
+    /// </summary>
+    private BiteType _lastBiteType = BiteType.Unknown;
 
     private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, ulong targetId,
         uint a4, uint a5,
@@ -69,13 +129,45 @@ public partial class FishingManager : IDisposable
         UpdateCatch?.Dispose();
     }
 
+    private const string UpdateCatchSignature =
+        @"48 89 6C 24 ?? 56 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B 01";
+
+    public const string UnavailableNotice =
+        @"遊戲改版後有遊戲位址對不上：自動釣魚（自動提鉤、自動拋竿與技能、釣到魚之後的動作）整項停用，preset 編輯與自動刺魚照常。請等插件更新。";
+
+    /// <summary>
+    /// null＝可用（或載入後還沒判定）；非 null＝自動釣魚整項停用的原因。只在 <see cref="CreateDalamudHooks"/> 寫一次。
+    /// </summary>
+    public string? UnavailableReason { get; private set; }
+
     public unsafe void CreateDalamudHooks()
     {
-        UpdateCatch = Service.GameInteropProvider.HookFromSignature<UpdateCatchDelegate>(
-            @"40 55 56 41 54 41 56 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 01",
-            UpdateCatchDetour);
-        var hookPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
-        _useActionHook = Service.GameInteropProvider.HookFromAddress<UseActionDelegate>(hookPtr, OnUseAction);
+        // 刻意三項缺一就整項不啟用（不訂閱每幀、不建 hook）：少了咬鉤力道會每一竿都放生，
+        // 少了釣獲通知或拋竿偵測會拿錯的魚／餌去選 preset，停止條件也永遠不成立。
+        var missing = new List<string>();
+
+        if (Service.TugType is not { IsAvailable: true })
+            missing.Add(@"咬鉤力道（TugType 的特徵碼）");
+
+        if (!Service.SigScanner.TryScanText(UpdateCatchSignature, out var updateCatchPtr) || updateCatchPtr == IntPtr.Zero)
+            missing.Add(@"釣獲通知（UpdateCatch 的特徵碼）");
+
+        var useActionPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
+        if (useActionPtr == IntPtr.Zero)
+            missing.Add(@"拋竿偵測（ActionManager.UseAction 的位址）");
+
+        if (missing.Count > 0)
+        {
+            foreach (var item in missing)
+                Service.PluginLog.Warning(@$"[HookManager] 遊戲改版後對不上：{item}");
+
+            UnavailableReason = UnavailableNotice;
+            Service.PluginLog.Warning(@$"[HookManager] {UnavailableNotice}");
+            return;
+        }
+
+        UpdateCatch = Service.GameInteropProvider.HookFromAddress<UpdateCatchDelegate>(updateCatchPtr, UpdateCatchDetour);
+        _useActionHook = Service.GameInteropProvider.HookFromAddress<UseActionDelegate>(useActionPtr, OnUseAction);
 
         Enable();
     }
@@ -98,6 +190,13 @@ public partial class FishingManager : IDisposable
 
     public void StartFishing()
     {
+        // 整項停用時不拋竿：拋了也沒有後續（不會提鉤），只會浪費魚餌。
+        if (UnavailableReason is { } unavailable)
+        {
+            Service.PrintChat(@$"[AutoHook] {unavailable}");
+            return;
+        }
+
         if (!PlayerRes.IsCastAvailable())
         {
             Service.PrintChat(@"[AutoHook] You can't cast right now.");
@@ -202,10 +301,33 @@ public partial class FishingManager : IDisposable
 
     private void OnFrameworkUpdate(IFramework _)
     {
+        // 🔴 誇獎的跨外掛 IPC 一律在這裡送出：UpdateCatch 的 detour 只把理由排進佇列。
+        //    放在所有 early return 之前 —— 租約壓制中／人已經離開釣魚，都不該讓已經判定成立的
+        //    那一句卡在佇列裡（判準是在釣獲的當下成立的，跟現在還在不在釣魚無關）。
+        FlushPendingPraises();
+
         var currentState = Service.BaitManager.FishingState;
 
-        if (!Service.Configuration.PluginEnabled || currentState == FishingState.NotFishing)
+        // 🔴 讀的是<b>疊加後</b>的值：別的外掛可以用暫停租約要求 AutoHook 先停手。
+        //    見 Configurations/PluginEnabledLeases.cs。
+        var enabled = Service.Configuration.EffectivePluginEnabled;
+
+        if (!enabled || currentState == FishingState.NotFishing)
+        {
+            // 🔴 魚影是跨拋竿的狀態，只靠聊天訊息清除會有漏網（訊息被別的外掛吃掉、玩家直接收竿、
+            //    切區、外掛中途被關掉…）。這裡是**兜底**：只要人不在釣魚就一定清掉，
+            //    否則會永遠停在「不再施放引誘」。已經是 null 時 ClearLureShadow 直接返回，不會洗版。
+            if (currentState == FishingState.NotFishing)
+            {
+                ClearLureShadow(@"離開釣魚 (NotFishing)");
+
+                // 自動拋竿只在「外掛啟用中」時考慮（上面那個 if 有兩個進來的理由）。
+                if (enabled)
+                    TryAutoStartFishing();
+            }
+
             return;
+        }
 
         if (currentState != FishingState.Quit && _lastStep.HasFlag(FishingSteps.Quitting))
         {
@@ -223,6 +345,11 @@ public partial class FishingManager : IDisposable
 
         if (currentState == FishingState.NormalFishing || currentState == FishingState.LureFishing)
         {
+            // 純蒐證：量狀態列比伺服器階梯訊息慢多少。沒有待量的樣本時 HasPending 是個 bool 判斷，
+            // 連狀態列都不會去讀 —— 不在沒事的時候付每幀成本。
+            if (LureLadderLog.HasPending)
+                LureLadderLog.Poll();
+
             CheckWhileFishingActions();
             CheckTimeout();
         }
@@ -250,6 +377,47 @@ public partial class FishingManager : IDisposable
                 OnFishingStop();
                 break;
         }
+    }
+
+    /// <summary>一次自動拋竿嘗試與下一次之間的最短間隔（毫秒）。</summary>
+    private const int AutoStartFishingIntervalMs = 1000;
+
+    /// <summary>下一次可以嘗試自動拋竿的時刻（<see cref="Environment.TickCount64"/> 座標）。</summary>
+    /// <remarks>
+    /// 🔑 刻意<b>不</b>用 ECommons 的 <c>EzThrottler</c>：那是整個外掛共用的靜態字典、
+    /// key 全域持久而且首次必放行；這裡只需要一個私有欄位，也不會跟別人撞 key。
+    /// </remarks>
+    private long _nextAutoStartTick;
+
+    /// <summary>
+    /// 「沒在釣魚時自動拋竿」（<see cref="Configuration.AutoStartFishing"/>，<b>預設關</b>）。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>第一件事就是判旗標</b>：這是每幀都會走到的地方，關著的時候除了一次布林判斷之外零成本。
+    /// <br/>⚠️ 三個前提都要成立才拋竿：遊戲現在真的讓你拋
+    /// （<see cref="Utils.PlayerRes.IsCastAvailable"/> 讀的是遊戲自己的動作狀態，職業不對／
+    /// 不在水邊時它就是 false，所以這裡不必自己判職業）、自動施放的總開關開著、
+    /// 且「自動拋竿」這個動作本身可用（<c>IsAvailableToCast</c> 已經含 <c>Enabled</c> 判斷）。
+    /// <br/>🔑 節流時刻在<b>旗標判完之後、其餘判斷之前</b>就推進：失敗的嘗試也要等。
+    /// </remarks>
+    private void TryAutoStartFishing()
+    {
+        if (!Service.Configuration.AutoStartFishing)
+            return;
+
+        var now = Environment.TickCount64;
+        if (now < _nextAutoStartTick)
+            return;
+        _nextAutoStartTick = now + AutoStartFishingIntervalMs;
+
+        if (!PlayerRes.IsCastAvailable())
+            return;
+
+        var autoCastCfg = GetAutoCastCfg();
+        if (!autoCastCfg.EnableAll || !autoCastCfg.CastLine.IsAvailableToCast())
+            return;
+
+        StartFishing();
     }
 
     private void InitFinishing()
@@ -301,6 +469,9 @@ public partial class FishingManager : IDisposable
         _isMooching = mooching;
         _lureSuccess = false;
 
+        // 純蒐證：重設「距拋竿／距上一則階梯訊息」的基準。不影響任何行為。
+        LureLadderLog.OnCastStarted();
+
         var baitname = MultiString.GetItemName(GetCurrentBaitMoochId());
         if (!_isMooching)
         {
@@ -349,8 +520,11 @@ public partial class FishingManager : IDisposable
 
         _lastCatch = null;
         _lastStep = FishingSteps.FishBit;
-        HookFish(Service.TugType?.Bite ?? BiteType.Unknown, currentHook);
-        
+
+        // 只讀一次 TugType，順手留一份給量測用（見 _lastBiteType）。
+        _lastBiteType = Service.TugType?.Bite ?? BiteType.Unknown;
+        HookFish(_lastBiteType, currentHook);
+
     }
 
     private void HookFish(BiteType bite, HookConfig currentHook)
@@ -383,8 +557,20 @@ public partial class FishingManager : IDisposable
         Service.Status = (@$"Using {hook.ToString()} hook. (Bite: {bite})");
     }
 
-    private void OnCatch(uint fishId, uint amount)
+    /// <param name="large">遊戲傳來的「大型」旗標。目前只給量測用，不影響任何決策。</param>
+    /// <param name="size">遊戲傳來的尺寸。同上。</param>
+    /// <param name="collectible">這一竿是不是以收藏品形式入手。同上。</param>
+    private void OnCatch(uint fishId, uint amount, bool large, ushort size, bool collectible)
     {
+        // 🔴 純量測，零行為變化：只寫 log。放在最前面是為了「就算下面的既有邏輯出事也已經量到了」。
+        //    這裡刻意不讀任何任務分數 —— 那是 ICE 的職權，見 CosmicCatchLog 的權威邊界說明。
+        // ⚠️ 咬鉤力道**用完就清**：OnBite 不見得每一竿都跑得到（例如外掛在拋竿後才被開啟），
+        //    不清的話這一竿會被貼上「上一竿的力道」——那正好會污染我們要量的那個相關性，
+        //    而且完全看不出來。清成 Unknown 至少讓「不知道」在 log 裡看得見。
+        var biteType = _lastBiteType;
+        _lastBiteType = BiteType.Unknown;
+        CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType);
+
         _lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         var lastFishCatchCfg = GetLastCatchConfig();
 
@@ -393,6 +579,12 @@ public partial class FishingManager : IDisposable
         Service.PrintDebug(@$"[HookManager] Caught {_lastCatch.Name} (id {_lastCatch.Id})");
 
         _lastStep = FishingSteps.FishCaught;
+
+        // 跨 preset 的「本次釣魚某魚 id 釣了幾條」。
+        // ⚠️ 刻意用遊戲傳進來的 fishId 而不是 _lastCatch.Id —— 後者查不到魚時會是 -1，
+        //    那會讓計數靜默落到一個不存在的鍵上。收藏品的 +500000 已經在 UpdateCatchDetour 扣掉了。
+        // 這一份計數與下面的 per-FishConfig 計數**互不取代**，用途見 FishingHelper.SessionCatch。
+        FishingHelper.AddSessionCatch((int)fishId, (int)amount);
 
         if (lastFishCatchCfg != null)
         {
@@ -405,6 +597,11 @@ public partial class FishingManager : IDisposable
         var hook = GetHookCfg();
         if (hook.Enabled)
             FishingHelper.AddFishCount(hook.UniqueId);
+
+        // 🔴 刻意放在最後：上面每一行都是既有邏輯，先讓它們原封不動跑完，
+        //    通知這一步就算整個爛掉也已經不可能影響換餌／換 preset／停手判斷。
+        //    方法本身還有自己的 try/catch，這裡不需要再包一層。
+        NotifyRareCatch(fishId, large, collectible, biteType);
     }
 
     private void CheckStopCondition()
@@ -458,6 +655,11 @@ public partial class FishingManager : IDisposable
     {
         _lastStep = FishingSteps.None;
 
+        // 魚影跨拋竿，但**不跨釣魚**：收竿就清（三個清除時機的第③個）。
+        ClearLureShadow(@"離開釣魚 (Quit)");
+
+        LureLadderLog.OnFishingStopped();
+
         if (_fishingTimer.IsRunning)
             _fishingTimer.Reset();
 
@@ -466,7 +668,7 @@ public partial class FishingManager : IDisposable
         FishingHelper.Reset();
 
         PlayerRes.CastActionNoDelay(IDs.Actions.Quit);
-        PlayerRes.DelayNextCast(0);
+        _ = PlayerRes.DelayNextCast(0);
     }
 
     private bool OnUseAction(IntPtr manager, ActionType actionType, uint actionId, ulong targetId, uint a4,
@@ -474,7 +676,11 @@ public partial class FishingManager : IDisposable
     {
         try
         {
-            if (actionType == ActionType.Action && Service.Configuration.PluginEnabled &&
+            // 🔴 這是第二個<b>行為驅動</b>的讀取點（UseAction 的 hook detour，跑在遊戲自己的
+            //    執行緒上）。漏掉它的話，租約壓制期間 OnBeganFishing 仍然會跑，
+            //    _lastStep／_isMooching 被改掉 ⇒ 租約一放開 AutoHook 從錯的狀態接下去，
+            //    而且完全靜默。兩個讀取點必須一起換。
+            if (actionType == ActionType.Action && Service.Configuration.EffectivePluginEnabled &&
                 PlayerRes.ActionTypeAvailable(actionId))
             {
                 switch (actionId)
@@ -499,19 +705,20 @@ public partial class FishingManager : IDisposable
             Service.PrintDebug(@$"[HookManager] Error: {e.Message}");
         }
 
-        return _useActionHook!.Original(manager, actionType, actionId, targetId, a4, a5, a6, a7);
+        return _useActionHook!.OriginalDisposeSafe(manager, actionType, actionId, targetId, a4, a5, a6, a7);
     }
 
     private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
         byte unk7,
         byte unk8, byte unk9, byte unk10, byte unk11, byte unk12)
     {
-        UpdateCatch!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
+        UpdateCatch!.OriginalDisposeSafe(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
 
         // Check against collectibles.
-        if (fishId > 500000)
+        var collectible = fishId > 500000;
+        if (collectible)
             fishId -= 500000;
 
-        OnCatch(fishId, amount);
+        OnCatch(fishId, amount, large, size, collectible);
     }
 }

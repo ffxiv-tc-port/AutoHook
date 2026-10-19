@@ -61,16 +61,41 @@ public partial class FishingManager
                 var logId = Service.DataManager.GetExcelSheet<LogMessage>()
                     ?.FirstOrDefault(x => x.Text.ToString() == text).RowId;
 
-                // Check if a special fish is found
-                _lureSuccess = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
+                // ── 魚影（跨拋竿）────────────────────────────────────────────────
+                // 三則訊息都來自 FishParameter：_1 出現、_2 消失、_3 釣起。
+                // ⚠️ LureFishes 是每次存取都重算的屬性（Where + ToList），這裡只取一次快照。
+                var lureFishes = GameRes.LureFishes;
 
-                if (_lureSuccess)
-                    return;
-
-                if (GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any)
+                var shadowAppeared = lureFishes.FirstOrDefault(f => f.LureMessage == text);
+                if (shadowAppeared != null)
                 {
-                    _lureSuccess = logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess;
+                    SetLureShadow(shadowAppeared, @"魚影出現訊息 (FishParameter._1)");
+                    _lureSuccess = true;
+                    return;
                 }
+
+                var shadowGone = lureFishes.FirstOrDefault(f => f.LureGoneMessage == text);
+                if (shadowGone != null)
+                {
+                    ClearLureShadow(@$"魚影消失訊息 (FishParameter._2)：{shadowGone.Name}");
+                }
+                else
+                {
+                    var shadowCaught = lureFishes.FirstOrDefault(f => f.LureCaughtMessage == text);
+                    if (shadowCaught != null)
+                        ClearLureShadow(@$"釣起訊息 (FishParameter._3)：{shadowCaught.Name}");
+                }
+
+                // ── 引誘階梯（純蒐證，零行為變化）───────────────────────────────
+                // 伺服器每次引誘生效都會下發 5566-5568／5570-5572，那是精確的層數轉換時點；
+                // AutoLures 目前是靠有延遲的狀態列推層數。這裡只把訊息接起來量差距，不改行為。
+                LureLadderLog.Record(logId);
+
+                // ── 體型鎖定（每竿）─────────────────────────────────────────────
+                // 魚影那一支已經在上面 return 掉了，所以這裡只看鎖定訊息。
+                // ⚠️ LureTarget != Any 時不因鎖定訊息停手是刻意取捨（追特定魚影時不停），不要動。
+                _lureSuccess = GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any &&
+                               logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess;
             }
             else if (type is SystemAlert)
             {
@@ -96,6 +121,27 @@ public partial class FishingManager
         public static List<Guid> FishBaitSwapped = new();
 
         public static List<Guid> ToBeRemoved = new();
+
+        /// <summary>
+        /// 本次釣魚期間，每個**魚 id** 釣起的數量。
+        /// 🔑 不能用上面的 <see cref="FishCount"/> 代替：那一份的鍵是 <c>FishConfig.UniqueId</c>
+        /// （某一份 preset 裡的某一條魚設定），換了 preset 計數就歸零。上游的 <c>FishCaughtCountCD</c>
+        /// 算的是**整段釣魚期間、跨 preset** 的某魚 id 數量 —— 多階段 preset 的換階條件靠的正是它。
+        /// 生命週期跟 <see cref="FishCount"/> 一致：<see cref="Reset"/>（收竿）時清空。
+        /// </summary>
+        public static Dictionary<int, int> SessionCatch = new();
+
+        public static void AddSessionCatch(int fishId, int amount)
+        {
+            if (fishId <= 0 || amount <= 0)
+                return;
+
+            SessionCatch.TryAdd(fishId, 0);
+            SessionCatch[fishId] += amount;
+        }
+
+        public static int GetSessionCatch(int fishId)
+            => SessionCatch.TryGetValue(fishId, out var count) ? count : 0;
 
         public static void AddFishCount(Guid guid)
         {
@@ -166,6 +212,7 @@ public partial class FishingManager
             FishCount = new Dictionary<Guid, int>();
             FishPresetSwapped = [];
             FishBaitSwapped = [];
+            SessionCatch = new Dictionary<int, int>();
         }
     }
 }

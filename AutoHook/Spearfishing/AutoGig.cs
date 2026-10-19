@@ -5,7 +5,7 @@ using AutoHook.Utils;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -40,10 +40,10 @@ internal class AutoGig : Window, IDisposable
     
     public static string Gig = "Gig";
     
-    private TaskManager _taskManager = new TaskManager()
+    private TaskManager _taskManager = TaskTimeoutLog.Attach(new TaskManager()
     {
         DefaultConfiguration = { TimeLimitMS = 10000, ShowDebug = false }
-    };
+    }, "AutoGig");
 
     public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true)
     {
@@ -78,7 +78,13 @@ internal class AutoGig : Window, IDisposable
     public unsafe void DrawSettings()
     {
         if (ImGui.Checkbox(UIStrings.Enable_AutoGig, ref _gigCfg.AutoGigEnabled))
+        {
+            // 使用者自己動了這個設定 ⇒ 他的選擇重新成為權威。
+            IpcConfigOverrides.Clear(IpcConfigOverrides.AutoGigEnabledKey);
             Service.Save();
+        }
+
+        DrawUtil.DrawIpcOverrideMarker(IpcConfigOverrides.AutoGigEnabledKey);
         
         var selectedPreset = _gigCfg.SelectedPreset;
         
@@ -115,17 +121,23 @@ internal class AutoGig : Window, IDisposable
 
     private unsafe void DrawFishOverlay()
     {
-        _addon = (SpearfishWindow*)Service.GameGui.GetAddonByName("SpearFishing", 1);
+        _addon = (SpearfishWindow*)Service.GameGui.GetAddonByName("SpearFishing", 1).Address;
 
         if (!checkForNullAddon && (_addon == null || _addon->Base.WindowNode == null))
         {
+            // 🔴 上面的條件是 (_addon == null || _addon->Base.WindowNode == null)：_addon 為 null 時也會進到這個區塊，
+            //    所以兩種情況用 if／else if 分開報（對 null 解參考是 try/catch 攔不到的 AccessViolation）。
+            //    checkForNullAddon 的語意是「只報一次、下次開始叉魚才重置」。
             if (_addon == null)
-                Service.Chat.PrintError(
+            {
+                ChatQueue.PrintError(
                     $"AutoHook has detected a null addon whilst spearfishing. Please let us know in the Discord this happened.");
-
-            if (_addon->Base.WindowNode == null)
-                Service.Chat.PrintError(
+            }
+            else if (_addon->Base.WindowNode == null)
+            {
+                ChatQueue.PrintError(
                     $"AutoHook has detected a null window whilst spearfishing. Please let us know in the Discord this happened.");
+            }
 
             checkForNullAddon = true;
             return;
@@ -178,6 +190,13 @@ internal class AutoGig : Window, IDisposable
         if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
+        // 🔴 node 來自 _addon->FishNNode,也就是同一份 UldManager 節點清單,同樣可能是 null。
+        //    底下 node->X / node->Width / node->ScaleX 都會解參考它。
+        //    ⚠️ 判斷刻意放在這裡而不是函式開頭:上面那些施法(塔利亞克斯的恩惠、自然的恩惠)
+        //    與節點無關,提早返回會把它們一起停掉 —— 那是回退既有行為。
+        if (node == null)
+            return;
+
         var centerX = (_uiSize.X / 2);
 
         float fishHitbox = 0;
@@ -221,12 +240,19 @@ internal class AutoGig : Window, IDisposable
         if (!_gigCfg.AutoGigDrawGigHitbox)
             return;
 
+        // 🔴 _addon 到這裡已經被 Draw() 的 isOpen 閘門守住,但 FishLines 是 UldManager 節點清單
+        //    裡的一格,它自己還是可能是 null(視窗剛開、節點清單還沒配置好的那幾幀)。解參考 null 是
+        //    try/catch 攔不到的 AccessViolation。取不到就這一幀不畫,下一幀再試。
+        var fishLines = _addon->FishLines;
+        if (fishLines == null)
+            return;
+
         int space = gigHitbox;
 
         float startX = _uiSize.X / 2;
-        float centerY = _addon->FishLines->Y * _uiScale;
-        float endY = _addon->FishLines->Height * _uiScale;
-        
+        float centerY = fishLines->Y * _uiScale;
+        float endY = fishLines->Height * _uiScale;
+
         //Hitbox left
         var lineStart = _uiPos + new Vector2(startX - space, centerY);
         var lineEnd = lineStart + new Vector2(0, endY);
@@ -243,8 +269,13 @@ internal class AutoGig : Window, IDisposable
         if (!_gigCfg.AutoGigDrawFishHitbox)
             return;
 
-        var lineStart = _uiPos + new Vector2(fishHitbox, _addon->FishLines->Y * _uiScale);
-        var lineEnd = lineStart + new Vector2(0, _addon->FishLines->Height * _uiScale);
+        // 同 DrawGigHitbox:FishLines 可能是 null,解參考它是攔不到的 AccessViolation。
+        var fishLines = _addon->FishLines;
+        if (fishLines == null)
+            return;
+
+        var lineStart = _uiPos + new Vector2(fishHitbox, fishLines->Y * _uiScale);
+        var lineEnd = lineStart + new Vector2(0, fishLines->Height * _uiScale);
         drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1 * ImGuiHelpers.GlobalScale);
     }
 
@@ -254,7 +285,7 @@ internal class AutoGig : Window, IDisposable
     {
         var lastOpen = _isOpen;
 
-        _addon = (SpearfishWindow*)Service.GameGui.GetAddonByName(@"SpearFishing");
+        _addon = (SpearfishWindow*)Service.GameGui.GetAddonByName(@"SpearFishing").Address;
         _isOpen = _addon != null && _addon->Base.WindowNode != null;
 
         if (!_isOpen)
@@ -278,7 +309,7 @@ internal class AutoGig : Window, IDisposable
         if (tm.Target.ObjectKind != ObjectKind.GatheringPoint)
             return;
 
-        currentNode = (int)tm.Target.DataId;
+        currentNode = (int)tm.Target.BaseId;
     }
 
     public override unsafe void PreDraw()

@@ -3,7 +3,7 @@ using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -175,7 +175,9 @@ public abstract class BaseActionCast
 
         ImGui.SameLine();
 
-        if (!availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority))
+        // 按下箭頭會在中間交換優先序；EndDisabled 必須照推入當下的判定，不能重算。
+        var upDisabled = !availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority);
+        if (upDisabled)
             ImGui.BeginDisabled();
 
         if (ImGui.ArrowButton(@"###UpArrow", ImGuiDir.Up))
@@ -189,12 +191,13 @@ public abstract class BaseActionCast
             }
         }
 
-        if (!availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority))
+        if (upDisabled)
             ImGui.EndDisabled();
 
         ImGui.SameLine();
 
-        if (!availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority))
+        var downDisabled = !availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority);
+        if (downDisabled)
             ImGui.BeginDisabled();
 
         if (ImGui.ArrowButton(@"###DownArrow", ImGuiDir.Down))
@@ -208,7 +211,7 @@ public abstract class BaseActionCast
             }
         }
 
-        if (!availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority))
+        if (downDisabled)
             ImGui.EndDisabled();
     }
 
@@ -217,7 +220,7 @@ public abstract class BaseActionCast
         ImGui.PushID(@$"{GetName()}_gp");
         if (ImGui.Button($"GP"))
         {
-            ImGui.OpenPopup(str_id: @"gp_cfg");
+            ImGui.OpenPopup(strId: @"gp_cfg");
         }
 
         if (ImGui.BeginPopup(@"gp_cfg"))

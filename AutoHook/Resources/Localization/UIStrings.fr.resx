@@ -1204,10 +1204,7 @@ Vous pouvez également utiliser la commande /ahstart pour commencer. Essayez de 
   <data name="NBBeforeFishHelpText" xml:space="preserve">
     <value>Peut gâcher des PR si le poisson ciblé n'apparaît pas</value>
   </data>
-  <data name="AutoCordialPandoras" xml:space="preserve">
-    <value></value>
-  </data>
-  <data name="UseLures" xml:space="preserve">
+<data name="UseLures" xml:space="preserve">
     <value>Utiliser les leurres</value>
   </data>
   <data name="BigGameFishing" xml:space="preserve">

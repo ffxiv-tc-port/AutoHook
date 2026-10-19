@@ -11,7 +11,24 @@ namespace AutoHook.Spearfishing;
 
 public class SpearFishingPresets : BasePreset
 {
+    /// <summary>
+    /// 使用者的「啟用自動魚叉」開關。<b>執行期真值</b>——所有讀取端都讀這個欄位。
+    /// </summary>
+    /// <remarks>
+    /// ⚠️ 不直接序列化；寫進設定檔的是 <see cref="AutoGigEnabledPersisted"/>。
+    /// 與 <c>Configuration.PluginEnabled</c> 完全同一個形狀，理由見 <see cref="IpcConfigOverrides"/>。
+    /// </remarks>
+    [JsonIgnore]
     public bool AutoGigEnabled = false;
+
+    /// <summary><see cref="AutoGigEnabled"/> 的序列化替身。JSON 鍵名維持 <c>AutoGigEnabled</c> 不變。</summary>
+    [JsonProperty(nameof(AutoGigEnabled))]
+    public bool AutoGigEnabledPersisted
+    {
+        get => IpcConfigOverrides.ValueForSave(IpcConfigOverrides.AutoGigEnabledKey, AutoGigEnabled);
+        set => AutoGigEnabled = value;
+    }
+
     public bool AutoGigHideOverlay = false;
     
     [DefaultValue(true)]

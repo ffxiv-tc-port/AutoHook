@@ -1,26 +1,37 @@
-<div align="center">
+# AutoHook
 
-# AutoHook - Final Fantasy XIV Fishing Plugin
+[AutoHook](https://github.com/PunishXIV/AutoHook) 的台服移植版。全自動釣魚插件：自動拋竿、依魚訊自動提鉤，並支援刺魚。
 
-## Help us with localization
-https://crowdin.com/project/autohook
+## 功能
 
-![image](https://github.com/PunishXIV/AutoHook/assets/13919114/e032741f-c57a-4b1f-866d-af6125d05206)
+- 自動拋竿、依咬鉤型態（！／！！／！！！）與等待時間自動提鉤，可依魚種、釣餌個別設定提鉤方式（提鉤、強力提鉤、精準提鉤、雙重／三重提鉤）
+- 自動以小釣大、換釣餌，釣到指定魚後可自動切換預設或釣餌
+- 自動施放釣魚技能（撒餌、耐心、專一垂釣、大魚獵手、放生等）與使用道具
+- **自動刺魚**：依魚的尺寸與速度自動出手，可顯示刺魚命中框
+- **天氣與窗口**分頁：顯示各魚的天氣與時段窗口（唯讀，不會因此自動開始或停止釣魚）
+- **社群預設**：從 wiki 取得他人分享的預設，也能匯出自己的預設到剪貼簿
+- 選用整合 TataruPraise：釣到稀有魚時請塔塔露念一句提醒你回來（預設只認大魚）
+- 提供 IPC 給其他插件（Questionable、ICE 等）開關自動釣魚、切換或匯入預設
 
-Repo
-```
-https://love.puni.sh/ment.json
-```
+## 指令
 
-# AutoHook is now published by [Puni.sh](https://puni.sh/)
+`/autohook`、`/ahcfg`、`/ahon`、`/ahoff`、`/ahtg`、`/ahpreset`、`/ahstart`、`/ahbait`、`/bait`、`/agpreset`
 
-[![image](https://github.com/PunishXIV/AutoHook/assets/13919114/a8a977d6-457b-4e43-8256-ca298abd9009)](https://puni.sh/)
+## 台服版的修改
 
+- 新增「天氣與窗口」分頁（使用遊戲自己的天氣資料）
+- 宇宙探索釣魚：條件式換預設讓多階段預設真的會推進、新增資料夾預設匯入 IPC（給 ICE 用）、華麗提鉤可用時優先使用
+- 別的插件借走啟用開關時改用有逾時的租約，不再寫進使用者的設定檔
+- 補上 Questionable 會用到、上游卻沒註冊的 IPC 端點（換餌、自動拋竿、啟用狀態）
+- `/bait`、`/ahbait` 找不到或換不成釣餌時在聊天視窗說明原因
+- 遊戲改版後有遊戲位址對不上時，插件照常載入，只停用自動釣魚或換餌並寫明原因
+- 支援匯入上游新版格式的預設
+- 釣魚術語逐條對台服資料表修正，介面繁體中文化
 
-Visit https://puni.sh/plugin/AutoHook for more details
+## 安裝
 
-## Join the Discord
-If you have any suggestions or reports to make, feel free to join the discord
+在 Dalamud 設定的「自訂插件庫」加入
+`https://raw.githubusercontent.com/ffxiv-tc-port/DalamudPluginsTC/main/repo.json` 並啟用，
+再從插件列表安裝。
 
-[![image](https://discordapp.com/api/guilds/1001823907193552978/embed.png?style=banner2)](https://discord.gg/Zzrcc8kmvy)
-</div>
+原作者：Det，上游由 [PunishXIV](https://github.com/PunishXIV/AutoHook) 維護

@@ -8,7 +8,7 @@ using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;
 
@@ -63,7 +63,7 @@ internal class TabAutoGig : BaseTab
                 Service.Save();
             
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoCordialPandoras);
-        });
+        }, ipcOverrideKey: IpcConfigOverrides.AutoGigEnabledKey);
 
         ImGui.Spacing();
         ImGui.TextWrapped(UIStrings.Current_Selected_Preset);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AutoHook.Classes;
+using AutoHook.Conditions;
 using AutoHook.Data;
 using AutoHook.Enums;
 using AutoHook.Fishing;
@@ -137,14 +138,36 @@ public class HookConfig : BaseOption
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
         
+        var stellarDictionary = new Dictionary<BiteType, BaseBiteConfig>
+        {
+            { BiteType.Weak, hookset.StellarWeak },
+            { BiteType.Strong, hookset.StellarStrong },
+            { BiteType.Legendary, hookset.StellarLegendary },
+        };
+
+        stellarDictionary.TryGetValue(bite, out var stellar);
+
+        // 「自動」模式會去讀目前任務的計分方式（判不出來就退回使用者手動設定的那一態）。
+        // 一次算完存起來，保證底下兩個分支看到的是同一個決定。
+        var stellarFirst = hookset.ResolveStellarFirst();
+
+        // 🔴 只在任務說明**自己講明**「任意／每條魚都算分」時（WKSMissionText 115、121）忽略時間窗：
+        //    宇宙 preset 的時間窗多半是拿來「挑特定魚種」的，在每條魚都算分的任務裡放掉咬鉤是純粹的損失。
+        //    113/114/141 那種「特定／目標水產品」的任務**不套用** —— 那裡的時間窗是選魚用的。
+        var ignoreTimers = hookset.ShouldIgnoreHookTimers();
+
         Service.Status = "";
 
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
+            // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前。
+            if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
+                return HookType.Stellar;
+
             // Triple Hook
             if (hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
-                if (CheckHookCondition(hook.th, timePassed))
+                if (CheckHookCondition(hook.th, timePassed, ignoreTimers))
                     if (IsHookAvailable(hook.th))
                         return hook.th.HooksetType;
 
@@ -160,7 +183,7 @@ public class HookConfig : BaseOption
             // Double Hook
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
-                if (CheckHookCondition(hook.dh, timePassed))
+                if (CheckHookCondition(hook.dh, timePassed, ignoreTimers))
                     if (IsHookAvailable(hook.dh))
                         return hook.dh.HooksetType;
 
@@ -173,10 +196,15 @@ public class HookConfig : BaseOption
                 Service.Status = $"(Triple Hook) {Service.Status}";
             }
 
+            // 華麗提鉤（宇宙探索）—— 另一種順位：雙重／三重沒有出手時才補位，
+            // 但仍然排在精準／強力提鉤之前（它不耗 GP，而且評價比較高）。
+            if (!stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
+                return HookType.Stellar;
+
             // Normal - Patience
             if (hook.ph.HooksetEnabled)
             {
-                if (CheckHookCondition(hook.ph, timePassed))
+                if (CheckHookCondition(hook.ph, timePassed, ignoreTimers))
                     return IsHookAvailable(hook.ph) ? hook.ph.HooksetType : HookType.Normal;
                 
                 Service.Status = $"(Normal/Patience Hook) {Service.Status}";
@@ -189,21 +217,99 @@ public class HookConfig : BaseOption
         return HookType.None;
     }
 
-    private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)
+    /// <summary>
+    /// 這一咬要不要改用華麗提鉤（動作 ID 41278，宇宙探索的探索任務專用）。
+    /// 🔑「可不可以用」完全交給遊戲自己判斷（<c>GetActionStatus</c> + 復唱時間），不用地區 ID、也不用計時去猜：
+    ///    在宇宙探索以外這個判斷永遠是 false；假設不成立時最壞情況是「多放了一次提鉤動作」。
+    /// 回傳 false 時**不會**降級成普通提鉤，而是讓呼叫端繼續往下走原本設定好的提鉤順序。
+    /// </summary>
+    /// <param name="hook">同一個 bite 型別原本的三重／雙重／精準設定，用來判斷這一咬本來要不要提鉤。</param>
+    private bool ShouldUseStellarHook(BaseHookset hookset,
+        (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph) hook,
+        BaseBiteConfig? stellar, double timePassed, bool ignoreTimers)
+    {
+        if (!hookset.UseStellarHook || stellar is not { HooksetEnabled: true })
+            return false;
+
+        // 🔴 這個閘門不能拿掉。preset 把某個 bite 型別的三個提鉤全部關掉，
+        //    意思是「這一咬**故意**放它跑」（例如只要傳說級、小咬一律不理）。
+        //    華麗提鉤預設是開的，少了這道閘門就會把本來該放走的魚也勾起來 ——
+        //    這是回退既有行為，而且對使用者表現成「怎麼一直釣到不要的魚」。
+        var biteIsHookedAtAll = hook.ph.HooksetEnabled
+                                || (hookset.UseTripleHook && hook.th.HooksetEnabled)
+                                || (hookset.UseDoubleHook && hook.dh.HooksetEnabled);
+
+        if (!biteIsHookedAtAll)
+            return false;
+
+        // 先問可用性再檢查條件：CheckHookCondition 失敗時會寫 Service.Status，
+        // 而「華麗提鉤只是還在 CD」不該把使用者看得到的狀態文字洗掉。
+        if (!PlayerRes.ActionTypeAvailable((uint)HookType.Stellar))
+            return false;
+
+        // ⚠️ 條件要沿用「這一咬原本那一格」的設定，不能用華麗提鉤自己那格的空白預設。
+        //    華麗提鉤只是換一個提鉤**動作**，不該自帶一套條件 —— 否則 preset 設好的時間窗對華麗提鉤完全無效，
+        //    表現成「preset 說要放掉的咬鉤，只有華麗提鉤會去勾」。
+        var conditionSource = hook.ph.HooksetEnabled ? hook.ph : stellar;
+
+        var statusBefore = Service.Status;
+        if (!CheckHookCondition(conditionSource, timePassed, ignoreTimers))
+        {
+            Service.Status = statusBefore;
+            return false;
+        }
+
+        // 要使用者回報的診斷。華麗提鉤有 60 秒 CD，所以這行最多每分鐘一次，不需要另外節流。
+        Service.PrintInfo(@$"[HookManager] 華麗提鉤可用且條件符合，本次改用華麗提鉤（動作 ID {(uint)HookType.Stellar}）。");
+        return true;
+    }
+
+    private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed, bool ignoreTimers)
     {
         if (!CheckIdenticalCast(hookType))
             return false;
 
         if (!CheckSurfaceSlap(hookType))
             return false;
-        
+
         if (!CheckPrizeCatch(hookType))
             return false;
 
-        if (!CheckTimer(hookType, timePassed))
+        if (!ignoreTimers && !CheckTimer(hookType, timePassed))
+            return false;
+
+        if (!CheckConditionSet(hookType, timePassed, ignoreTimers))
             return false;
 
         return true;
+    }
+
+    /// <summary>
+    /// 上游 config v6／v7 把提鉤的時間窗（以及「要有某狀態才提」之類的限制）從固定欄位
+    /// 改成了一份條件。這裡是它的求值點，對應上游的 <c>hook.xx.ConditionSet.PassesOrUnconfigured()</c>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 三個保底規則，缺一個都會變成「外掛看起來壞掉」：
+    /// ①沒有條件（<c>null</c>／空群組）＝通過。既有使用者與所有 AH4_ preset 走這一條。
+    /// ②含有我們還沒實作的條件＝**通過**（不擋）。這條路徑上「不認得就不提鉤」會讓每一咬都放生。
+    /// ③<paramref name="ignoreTimers"/> 為 true 時，條件裡的時間窗（BiteTimerCD／ChumTimerCD）一律視為成立
+    ///   —— 否則「每條魚都算分的任務忽略時間窗」會在帶條件的 preset 上靜默失效。
+    /// </remarks>
+    private bool CheckConditionSet(BaseBiteConfig hookType, double timePassed, bool ignoreTimers)
+    {
+        var set = hookType.ConditionSet;
+
+        if (!ConditionEvaluator.HasGroups(set))
+            return true;
+
+        var ctx = ConditionContext.OnBite(timePassed, ignoreTimers);
+
+        if (ConditionEvaluator.Passes(set, ctx, unconfiguredResult: true, unsupportedResult: true,
+                where: @"提鉤條件"))
+            return true;
+
+        Service.Status = $"Skipping bite - {ConditionEvaluator.Describe(set, ctx)}";
+        return false;
     }
 
     private bool IsHookAvailable(BaseBiteConfig hookType)

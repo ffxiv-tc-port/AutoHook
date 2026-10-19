@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using AutoHook.Classes;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Utils;
@@ -32,8 +32,8 @@ public static class GameRes
              ?? [])
             .Concat(
                 Service.DataManager.GetExcelSheet<WKSItemInfo>()?
-                    .Where(i => i.Unknown3 == 5)
-                    .Select(i => Service.DataManager.GetExcelSheet<Item>()?.GetRow(i.Unknown0))
+                    .Where(i => i.WKSItemSubCategory.RowId == 5)
+                    .Select(i => Service.DataManager.GetExcelSheet<Item>()?.GetRow(i.Item.RowId))
                     .Where(item => item != null)
                     .Cast<Item>()
                 ?? []
@@ -54,11 +54,13 @@ public static class GameRes
             var fishList = Path.Combine(Service.PluginInterface.AssemblyLocation.DirectoryName!,
                 $"Data\\FishData\\fish_list.json");
 
+            // 直接從檔案串流解析：先讀成整份字串會多配置約 4 MB（字串＋StreamReader 的 StringBuilder／char[]）。
+            // Stream 多載與 ReadAllText 一樣會跳過 UTF-8 BOM，解析結果相同。
             if (File.Exists(fishList))
             {
-                var json = File.ReadAllText(fishList);
+                using var stream = File.OpenRead(fishList);
 
-                ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(json)!;
+                ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(stream)!;
             }
 
             var biteTimers = Path.Combine(Service.PluginInterface.AssemblyLocation.DirectoryName!,
@@ -66,9 +68,9 @@ public static class GameRes
 
             if (File.Exists(biteTimers))
             {
-                var json = File.ReadAllText(biteTimers);
+                using var stream = File.OpenRead(biteTimers);
 
-                BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(json)!;
+                BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(stream)!;
             }
         }
         catch (Exception e)

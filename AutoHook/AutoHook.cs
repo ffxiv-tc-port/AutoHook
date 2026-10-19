@@ -52,6 +52,8 @@ public class AutoHook : IDalamudPlugin
 
     private static AutoGig _autoGig = null!;
 
+    private readonly WeatherWatcher _weatherWatcher;
+
     public readonly FishingManager HookManager;
 
     public AutoHookIPC AutoHookIpc;
@@ -60,8 +62,17 @@ public class AutoHook : IDalamudPlugin
     {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         Service.Initialize(pluginInterface);
+
+        // 🔴 聊天輸出一律先排進 ChatQueue，由這裡註冊的每幀排乾送出。
+        //    註冊要早於任何一則訊息（本建構子底下的 Loc.ReportEmptyResourceKeys 等等）。
+        ChatQueue.Initialize();
+
         PunishLibMain.Init(pluginInterface, "AutoHook",
-            new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
+            new AboutPlugin()
+            {
+                Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet",
+                IconPath = LocalIconPath(pluginInterface)
+            });
         Plugin = this;
         Service.BaitManager = new BaitManager();
         Service.TugType = new SeTugType(Service.SigScanner);
@@ -73,6 +84,12 @@ public class AutoHook : IDalamudPlugin
 
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
+
+        // 資源檔裡「鍵存在但值是空字串」的條目，在被畫出來的那一刻會讓遊戲當場崩潰
+        // （空字串 → ImU8String 零長度 → 原生邊界拿到空指標 → igFindRenderedTextEnd 從位址 0 開始掃）。
+        // 在被踩到之前先列出來，寫 Information 讓使用者回報得出來。
+        Loc.ReportEmptyResourceKeys();
+
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
 
@@ -87,9 +104,26 @@ public class AutoHook : IDalamudPlugin
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
 
+        // 「前一個時段的天氣」問不到遊戲（負 offset 會靜默算錯、API13 沒有 GetPreviousWeather），
+        // 只能趁它還是「目前時段」的時候抄下來。每幀先比一次 TickCount64 就返回，
+        // 真正的取樣最多 5 秒一次。
+        _weatherWatcher = new WeatherWatcher();
+
 #if (DEBUG)
         OnOpenConfigUi();
 #endif
+    }
+
+    /// <summary>
+    /// 出貨包裡的 images/Fishy.png（外觀與外掛庫圖示相同）；不存在時回 null（關於分頁沿用 manifest 的 IconUrl）。
+    /// 路徑字串與設定視窗左側 logo 的相同，兩處共用同一份貼圖快取。
+    /// </summary>
+    private static string? LocalIconPath(IDalamudPluginInterface pluginInterface)
+    {
+        var dir = pluginInterface.AssemblyLocation.DirectoryName;
+        if (dir is null) return null;
+        var path = System.IO.Path.Combine(dir, "images/Fishy.png");
+        return System.IO.File.Exists(path) ? path : null;
     }
 
     private void OnCommand(string command, string args)
@@ -100,20 +134,26 @@ public class AutoHook : IDalamudPlugin
             case CmdAh:
                 OnOpenConfigUi();
                 break;
+            // 這四個 case 都是使用者親自下的指令 ⇒ 丟掉別的外掛借走開關時記下的 IPC 覆寫，
+            // 他的值重新成為權威（見 IpcConfigOverrides）。
             case CmdAhOn:
-                Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                ChatQueue.Print(UIStrings.AutoHook_Enabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhOff:
-                Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                ChatQueue.Print(UIStrings.AutoHook_Disabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg when Service.Configuration.PluginEnabled:
-                Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                ChatQueue.Print(UIStrings.AutoHook_Disabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg:
-                Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                ChatQueue.Print(UIStrings.AutoHook_Enabled);
+                IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhPreset:
@@ -134,8 +174,31 @@ public class AutoHook : IDalamudPlugin
 
     private static void SwapBait(string args)
     {
+        if (string.IsNullOrWhiteSpace(args))
+        {
+            ChatQueue.Print(@"[AutoHook] 用法：/bait <釣餌名稱或道具 ID>（/ahbait 相同）");
+            return;
+        }
+
         var bait = GameRes.Baits.FirstOrDefault(f => f.Name.ToLower() == args.ToLower() || f.Id.ToString() == args);
-        Service.BaitManager.ChangeBait((uint)bait?.Id!);
+        if (bait == null)
+        {
+            ChatQueue.Print(@$"[AutoHook] 找不到釣餌「{args}」：請輸入完整的釣餌名稱或道具 ID。");
+            return;
+        }
+
+        // 成功與已裝備不印：遊戲自己會顯示換餌結果，巨集反覆下 /bait 時也不洗版。
+        var reason = Service.BaitManager.ChangeBait((uint)bait.Id) switch
+        {
+            BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped => null,
+            BaitManager.ChangeBaitReturn.NotInInventory => @"背包裡沒有這個釣餌（換區／傳送途中也會讀成沒有，請稍後再試）。",
+            BaitManager.ChangeBaitReturn.InvalidBait => @"這個道具不是可以使用的釣餌。",
+            BaitManager.ChangeBaitReturn.Unavailable => @"換餌功能目前停用（遊戲改版後對應的遊戲函式對不上），請等插件更新。",
+            _ => @"遊戲沒有接受換餌指令，可能是目前的狀態不能更換釣餌（例如拋竿中）。",
+        };
+
+        if (reason != null)
+            ChatQueue.Print(@$"[AutoHook] 沒有換成「{bait.Name}」：{reason}");
     }
 
     private static void SetPreset(string presetName)
@@ -143,13 +206,13 @@ public class AutoHook : IDalamudPlugin
         var preset = Service.Configuration.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null)
         {
-            Service.Chat.Print(UIStrings.Preset_not_found);
+            ChatQueue.Print(UIStrings.Preset_not_found);
             return;
         }
 
         Service.Save();
         Service.Configuration.HookPresets.SelectedPreset = preset;
-        Service.Chat.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
+        ChatQueue.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
         Service.Save();
     }
 
@@ -158,19 +221,20 @@ public class AutoHook : IDalamudPlugin
         var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null)
         {
-            Service.Chat.Print(UIStrings.Preset_not_found);
-            Service.Chat.Print(presetName);
+            ChatQueue.Print(UIStrings.Preset_not_found);
+            ChatQueue.Print(presetName);
             return;
         }
 
         Service.Save();
         Service.Configuration.AutoGigConfig.SelectedPreset = preset;
-        Service.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
+        ChatQueue.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
         Service.Save();
     }
 
     public void Dispose()
     {
+        _weatherWatcher.Dispose();
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();
@@ -182,6 +246,14 @@ public class AutoHook : IDalamudPlugin
         {
             Service.Commands.RemoveHandler(command);
         }
+
+        // 🔴 租約表是靜態的，外掛重載後不清掉的話舊租約會活到逾時為止，
+        //    而新的實例根本不知道那些持有者是誰。
+        PluginEnabledLeases.ReleaseAll(@"AutoHook 正在卸載");
+
+        // 停止每幀排乾；還在佇列裡的訊息由 Shutdown 自己決定要送出還是丟掉
+        //（只有確定在 Framework 執行緒上才送）。
+        ChatQueue.Shutdown();
 
         ECommonsMain.Dispose();
     }

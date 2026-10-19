@@ -3312,7 +3312,115 @@ namespace AutoHook.Resources.Localization {
                 return ResourceManager.GetString("StellarHookset", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cosmic Exploration only. 60s cooldown, no GP cost. Ignored everywhere else.
+        /// </summary>
+        internal static string StellarHookCosmicOnly {
+            get {
+                return ResourceManager.GetString("StellarHookCosmicOnly", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Use Stellar Hookset when available.
+        /// </summary>
+        internal static string UseStellarHook {
+            get {
+                return ResourceManager.GetString("UseStellarHook", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Uses Stellar Hookset whenever the game says it is off cooldown and usable.
+        /// </summary>
+        internal static string UseStellarHookHelpText {
+            get {
+                return ResourceManager.GetString("UseStellarHookHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Prioritise over Double/Triple Hook.
+        /// </summary>
+        internal static string StellarHookBeforeMultiHook {
+            get {
+                return ResourceManager.GetString("StellarHookBeforeMultiHook", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Which way &quot;Auto&quot; goes when it cannot tell what the current mission scores on.
+        /// </summary>
+        internal static string StellarHookBeforeMultiHookHelpText {
+            get {
+                return ResourceManager.GetString("StellarHookBeforeMultiHookHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore hook timers when every fish counts.
+        /// </summary>
+        internal static string IgnoreTimersEveryFishCounts {
+            get {
+                return ResourceManager.GetString("IgnoreTimersEveryFishCounts", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Some Cosmic Exploration presets restrict hooking to a narrow time window.
+        /// </summary>
+        internal static string IgnoreTimersEveryFishCountsHelpText {
+            get {
+                return ResourceManager.GetString("IgnoreTimersEveryFishCountsHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Stellar Hookset priority.
+        /// </summary>
+        internal static string StellarPriorityLabel {
+            get {
+                return ResourceManager.GetString("StellarPriorityLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Auto (follow the mission&apos;s scoring method).
+        /// </summary>
+        internal static string StellarPriorityAuto {
+            get {
+                return ResourceManager.GetString("StellarPriorityAuto", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Evaluation first (Stellar before Double/Triple).
+        /// </summary>
+        internal static string StellarPriorityEvaluation {
+            get {
+                return ResourceManager.GetString("StellarPriorityEvaluation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Quantity first (Double/Triple Hook first).
+        /// </summary>
+        internal static string StellarPriorityQuantity {
+            get {
+                return ResourceManager.GetString("StellarPriorityQuantity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;Auto&quot; reads the Cosmic Exploration mission you are currently on and classifies how it scores.
+        /// </summary>
+        internal static string StellarPriorityHelpText {
+            get {
+                return ResourceManager.GetString("StellarPriorityHelpText", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Stop After Caught.
         /// </summary>
@@ -4104,6 +4212,42 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Support AutoHook.
+        /// </summary>
+        internal static string SupportAutoHook {
+            get {
+                return ResourceManager.GetString("SupportAutoHook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minor Changes.
+        /// </summary>
+        internal static string MinorChanges {
+            get {
+                return ResourceManager.GetString("MinorChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initial Bait:.
+        /// </summary>
+        internal static string InitialBait_ {
+            get {
+                return ResourceManager.GetString("InitialBait_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Preset and Close.
+        /// </summary>
+        internal static string CreatePresetAndClose {
+            get {
+                return ResourceManager.GetString("CreatePresetAndClose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to When Angler&apos;s Art stack is at....
         /// </summary>
         internal static string WhenAnglersAt {
@@ -4118,6 +4262,51 @@ namespace AutoHook.Resources.Localization {
         internal static string WillBeUsedWhenYourGPIsEqualOr {
             get {
                 return ResourceManager.GetString("WillBeUsedWhenYourGPIsEqualOr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Another plugin is temporarily changing this setting..
+        /// </summary>
+        internal static string IpcOverrideTitle {
+            get {
+                return ResourceManager.GetString("IpcOverrideTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The change applies to this game session only and is not written to your config file..
+        /// </summary>
+        internal static string IpcOverrideSessionOnly {
+            get {
+                return ResourceManager.GetString("IpcOverrideSessionOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your own setting: ON.
+        /// </summary>
+        internal static string IpcOverrideYourValueOn {
+            get {
+                return ResourceManager.GetString("IpcOverrideYourValueOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your own setting: OFF.
+        /// </summary>
+        internal static string IpcOverrideYourValueOff {
+            get {
+                return ResourceManager.GetString("IpcOverrideYourValueOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change it here yourself to make your own value authoritative again..
+        /// </summary>
+        internal static string IpcOverrideReclaim {
+            get {
+                return ResourceManager.GetString("IpcOverrideReclaim", resourceCulture);
             }
         }
     }

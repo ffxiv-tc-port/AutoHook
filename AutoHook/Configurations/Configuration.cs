@@ -20,11 +20,74 @@ namespace AutoHook.Configurations;
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 5;
-    public string CurrentLanguage { get; set; } = @"en";
+    // TC fork: default to Traditional Chinese; users can switch in settings
+    public string CurrentLanguage { get; set; } = @"zh-Hant";
 
     public bool HideLocButtonn = true;
 
+    /// <summary>
+    /// 使用者的「啟用 AutoHook」開關。<b>執行期真值</b>——所有讀取端都讀這個欄位。
+    /// </summary>
+    /// <remarks>
+    /// ⚠️ 這個欄位<b>不直接序列化</b>；寫進設定檔的是 <see cref="PluginEnabledPersisted"/>。
+    /// 別的外掛用 <c>AutoHook.SetPluginState</c> 借走這個開關時，磁碟上要保留<b>使用者自己的值</b>
+    /// ——理由與機制見 <see cref="IpcConfigOverrides"/>。
+    /// </remarks>
+    [JsonIgnore]
     [DefaultValue(true)] public bool PluginEnabled = true;
+
+    /// <summary>
+    /// <see cref="PluginEnabled"/> 的序列化替身。JSON 鍵名維持 <c>PluginEnabled</c> 不變，
+    /// 既有設定檔照樣讀得回來、寫出去也還是同一個鍵。
+    /// </summary>
+    /// <remarks>
+    /// 🔑 這裡刻意<b>不</b>用「存檔前把欄位換成使用者的值、存完再換回來」：那會留下一段
+    /// 欄位值不對的時間窗，而 <c>FishingManager</c> 每幀都在讀它（<c>Service.Save()</c> 又可能
+    /// 從非 Framework 執行緒進來）。改成序列化替身之後，執行期欄位<b>完全不被碰</b>。
+    /// </remarks>
+    [JsonProperty(nameof(PluginEnabled))]
+    public bool PluginEnabledPersisted
+    {
+        get => IpcConfigOverrides.ValueForSave(IpcConfigOverrides.PluginEnabledKey, PluginEnabled);
+        set => PluginEnabled = value;
+    }
+
+    /// <summary>
+    /// 「沒在釣魚時自動拋竿」。<b>執行期真值</b>——讀取端讀這個欄位。
+    /// </summary>
+    /// <remarks>
+    /// 📌 <b>預設 <see langword="false"/>，與上游一致</b>：
+    /// 既有使用者的設定檔裡沒有這個鍵 ⇒ 吃這裡的初值 ⇒ <b>行為零改變</b>。
+    /// <br/>⚠️ 這個欄位<b>不直接序列化</b>；寫進設定檔的是 <see cref="AutoStartFishingPersisted"/>。
+    /// 別的外掛用 <c>AutoHook.SetAutoStartFishing</c> 借走這個開關時，磁碟上要保留<b>使用者自己的值</b>
+    /// ——理由與機制見 <see cref="IpcConfigOverrides"/>。
+    /// </remarks>
+    [JsonIgnore]
+    public bool AutoStartFishing = false;
+
+    /// <summary>
+    /// <see cref="AutoStartFishing"/> 的序列化替身。JSON 鍵名維持 <c>AutoStartFishing</c> 不變。
+    /// </summary>
+    [JsonProperty(nameof(AutoStartFishing))]
+    public bool AutoStartFishingPersisted
+    {
+        get => IpcConfigOverrides.ValueForSave(IpcConfigOverrides.AutoStartFishingKey, AutoStartFishing);
+        set => AutoStartFishing = value;
+    }
+
+    /// <summary>
+    /// <b>實際生效</b>的啟用狀態：使用者的值疊上目前的暫停租約。
+    /// <b>所有「要不要動作」的判斷都讀這個</b>，不要直接讀 <see cref="PluginEnabled"/>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 談「使用者自己的意思」的地方（勾選框、<c>/ahtg</c> 反向切換、序列化、
+    /// <c>AutoHook.GetPluginState</c>）<b>必須繼續讀 <see cref="PluginEnabled"/></b>：
+    /// 那些地方拿到被壓制過的值會把別人的值寫回使用者身上。
+    /// <br/>⚠️ <c>[JsonIgnore]</c> 是必要的：<c>SavePluginConfig</c> 會序列化所有公開屬性，
+    /// 不標的話設定檔裡會多一個沒人讀的鍵。
+    /// </remarks>
+    [JsonIgnore]
+    public bool EffectivePluginEnabled => PluginEnabledLeases.ResolveEnabled(PluginEnabled);
 
     public FishingPresets HookPresets = new();
 
@@ -54,6 +117,32 @@ public class Configuration : IPluginConfiguration
     [DefaultValue(true)] public bool DontHideOptionsDisabled = true;
 
     [DefaultValue(true)] public bool ResetAfkTimer = true;
+
+    // ── 塔塔露誇獎（TataruPraise）通知 ────────────────────────────────────────
+    // 掛機釣魚時被「有聲音」叫回電腦前用的。純通知：不換餌、不換 preset、不停手，
+    // 對方沒安裝時整條路徑是 no-op。判準的取捨寫在 FishingManager.Praise.cs。
+    // ⚠️ 新欄位對既有使用者是「設定檔裡沒有這個鍵」⇒ 吃這裡的初值，不必寫遷移。
+
+    /// <summary>總開關。關掉之後連判準都不會算。</summary>
+    [DefaultValue(true)] public bool TataruPraiseEnabled = true;
+
+    /// <summary>
+    /// 大魚（需要漁人的直覺／需要天氣轉換／魚影魚）。<b>唯一預設開的判準</b>——
+    /// 離線量測非魚叉魚 1869 條裡只有 135 條（7.2%）符合。
+    /// </summary>
+    [DefaultValue(true)] public bool TataruPraiseBigFish = true;
+
+    /// <summary>遊戲自己的「大物」旗標。頻率沒有實機數據，預設關。</summary>
+    public bool TataruPraiseLargeFlag = false;
+
+    /// <summary>傳說咬「!!!」。某些餌／釣場是常態，預設關。</summary>
+    public bool TataruPraiseLegendaryBite = false;
+
+    /// <summary>收藏品。收藏品釣魚時每一條都是，預設關。</summary>
+    public bool TataruPraiseCollectible = false;
+
+    /// <summary>兩次出聲之間的本機最短間隔（秒）。判準寫壞時的保險絲，不是功能本身。</summary>
+    public int TataruPraiseMinIntervalSeconds = 60;
 
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
@@ -148,6 +237,9 @@ public class Configuration : IPluginConfiguration
 
     public static Configuration Load()
     {
+        // 載入設定檔＝重新確立「使用者的值」，任何殘留的 IPC 覆寫都作廢。
+        IpcConfigOverrides.ClearAll();
+
         try
         {
             if (Service.PluginInterface.GetPluginConfig() is Configuration config)
@@ -200,6 +292,14 @@ public class Configuration : IPluginConfiguration
         public string FolderName { get; set; }
         public List<CustomPresetConfig> Presets { get; set; } = new();
 
+        /// <summary>
+        /// AHFOLDER2_ 才有的巢狀子資料夾。AHFOLDER_（我們自己匯出的那版）的 JSON 裡沒有這個鍵，
+        /// 反序列化後就是空清單 ⇒ 舊格式的匯入行為完全沒變。
+        /// ⚠️ 我們的 <see cref="PresetFolder"/> 沒有 ParentFolderId，**表達不了階層**，
+        /// 所以匯入時是攤平的，見 <see cref="CollectFolderPresets"/>。
+        /// </summary>
+        public List<FolderExport> ChildFolders { get; set; } = new();
+
         public FolderExport(string name)
         {
             FolderName = name;
@@ -227,7 +327,9 @@ public class Configuration : IPluginConfiguration
 
     public static (PresetFolder Folder, List<CustomPresetConfig> Presets)? ImportFolder(string import)
     {
-        if (!import.StartsWith(ExportPrefixFolder))
+        import = import.Trim();
+
+        if (!import.StartsWith(ExportPrefixFolder) && !import.StartsWith(ExportPrefixFolderV2))
             return null;
 
         try
@@ -239,15 +341,18 @@ public class Configuration : IPluginConfiguration
                 return null;
 
             var folder = new PresetFolder(folderData.FolderName);
+            var presets = new List<CustomPresetConfig>();
+            var nestedFolders = 0;
 
-            // Generate new GUIDs for all presets to avoid conflicts
-            foreach (var preset in folderData.Presets)
-            {
-                preset.UniqueId = Guid.NewGuid();
-                folder.AddPreset(preset.UniqueId);
-            }
+            CollectFolderPresets(folderData, folder, presets, ref nestedFolders, string.Empty, 0);
 
-            return (folder, folderData.Presets);
+            // 要使用者回報的診斷。
+            if (nestedFolders > 0)
+                Service.PluginLog.Information(
+                    $"[ImportFolder] 這份匯入含 {nestedFolders} 個子資料夾。本插件的資料夾沒有階層，" +
+                    $"已攤平成單一資料夾（共 {presets.Count} 個 preset）；子資料夾裡的 preset 名稱前面補上了來源路徑。");
+
+            return (folder, presets);
         }
         catch (Exception e)
         {
@@ -256,8 +361,63 @@ public class Configuration : IPluginConfiguration
         }
     }
 
+    /// <summary>
+    /// 上限只是為了擋掉手工捏出來的病態巢狀 —— 遞迴爆掉是 StackOverflowException，
+    /// 那是**攔不到**的、直接把行程帶走。正常匯出不可能接近這個深度。
+    /// </summary>
+    private const int MaxFolderImportDepth = 16;
+
+    /// <summary>
+    /// 把 <see cref="FolderExport"/> 這棵樹上的 preset 全部收進單一資料夾（攤平）。
+    /// 階層資訊改用「子資料夾名/」前綴留在 preset 名稱上 —— 匯入對話框本來就每個 preset
+    /// 都有可編輯的名稱欄，使用者看得到也改得掉。
+    /// 🔑 攤平只損失「分組」，**不會少匯任何一個 preset**。
+    /// </summary>
+    private static void CollectFolderPresets(FolderExport data, PresetFolder target,
+        List<CustomPresetConfig> presets, ref int nestedFolders, string namePrefix, int depth)
+    {
+        foreach (var preset in data.Presets ?? new List<CustomPresetConfig>())
+        {
+            if (preset == null)
+                continue;
+
+            // Generate new GUIDs for all presets to avoid conflicts
+            preset.UniqueId = Guid.NewGuid();
+
+            if (namePrefix.Length > 0)
+                preset.PresetName = namePrefix + preset.PresetName;
+
+            target.AddPreset(preset.UniqueId);
+            presets.Add(preset);
+        }
+
+        if (data.ChildFolders is not { Count: > 0 })
+            return;
+
+        if (depth >= MaxFolderImportDepth)
+        {
+            Service.PluginLog.Information(
+                $"[ImportFolder] 子資料夾巢狀深度超過 {MaxFolderImportDepth} 層，更深的部分沒有匯入。");
+            return;
+        }
+
+        foreach (var child in data.ChildFolders)
+        {
+            if (child == null)
+                continue;
+
+            nestedFolders++;
+            CollectFolderPresets(child, target, presets, ref nestedFolders,
+                $"{namePrefix}{child.FolderName}/", depth + 1);
+        }
+    }
+
     public static BasePresetConfig? ImportPreset(string import)
     {
+        // 一定要跟 DecompressString 用同一個字串：那邊已經 Trim 過，這邊的 StartsWith
+        // 若拿沒 Trim 的原字串去比，開頭帶空白時會選錯分支（例如 " AH_" 會漏掉舊版轉換）。
+        import = import.Trim();
+
         if (import.StartsWith(ExportPrefixV2))
         {
             var old = JsonConvert.DeserializeObject<BaitPresetConfig>(DecompressString(import),
@@ -273,7 +433,9 @@ public class Configuration : IPluginConfiguration
             return ConvertOldPresetV3(old);
         }
 
-        if (import.StartsWith(ExportPrefixSf))
+        // AHSF2_ 是 AHSF1_ 的 Brotli 版，對應的 C# 型別一樣是 AutoGigConfig
+        // （上游 ImportPreset 也是把兩個前綴併在同一條分支）。
+        if (import.StartsWith(ExportPrefixSf) || import.StartsWith(ExportPrefixSf2))
         {
             var autogig = JsonConvert.DeserializeObject<AutoGigConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
@@ -289,13 +451,53 @@ public class Configuration : IPluginConfiguration
     [NonSerialized] private const string ExportPrefixV2 = "AH_";
     [NonSerialized] private const string ExportPrefixV3 = "AH3_";
     [NonSerialized] private const string ExportPrefixV4 = "AH4_";
+
+    /// <summary>
+    /// 上游較新版本匯出的 preset 前綴。**只收不發** —— <see cref="ExportPreset"/> 仍然輸出
+    /// <see cref="ExportPrefixV4"/>。酬載與型別跟 AH4_ 相同（base64(gzip(utf8 json))、<see cref="CustomPresetConfig"/>），
+    /// 所以走 <see cref="ImportPreset"/> 末尾那條共用路徑。⚠️ **AH6_ 的 schema 比 AH4_ 大一圈**：
+    /// 我們只接了提鉤的 <c>ConditionSet</c> 與 <c>SwapPresetConditionSet</c>，其餘沒有宣告的屬性
+    /// （<c>NamedConditions</c>、<c>ExtraCfg.Triggers</c>、<c>ListOfFish[*].Multihook</c> 等）Newtonsoft 直接忽略
+    /// —— **不丟例外，但那些行為沒有生效**；AH4_ 才有的計數式欄位在 AH6_ 已不存在，匯入後落在型別預設值上。
+    /// </summary>
+    [NonSerialized] private const string ExportPrefixV6 = "AH6_";
+
+    /// <summary>
+    /// 上游後來改用的匯出前綴，酬載是 <b>base64(brotli(utf8 json))</b>，不是 gzip。同樣**只收不發** ——
+    /// <see cref="ExportPreset"/>／<see cref="ExportFolder"/> 仍舊輸出 <see cref="ExportPrefixV4"/>／
+    /// <see cref="ExportPrefixFolder"/>（gzip）。
+    /// 🔴 **Brotli 沒有 gzip 的 ISIZE trailer**：把「最後四個位元組」當成解壓後長度會去要一塊上百 MB 的緩衝區
+    /// （OutOfMemoryException／OverflowException），所以**必須**走不依賴長度的串流路徑，見 <see cref="BrotliExportPrefixes"/>。
+    /// ⚠️ schema 落差與 AH6_ 同性質、而且更大：沒有宣告的屬性靜默忽略，那些條件不會生效。
+    /// </summary>
+    [NonSerialized] private const string ExportPrefixV7 = "AH7_";
+
     [NonSerialized] private const string ExportPrefixSf = "AHSF1_";
+
+    /// <inheritdoc cref="ExportPrefixV7"/>
+    [NonSerialized] private const string ExportPrefixSf2 = "AHSF2_";
+
     [NonSerialized] private const string ExportPrefixFolder = "AHFOLDER_";
 
+    /// <inheritdoc cref="ExportPrefixV7"/>
+    [NonSerialized] private const string ExportPrefixFolderV2 = "AHFOLDER2_";
 
+
+    // ⚠️ 順序有意義：DecompressString 用 First(s.StartsWith) 取前綴。
+    // 目前沒有任何一個前綴是另一個的前綴，所以怎麼排都不會誤判。
+    // 🔴 之後要加新前綴時請重新確認這一點 —— 前綴互為前綴時，選錯的那個會讓
+    //    BrotliExportPrefixes 的判斷跟著選錯，結果是拿 gzip 去解 brotli（或反之）。
     [NonSerialized] private static readonly List<string> ExportPrefixes =
     [
-        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixSf, ExportPrefixFolder
+        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixV6, ExportPrefixV7,
+        ExportPrefixSf, ExportPrefixSf2, ExportPrefixFolder, ExportPrefixFolderV2
+    ];
+
+    // 走 Brotli 而非 gzip 的前綴（上游同一份清單叫 BroccoliExportPrefixes，是個雙關，
+    // 跨檔比對上游碼時用那個名字搜）。
+    [NonSerialized] private static readonly List<string> BrotliExportPrefixes =
+    [
+        ExportPrefixV7, ExportPrefixSf2, ExportPrefixFolderV2
     ];
 
     public static string CompressString(string s)
@@ -310,11 +512,28 @@ public class Configuration : IPluginConfiguration
 
     public static string DecompressString(string s)
     {
+        // 使用者是從 wiki／Discord 貼過來的，前後常帶換行。
+        // （尾端空白其實無所謂 —— Convert.FromBase64String 本來就忽略空白字元 ——
+        //  但**開頭**的空白會讓下面的 StartsWith 對不上，變成「無效的匯入資料」。）
+        s = s.Trim();
+
         if (!ExportPrefixes.Any(s.StartsWith))
             throw new ApplicationException(UIStrings.DecompressString_Invalid_Import);
 
         var prefix = ExportPrefixes.First(s.StartsWith);
         var data = Convert.FromBase64String(s[prefix.Length..]);
+
+        // 🔴 Brotli 串流沒有 gzip 的 ISIZE trailer，所以**不能**走下面那條
+        // 「讀末四位元組當解壓後長度」的路徑（見 ExportPrefixV7 的註解），這裡用不依賴長度的串流複製。
+        if (BrotliExportPrefixes.Contains(prefix))
+        {
+            using var brotliInput = new MemoryStream(data);
+            using var brotli = new BrotliStream(brotliInput, CompressionMode.Decompress);
+            using var brotliOutput = new MemoryStream();
+            brotli.CopyTo(brotliOutput);
+            return Encoding.UTF8.GetString(brotliOutput.ToArray());
+        }
+
         var lengthBuffer = new byte[4];
         Array.Copy(data, data.Length - 4, lengthBuffer, 0, 4);
         var uncompressedSize = BitConverter.ToInt32(lengthBuffer, 0);
@@ -323,7 +542,14 @@ public class Configuration : IPluginConfiguration
         using (var ms = new MemoryStream(data))
         {
             using var gzip = new GZipStream(ms, CompressionMode.Decompress);
-            gzip.Read(buffer, 0, uncompressedSize);
+            var totalRead = 0;
+            while (totalRead < uncompressedSize)
+            {
+                var read = gzip.Read(buffer, totalRead, uncompressedSize - totalRead);
+                if (read == 0)
+                    break;
+                totalRead += read;
+            }
         }
 
         return Encoding.UTF8.GetString(buffer);

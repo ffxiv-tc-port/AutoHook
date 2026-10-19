@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using AutoHook.Configurations;
 using AutoHook.Enums;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;
 
@@ -55,7 +56,9 @@ public class TabSettings : BaseTab
 
     private void DrawConfigs()
     {
-        DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp);
+        DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp,
+            ipcOverrideKey: IpcConfigOverrides.PluginEnabledKey);
+        DrawUtil.DrawSuppressionLeaseMarker();
         
         if (ImGui.TreeNodeEx(UIStrings.DelaySettings, ImGuiTreeNodeFlags.FramePadding))
         {
@@ -77,6 +80,15 @@ public class TabSettings : BaseTab
 
         DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
 
+        DrawUtil.Checkbox(@"沒在釣魚時自動拋竿", ref Service.Configuration.AutoStartFishing,
+            @"人站在釣點、竿子收著的時候自動幫你拋第一竿。" + "\n" +
+            @"⚠️ 還需要「自動施放」那一頁的總開關也開著，而且那裡的「自動拋竿」要是啟用的；" +
+            @"職業不對或不在水邊時不會有動作。" + "\n" +
+            @"一直開著 AutoHook 的人建議關掉這個 —— 收竿之後它會自己再拋一次。",
+            ipcOverrideKey: IpcConfigOverrides.AutoStartFishingKey);
+
+        DrawTataruPraise();
+
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);
@@ -97,6 +109,47 @@ public class TabSettings : BaseTab
 
             ImGui.Text("Hello, you're cute!");
         });
+    }
+
+    /// <summary>
+    /// 「釣到稀有魚時請塔塔露念一句」的設定。
+    /// <para>
+    /// ⚠️ 字串刻意寫成字面繁中而不是走 <c>UIStrings</c>：這是台服 fork 專屬的功能，
+    /// 而 resx 那條路要同時動 11 份語言檔＋Designer，且「鍵存在但值為空」不會退回英文
+    /// （會直接顯示空字串）。這裡的取捨是「少一層可以靜默壞掉的東西」。
+    /// </para>
+    /// </summary>
+    private static void DrawTataruPraise()
+    {
+        DrawUtil.DrawCheckboxTree(@"釣到稀有魚時請塔塔露誇獎", ref Service.Configuration.TataruPraiseEnabled, () =>
+        {
+            DrawUtil.Checkbox(@"大魚（需要漁人的直覺／需要天氣轉換／魚影魚）",
+                ref Service.Configuration.TataruPraiseBigFish,
+                @"用 AutoHook 自己的魚資料判斷：這條魚要先靠捕食魚累出「漁人的直覺」、" +
+                @"或要等天氣轉換、或它是有魚影的大魚。" + "\n" +
+                @"非魚叉魚 1869 條裡只有 135 條符合（7.2%），掛機一整天也不會誤觸幾次。");
+
+            DrawUtil.Checkbox(@"遊戲的「大物」旗標",
+                ref Service.Configuration.TataruPraiseLargeFlag,
+                @"遊戲自己標記為大物的那一竿。語意精確，但觸發頻率沒有實機數據 —— " +
+                @"如果覺得太常出聲就關掉。");
+
+            DrawUtil.Checkbox(@"傳說咬「!!!」",
+                ref Service.Configuration.TataruPraiseLegendaryBite,
+                @"最強的咬鉤力道。某些餌／釣場的「!!!」是常態，開之前先想一下。");
+
+            DrawUtil.Checkbox(@"收藏品",
+                ref Service.Configuration.TataruPraiseCollectible,
+                @"⚠️ 收藏品釣魚時每一條都是收藏品 —— 開這個等於每一竿都出聲。");
+
+            var interval = Service.Configuration.TataruPraiseMinIntervalSeconds;
+            if (DrawUtil.EditNumberField(@"兩次出聲的最短間隔（秒）", 60f, ref interval,
+                    @"保險絲：不管上面勾了什麼，出聲都不會比這個間隔更頻繁。0＝不限制。"))
+            {
+                Service.Configuration.TataruPraiseMinIntervalSeconds = Math.Clamp(interval, 0, 3600);
+                Service.Save();
+            }
+        }, @"需要另外安裝 TataruPraise（塔塔露誇獎）插件；沒裝的話這裡勾了也不會有任何事發生，也不會影響釣魚。");
     }
 
     private static void DrawDelayHook()
@@ -195,11 +248,13 @@ public class TabSettings : BaseTab
             @"ja",
             @"ko",
             @"ru",
-            @"zh"
+            @"zh",
+            @"zh-Hant"
         };
         var currentLanguage = languages.IndexOf(Service.Configuration.CurrentLanguage);
 
-        if (!ImGui.Combo("Language###currentLanguage", ref currentLanguage, languages.ToArray(), languages.Count))
+        if (!ImGui.Combo($"{UIStrings.PluginUi_Language}###currentLanguage", ref currentLanguage, languages.ToArray(),
+                languages.Count))
             return;
 
         Service.Configuration.CurrentLanguage = languages[currentLanguage];

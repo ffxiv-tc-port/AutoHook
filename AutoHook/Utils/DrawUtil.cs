@@ -2,9 +2,10 @@
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
@@ -142,13 +143,95 @@ public static class DrawUtil
         return Checkbox(label, ref refValue, helpText, hoverHelpText);
     }
 
-    public static bool Checkbox(string label, ref bool refValue, string helpText = "", bool hoverHelpText = false)
+    /// <summary>
+    /// 有 IPC 覆寫在生效時，在該列右邊放一個灰字 <c>(IPC)</c> 標記。
+    /// </summary>
+    /// <remarks>
+    /// 🔑 「另一個外掛正在暫時改這個設定」本身要<b>在列上看得見</b>；
+    /// tooltip 藏的是「為什麼」，不是「有沒有」。
+    /// <br/>🔴 只有取值那一步進鎖，底下的 ImGui 呼叫全部在鎖外
+    /// （鎖內呼叫外部程式碼會擴大死鎖面）。
+    /// <br/>⚠️ 每一個交給 ImGui 的在地化字串都要過 <see cref="Loc.Safe"/>：
+    /// 資源檔裡「鍵存在但值是空字串」的條目<b>不會</b>退回英文，空字串到了原生層就是崩潰。
+    /// </remarks>
+    public static void DrawIpcOverrideMarker(string ipcOverrideKey)
+    {
+        if (string.IsNullOrEmpty(ipcOverrideKey))
+            return;
+
+        if (!IpcConfigOverrides.TryGetUserValue(ipcOverrideKey, out var userValue))
+            return;
+
+        ImGui.SameLine();
+        ImGui.TextDisabled(@"(IPC)");
+
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.BeginTooltip();
+        ImGui.TextUnformatted(Loc.Safe(UIStrings.IpcOverrideTitle, nameof(UIStrings.IpcOverrideTitle),
+            @"Another plugin is temporarily changing this setting."));
+        ImGui.TextUnformatted(Loc.Safe(UIStrings.IpcOverrideSessionOnly, nameof(UIStrings.IpcOverrideSessionOnly),
+            @"The change applies to this game session only and is not written to your config file."));
+        ImGui.TextUnformatted(userValue
+            ? Loc.Safe(UIStrings.IpcOverrideYourValueOn, nameof(UIStrings.IpcOverrideYourValueOn),
+                @"Your own setting: ON")
+            : Loc.Safe(UIStrings.IpcOverrideYourValueOff, nameof(UIStrings.IpcOverrideYourValueOff),
+                @"Your own setting: OFF"));
+        ImGui.TextUnformatted(Loc.Safe(UIStrings.IpcOverrideReclaim, nameof(UIStrings.IpcOverrideReclaim),
+            @"Change it here yourself to make your own value authoritative again."));
+        ImGui.EndTooltip();
+    }
+
+    /// <summary>
+    /// 有暫停租約壓著時，在該列右邊放一個 <c>(已暫停)</c> 標記。
+    /// </summary>
+    /// <remarks>
+    /// 🔑 「另一個外掛正讓 AutoHook 停手」本身要<b>在列上看得見</b>；
+    /// tooltip 藏的是「是誰、還剩多久」，不是「有沒有問題」。
+    /// <br/>🔴 只有取值那一步進鎖（<c>PluginEnabledLeases.Snapshot</c>），
+    /// 底下的 ImGui 呼叫全部在鎖外。
+    /// <br/>⚠️ 字串刻意寫成字面繁中而不走 <c>UIStrings</c>：這是台服 fork 專屬的功能，
+    /// 而 resx 那條路要同時動 11 份語言檔＋ Designer，且「鍵存在但值為空」不會退回英文。
+    /// </remarks>
+    public static void DrawSuppressionLeaseMarker()
+    {
+        if (!PluginEnabledLeases.AnySuppressing)
+            return;
+
+        var snapshot = PluginEnabledLeases.Snapshot();
+        var denying = snapshot.Where(x => x.Suppressing).ToArray();
+        if (denying.Length == 0)
+            return;
+
+        ImGui.SameLine();
+        ImGui.TextColored(ImGuiColors.DalamudOrange, @"(已暫停)");
+
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.BeginTooltip();
+        ImGui.TextUnformatted(@"另一個插件正透過暫停租約要求 AutoHook 暫時停手。");
+        foreach (var (owner, remainingMs, _) in denying)
+            ImGui.TextUnformatted($"  {owner}：還有 {remainingMs / 1000.0:f0} 秒自動解除");
+        ImGui.TextUnformatted(@"租約逾時或被放開之後會自動恢復，不需要重載插件。");
+        ImGui.TextUnformatted(@"你自己的設定沒被改掉，也不會被寫進設定檔。");
+        ImGui.EndTooltip();
+    }
+
+    /// <param name="ipcOverrideKey">
+    /// 非空時：使用者按下這個 checkbox 就丟掉該設定的 IPC 覆寫（他的值重新成為權威），
+    /// 並在列上畫出 <c>(IPC)</c> 標記。見 <see cref="IpcConfigOverrides"/>。
+    /// </param>
+    public static bool Checkbox(string label, ref bool refValue, string helpText = "", bool hoverHelpText = false,
+        string ipcOverrideKey = "")
     {
         bool clicked = false;
 
         if (ImGui.Checkbox($"{label}", ref refValue))
         {
             clicked = true;
+            IpcConfigOverrides.Clear(ipcOverrideKey);
             Service.Save();
         }
 
@@ -162,6 +245,8 @@ public static class DrawUtil
             else
                 ImGuiComponents.HelpMarker(helpText);
         }
+
+        DrawIpcOverrideMarker(ipcOverrideKey);
 
         return clicked;
     }
@@ -365,8 +450,12 @@ public static class DrawUtil
                     Notify.Success(UIStrings.PresetExportedToTheClipboard);
                 }
 
-                if (ImGui.IsItemHovered())
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    // 這裡還在 ImRaii.Disabled 區段內，不把 Alpha 推回 1 說明框會跟著變淡。
+                    using var tooltipAlpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, 1f);
                     ImGui.SetTooltip(UIStrings.ExportPresetToClipboard);
+                }
 
                 ImGui.SameLine();
             }
@@ -484,12 +573,15 @@ public static class DrawUtil
         
     }
 
-    public static void DrawCheckboxTree(string treeName, ref bool enable, Action action, string helpText = "")
+    /// <param name="ipcOverrideKey">見 <see cref="Checkbox"/> 的同名參數。</param>
+    public static void DrawCheckboxTree(string treeName, ref bool enable, Action action, string helpText = "",
+        string ipcOverrideKey = "")
     {
         ImGui.PushID(treeName);
         if (ImGui.Checkbox($"###checkbox{treeName}", ref enable))
         {
             if (enable) ImGui.SetNextItemOpen(true);
+            IpcConfigOverrides.Clear(ipcOverrideKey);
             Service.Save();
         }
 
@@ -498,6 +590,8 @@ public static class DrawUtil
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(helpText);
         }
+
+        DrawIpcOverrideMarker(ipcOverrideKey);
 
         ImGui.SameLine(0, 3);
         if (Service.Configuration.SwapToButtons)

@@ -9,5 +9,8 @@ public enum OpenWindow
     Settings,
     About,
     Debug,
-    Community
+    Community,
+
+    /// <summary>天氣與窗口（唯讀顯示頁）。<b>附加在列舉尾端</b>，不動既有成員的值。</summary>
+    Weather
 }

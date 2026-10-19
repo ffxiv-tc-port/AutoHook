@@ -5,7 +5,7 @@ using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes;
 
@@ -15,6 +15,16 @@ public class BaseBiteConfig
     public bool HooksetEnabled = true;
 
     public bool EnableHooksetSwap;
+
+    /// <summary>
+    /// 「這一格提鉤可不可以出手」的條件（上游 config v6／v7 的格式）。
+    /// 📌 上游把舊的 <see cref="HookTimerEnabled"/>／<see cref="MinHookTimer"/>／<see cref="MaxHookTimer"/>
+    ///    整組換成了一條 <c>BiteTimerCD</c> 條件，所以匯入的新版 preset 裡**時間窗只存在於這個屬性**。
+    /// 🔴 <c>null</c> 時完全不參與判斷。含有我們不認得的條件時**也不擋**
+    ///    （見 <see cref="Conditions.ConditionEvaluator"/>）：在提鉤這條路徑上「不認得就不提鉤」
+    ///    會讓外掛看起來整個壞掉，比忽略條件更糟。
+    /// </summary>
+    public Conditions.ConditionSet? ConditionSet { get; set; }
 
     public bool HookTimerEnabled;
     public double MinHookTimer;

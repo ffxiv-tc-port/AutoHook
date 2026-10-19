@@ -23,10 +23,10 @@ public static class PlayerRes
 
     public static bool HasStatus(uint statusID)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusID)
                 return true;
@@ -37,42 +37,52 @@ public static class PlayerRes
     
     public static bool HasAnyStatus(uint[] statusIDs)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        return Service.ClientState.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
+        return Service.Objects.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
     }
 
     public static unsafe bool IsInActiveSpectralCurrent()
     {
-        if (EventFramework.Instance()->GetInstanceContentOceanFishing() is null)
+        // EventFramework.Instance() 是 [StaticAddress(..., isPointer: true)] —— 讀的是一個
+        // **指標變數**,遊戲還沒把框架建起來時它就是 null,執行期為 null 是合法狀態不是例外。
+        // ⚠️ 解參考 null 是 try/catch 攔不到的 AccessViolation ⇒ 取一次、判空、之後只用這份區域變數。
+        var eventFramework = EventFramework.Instance();
+
+        if (eventFramework == null)
             return false;
 
-        return EventFramework.Instance()->GetInstanceContentOceanFishing()->SpectralCurrentActive;
+        var oceanFishing = eventFramework->GetInstanceContentOceanFishing();
+
+        if (oceanFishing is null)
+            return false;
+
+        return oceanFishing->SpectralCurrentActive;
     }
 
     public static uint GetCurrentGp()
     {
-        if (Service.ClientState.LocalPlayer?.CurrentGp == null)
+        if (Service.Objects.LocalPlayer?.CurrentGp == null)
             return 0;
 
-        return Service.ClientState.LocalPlayer.CurrentGp;
+        return Service.Objects.LocalPlayer.CurrentGp;
     }
 
     public static uint GetMaxGp()
     {
-        if (Service.ClientState.LocalPlayer?.MaxGp == null)
+        if (Service.Objects.LocalPlayer?.MaxGp == null)
             return 0;
 
-        return Service.ClientState.LocalPlayer.MaxGp;
+        return Service.Objects.LocalPlayer.MaxGp;
     }
     
     public static int GetStatusStacks(uint status)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == status)
                 return buff.Param;
@@ -83,10 +93,10 @@ public static class PlayerRes
 
     public static bool HasAnglersArtStacks(int amount)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == IDs.Status.AnglersArt)
                 return buff.Param >= amount;
@@ -97,10 +107,10 @@ public static class PlayerRes
 
     public static float GetStatusTime(uint statusId)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Service.Objects.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Service.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusId)
                 return buff.RemainingTime;
@@ -128,7 +138,13 @@ public static class PlayerRes
         if (group == -1) // Im assuming -1 recast group has no CD
             return false;
 
+        // 🔴 GetRecastGroupDetail **會回 null**,不是只有 group==-1 那一種失效:只有 group 0..79 走純指標算術
+        //    (保證非 null),group >= 87 與 80..86 那段模組查詢失敗時都回 null,而解參考 null 是
+        //    try/catch 攔不到的 AccessViolation。
+        // 失敗方向沿用上面 group==-1 的既有語意(「當作沒有冷卻」)。這是每幀輪詢路徑 ⇒ 不寫 log。
         var recastDetail = ActionManager.Instance()->GetRecastGroupDetail(group);
+        if (recastDetail == null)
+            return false;
 
         return recastDetail->Total - recastDetail->Elapsed > 0;
     }
@@ -151,20 +167,67 @@ public static class PlayerRes
     public static unsafe int HasItem(uint itemId)
         => InventoryManager.Instance()->GetInventoryItemCount(itemId);
 
+    /// <summary>
+    /// 🔴 <c>AgentInventoryContext.Instance()</c> 的內部鏈 AgentModule → UIModule → Framework 任一層回 null
+    /// 整條就回 null(登入前、切場景、登出後都是常態),而底層特徵碼失配時改為擲
+    /// <c>InvalidOperationException</c>——兩種失效模式並存,只擋一種等於假防護。
+    /// 裸解參考 null 是 <c>try/catch</c> 攔不到的 AccessViolation ⇒ 只能事前判空。
+    /// fail-closed:取不到 agent 就不用道具,寫 Information(要使用者回報的診斷;
+    /// 這條路徑由釣魚流程觸發,不是每幀)。
+    /// </summary>
     public static unsafe void UseItems(uint id)
     {
-        AgentInventoryContext.Instance()->UseItem(id);
+        AgentInventoryContext* agent;
+        try
+        {
+            agent = AgentInventoryContext.Instance();
+        }
+        catch (Exception e)
+        {
+            Service.PluginLog.Information(
+                $"[AutoHook] 取得 AgentInventoryContext 失敗(特徵碼可能失配),道具 {id} 未使用:{e.Message}");
+            return;
+        }
+
+        if (agent == null)
+        {
+            Service.PluginLog.Information(
+                $"[AutoHook] AgentInventoryContext 尚未就緒,道具 {id} 未使用。");
+            return;
+        }
+
+        agent->UseItem(id);
     }
 
     // RecastGroup 68 = Cordial pots
     public static unsafe bool IsPotOffCooldown()
     {
+        // 68 落在 0..79 的純指標算術區段(見 ActionOnCoolDown 的註解),不會走到 return-null 的分支。
+        // 仍然判空:成本是一個 test,而萬一台服日後把冷卻組上限改到 68 以下,
+        // 失敗形式就是攔不到的 AVE 而不是一則錯誤訊息。
+        // fail-closed:取不到就當作「還沒好」——寧可不喝強心劑,也不要在未知狀態下送出動作。
         var recast = ActionManager.Instance()->GetRecastGroupDetail(68);
+        if (recast == null)
+            return false;
+
         return recast->Total - recast->Elapsed == 0;
     }
 
+    private static bool _actionCostMissingLogged;
+
+    // 反序列化設定時就經 BaseActionCast 建構子走到這裡：位址解不出回 0（不自動帶 GP 下限），不讓插件載入失敗。
     public static unsafe uint CastActionCost(uint id, ActionType actionType = ActionType.Action)
     {
+        if (ActionManager.MemberFunctionPointers.GetActionCost == null)
+        {
+            if (!_actionCostMissingLogged)
+            {
+                _actionCostMissingLogged = true;
+                Service.PluginLog.Warning("[AutoHook] ActionManager.GetActionCost 位址解不出：技能 GP 消耗一律當 0，GP 下限不自動帶入");
+            }
+            return 0;
+        }
+
         return (uint)ActionManager.GetActionCost(actionType, id, 0, 0, 0, 0);
     }
 
@@ -175,7 +238,12 @@ public static class PlayerRes
         if (group == -1) // Im assuming -1 recast group has no CD
             return 0;
 
+        // 同 ActionOnCoolDown:擋掉 -1 之後 GetRecastGroupDetail 仍可能回 null(group >= 87、
+        // 或 80..86 那段模組查詢失敗),裸解參考是攔不到的 AVE。
+        // 失敗方向沿用上面 group==-1 的既有語意(回 0 ＝沒有冷卻),不新增行為。
         var recast = ActionManager.Instance()->GetRecastGroupDetail(group);
+        if (recast == null)
+            return 0;
 
         return recast->Total - recast->Elapsed;
     }
@@ -213,7 +281,7 @@ public static class PlayerRes
                 Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}");
             }
 
-            DelayNextCast(actionId);
+            _ = DelayNextCast(actionId);
         }
         else if (actionType == ActionType.Item)
         {
@@ -228,7 +296,7 @@ public static class PlayerRes
                 Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}");
             }
 
-            DelayNextCast(actionId);
+            _ = DelayNextCast(actionId);
         }
     }
 
@@ -260,22 +328,32 @@ public static class PlayerRes
         _blockActionNoDelay = false;
     }
 
-    public static async void DelayNextCast(uint actionId)
+    // 呼叫端不等待；例外在方法內收掉，回傳的 Task 不會失敗。出錯也解除 _blockCasting，免得之後永遠不再拋竿。
+    public static async Task DelayNextCast(uint actionId)
     {
-        var delay = 0;
         try
         {
-            delay = new Random().Next(Service.Configuration.DelayBetweenCastsMin,
-                Service.Configuration.DelayBetweenCastsMax);
+            var delay = 0;
+            try
+            {
+                delay = new Random().Next(Service.Configuration.DelayBetweenCastsMin,
+                    Service.Configuration.DelayBetweenCastsMax);
+            }
+            catch (Exception e)
+            {
+                Service.PluginLog.Error(@$"Error getting delay between casts: {e}");
+            }
+
+            await Task.Delay(delay + ConditionalDelay(actionId));
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(@$"Error getting delay between casts: {e}");
+            Service.PluginLog.Warning(e, "DelayNextCast failed");
         }
-
-        await Task.Delay(delay + ConditionalDelay(actionId));
-
-        _blockCasting = false;
+        finally
+        {
+            _blockCasting = false;
+        }
     }
 
     private static int ConditionalDelay(uint id) =>

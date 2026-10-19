@@ -1,8 +1,9 @@
+using AutoHook.Configurations;
 using AutoHook.Ui;
 using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using PunishLib.ImGuiMethods;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ public class PluginUi : Window, IDisposable
     {
         new TabFishingPresets(),
         new TabAutoGig(),
+        new TabWeather(),
         new TabCommunity(),
         new TabSettings()
     };
@@ -51,7 +53,7 @@ public class PluginUi : Window, IDisposable
         {
             Click = (m) => { OpenBrowser(@"https://ko-fi.com/initialdet"); },
             Icon = FontAwesomeIcon.Heart,
-            ShowTooltip = () => ImGui.SetTooltip("Support AutoHook"),
+            ShowTooltip = () => ImGui.SetTooltip(UIStrings.SupportAutoHook),
         });
     }
 
@@ -94,7 +96,8 @@ public class PluginUi : Window, IDisposable
 
         ImGui.SameLine();
 
-        DrawUtil.Checkbox("###PluginEnable", ref Service.Configuration.PluginEnabled);
+        DrawUtil.Checkbox("###PluginEnable", ref Service.Configuration.PluginEnabled,
+            ipcOverrideKey: IpcConfigOverrides.PluginEnabledKey);
 
         ImGui.SameLine(0, 1);
 
@@ -146,7 +149,8 @@ public class PluginUi : Window, IDisposable
         ImGui.SetNextItemWidth(300);
         if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole))
         {
-            var logs = Service.LogMessages.ToArray().Reverse().ToList();
+            // C# 13 (net9 SDK) resolves array.Reverse() to void MemoryExtensions.Reverse; force LINQ
+            var logs = Service.SnapshotLogMessages().AsEnumerable().Reverse().ToList();
             for (var i = 0; i < logs.Count; i++)
             {
                 if (i == 0)
@@ -168,8 +172,20 @@ public class PluginUi : Window, IDisposable
         ImGui.PopID();
     }
 
+    /// <summary>遊戲改版後有功能停用時，在視窗最上方常駐說明（不受「顯示狀態」設定影響）。</summary>
+    private static void DrawUnavailableNotice()
+    {
+        if (AutoHook.Plugin?.HookManager?.UnavailableReason is { } fishing)
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudOrange, fishing);
+
+        if (Service.BaitManager is { CanChangeBait: false })
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudOrange, SeFunctions.BaitManager.ChangeBaitUnavailableNotice);
+    }
+
     private void DrawNewLayout()
     {
+        DrawUnavailableNotice();
+
         var region = ImGui.GetContentRegionAvail();
         var topLeftSideHeight = region.Y;
 
@@ -195,10 +211,11 @@ public class PluginUi : Window, IDisposable
                 using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight },
                            false, ImGuiWindowFlags.NoDecoration))
                 {
-                    if (ImGui.Selectable($"Start Actions"))
+                    if (ImGui.Selectable(UIStrings.StartActions))
                         AutoHook.Plugin.HookManager.StartFishing();
 
-                    var image = Service.Configuration.PluginEnabled ? "images/Fishy.png" : "images/Fishy_g.png";
+                    // 診斷用途：被租約壓著時 logo 也要變灰，使用者才看得出「現在不會動」。
+                    var image = Service.Configuration.EffectivePluginEnabled ? "images/Fishy.png" : "images/Fishy_g.png";
                     var imagePath = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, image);
                     using (var c = ImRaii.Child("logo", new(0, 125f.Scale())))
                     {
@@ -206,10 +223,14 @@ public class PluginUi : Window, IDisposable
                         {
                             ImGuiEx.LineCentered("###AHLogo", () =>
                             {
-                                ImGui.Image(logo.ImGuiHandle, new(125f.Scale(), 125f.Scale()));
+                                ImGui.Image(logo.Handle, new(125f.Scale(), 125f.Scale()));
 
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                                {
+                                    // 使用者自己動了這個設定 ⇒ 他的選擇重新成為權威。
+                                    IpcConfigOverrides.Clear(IpcConfigOverrides.PluginEnabledKey);
                                     Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+                                }
 
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                                     Service.OpenConsole = !Service.OpenConsole;
@@ -290,9 +311,13 @@ public class PluginUi : Window, IDisposable
     {
         ImGuiEx.LineCentered("###AhStatus", () =>
         {
-            if (!Service.Configuration.PluginEnabled)
+            if (!Service.Configuration.EffectivePluginEnabled)
             {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
+
+                // 🔑 使用者自己勾著、卻顯示 Disabled 的時候，差別就在這個標記上。
+                //    沒有它的話 UI 會讓人以為是自己把外掛關掉了。
+                DrawUtil.DrawSuppressionLeaseMarker();
             }
             else if (Service.BaitManager.FishingState == FishingState.NotFishing)
             {
@@ -437,7 +462,7 @@ public class PluginUi : Window, IDisposable
 
                 if (changes[0].Minor.Count > 0)
                 {
-                    ImGui.TextWrapped("Minor Changes");
+                    ImGui.TextWrapped(UIStrings.MinorChanges);
                     foreach (var minorChange in changes[0].Minor)
                     {
                         ImGui.TextWrapped($"- {minorChange}");
@@ -459,7 +484,7 @@ public class PluginUi : Window, IDisposable
                         if (changes[i].Minor.Count > 0)
                         {
                             ImGui.Spacing();
-                            ImGui.TextWrapped("Minor Changes");
+                            ImGui.TextWrapped(UIStrings.MinorChanges);
 
                             foreach (var minorChange in changes[i].Minor)
                                 ImGui.TextWrapped($"- {minorChange}");

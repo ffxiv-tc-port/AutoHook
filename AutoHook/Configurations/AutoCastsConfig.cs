@@ -79,7 +79,16 @@ public class AutoCastsConfig
 
     private unsafe bool InsideCastWindow()
     {
-        var clientTime = Framework.Instance()->ClientTime.EorzeaTime;
+        // 🔴 Framework.Instance() 是 [StaticAddress(..., isPointer: true)]：產生器讀「指標的位址」
+        //    再解參考一層，遊戲尚未建立該單例時回 null（非 isPointer 的才保證不回 null，是擲例外）。
+        //    裸解參考 null 原生指標是 AVE，屬 corrupted-state exception，try/catch 攔不到。
+        //    取不到時間就回 false（＝不在施放時段）：呼叫端會略過這個動作，
+        //    失敗方向是「少放一次技能」而不是「在錯的時段亂放」。
+        var framework = Framework.Instance();
+        if (framework == null)
+            return false;
+
+        var clientTime = framework->ClientTime.EorzeaTime;
         var eorzeaTime = TimeOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(clientTime).DateTime);
 
         return eorzeaTime.IsBetween(StartTime, EndTime);

@@ -1495,4 +1495,93 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
     <value>Moving folder:</value>
     <comment>Moving folder: FolderName</comment>
   </data>
+  <data name="SupportAutoHook" xml:space="preserve">
+    <value>Support AutoHook</value>
+  </data>
+  <data name="MinorChanges" xml:space="preserve">
+    <value>Minor Changes</value>
+  </data>
+  <data name="InitialBait_" xml:space="preserve">
+    <value>Initial Bait:</value>
+  </data>
+  <data name="CreatePresetAndClose" xml:space="preserve">
+    <value>Create Preset and Close</value>
+  </data>
+  <data name="StellarHookCosmicOnly" xml:space="preserve">
+    <value>Cosmic Exploration only. 60s cooldown, no GP cost. Ignored everywhere else.</value>
+  </data>
+  <data name="UseStellarHook" xml:space="preserve">
+    <value>Use Stellar Hookset when available</value>
+  </data>
+  <data name="UseStellarHookHelpText" xml:space="preserve">
+    <value>Uses Stellar Hookset whenever the game says it is off cooldown and usable.
+
+Availability is read straight from the game (action status + recast), never guessed from a timer or zone id, so this option does nothing outside Cosmic Exploration missions.
+
+When Stellar Hookset cannot be used, AutoHook simply falls through to your normal hookset settings - it will NOT downgrade to a plain Hook.
+
+If every hookset for a bite strength is disabled (i.e. you deliberately let that bite escape), Stellar Hookset will not hook it either.</value>
+  </data>
+  <data name="StellarHookBeforeMultiHook" xml:space="preserve">
+    <value>When the mission type cannot be detected, favour evaluation</value>
+  </data>
+  <data name="StellarHookBeforeMultiHookHelpText" xml:space="preserve">
+    <value>Which way "Auto" goes when it cannot tell what the current mission scores on.
+
+Off (default): stay on quantity. Double/Triple Hook land 2-3 fish while Stellar lands 1 - when the mission is unknown, keeping throughput is safer than betting on quality.
+
+On: favour evaluation instead.</value>
+  </data>
+  <data name="StellarPriorityLabel" xml:space="preserve">
+    <value>Stellar Hookset priority</value>
+  </data>
+  <data name="StellarPriorityAuto" xml:space="preserve">
+    <value>Auto (follow the mission's scoring method)</value>
+  </data>
+  <data name="StellarPriorityEvaluation" xml:space="preserve">
+    <value>Evaluation first (Stellar before Double/Triple)</value>
+  </data>
+  <data name="StellarPriorityQuantity" xml:space="preserve">
+    <value>Quantity first (Double/Triple Hook first)</value>
+  </data>
+  <data name="StellarPriorityHelpText" xml:space="preserve">
+    <value>"Auto" reads the Cosmic Exploration mission you are currently on and classifies how it scores:
+
+- Quantity / speed -&gt; Double and Triple Hook first.
+  These missions read "catch N as fast as you can - the more time left, the higher the rating" or "every fish is rated". Score is tied to fish count or speed, so multi-catch is a direct gain.
+
+- Evaluation / collectability -&gt; Stellar Hookset first.
+  These missions read "catch collectables - rated by collectability". Score depends on each fish's quality, and Stellar lands undamaged, higher-rated fish.
+
+- Cannot tell -&gt; use the checkbox below. It never picks a side on its own.
+  Size-based missions, species-variety missions and dual-class missions land here: the available data cannot prove which side is better, and guessing wrong is invisible in game.
+
+Not in Cosmic Exploration, or no mission in progress, also counts as "cannot tell".
+A log line is written whenever the mission changes so the decision can be checked afterwards.</value>
+  </data>
+  <data name="IgnoreTimersEveryFishCounts" xml:space="preserve">
+    <value>Ignore hook timers when every fish counts</value>
+  </data>
+  <data name="IgnoreTimersEveryFishCountsHelpText" xml:space="preserve">
+    <value>Some Cosmic Exploration presets restrict hooking to a narrow time window in order to select one specific fish. On missions whose own description says ANY fish is rated ("catch as many as you can - every fish is rated"), those windows only throw away bites.
+
+When this is on and such a mission is detected, the hook timers are ignored and every bite is hooked.
+
+It never applies to missions that ask for a specific or target fish, nor when the mission type cannot be detected - there the timing window is the fish-selection mechanism.</value>
+  </data>
+  <data name="IpcOverrideTitle" xml:space="preserve">
+    <value>Another plugin is temporarily changing this setting.</value>
+  </data>
+  <data name="IpcOverrideSessionOnly" xml:space="preserve">
+    <value>The change applies to this game session only and is not written to your config file.</value>
+  </data>
+  <data name="IpcOverrideYourValueOn" xml:space="preserve">
+    <value>Your own setting: ON</value>
+  </data>
+  <data name="IpcOverrideYourValueOff" xml:space="preserve">
+    <value>Your own setting: OFF</value>
+  </data>
+  <data name="IpcOverrideReclaim" xml:space="preserve">
+    <value>Change it here yourself to make your own value authoritative again.</value>
+  </data>
 </root>
