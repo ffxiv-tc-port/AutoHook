@@ -55,6 +55,15 @@ public unsafe class BaitManager
         return ChangeBaitReturn.Unavailable;
     }
 
+    /// <summary>
+    /// <see cref="FishingMan"/>、<see cref="Current"/> 用到的三個 CS 單例位址都有解出；任一個沒解出時讀它們會擲例外。
+    /// 只讀靜態欄位、不配置，熱路徑可用。
+    /// </summary>
+    internal static bool AddressesResolved =>
+        EventFramework.Addresses.Instance.Value != 0
+        && WKSManager.Addresses.Instance.Value != 0
+        && PlayerState.Addresses.Instance.Value != 0;
+
     // 版面跟著 CS 的 FishingEventHandler 走，不手抄偏移：遊戲改版時隨 CS 一起換。
     internal FishingEventHandler* FishingMan
     {

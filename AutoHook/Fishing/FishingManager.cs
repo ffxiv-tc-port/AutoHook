@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using AutoHook.Classes;
 using AutoHook.Configurations;
 using AutoHook.Data;
@@ -714,11 +716,49 @@ public partial class FishingManager : IDisposable
     {
         UpdateCatch!.OriginalDisposeSafe(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
 
-        // Check against collectibles.
-        var collectible = fishId > 500000;
-        if (collectible)
-            fishId -= 500000;
+        // 原函式已在上面呼叫恰好一次。下面的插件邏輯擲出的例外不可穿回原生框架（＝遊戲崩潰）；
+        // 位址判斷只讀三個靜態欄位，每一竿都走也不配置。
+        if (!BaitManager.AddressesResolved)
+        {
+            ReportCatchFailure(null);
+            return;
+        }
 
-        OnCatch(fishId, amount, large, size, collectible);
+        try
+        {
+            // Check against collectibles.
+            var collectible = fishId > 500000;
+            if (collectible)
+                fishId -= 500000;
+
+            OnCatch(fishId, amount, large, size, collectible);
+        }
+        catch (Exception ex)
+        {
+            ReportCatchFailure(ex);
+        }
+    }
+
+    private static int _catchFailureReported;
+
+    // 每次載入只記一次 Error、聊天說一次；detour 可能不在框架執行緒，聊天一律轉過去印（EzThrottler 不是執行緒安全的，不用它）。
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ReportCatchFailure(Exception? ex)
+    {
+        if (Interlocked.Exchange(ref _catchFailureReported, 1) != 0)
+            return;
+
+        try
+        {
+            Service.PluginLog.Error(ex, ex == null
+                ? "[改版防護] 釣魚狀態／釣餌的遊戲位址解不出：釣到魚之後的處理停用，遊戲本身照常。"
+                : "[改版防護] 釣到魚之後的處理擲出例外，已攔下；遊戲本身照常，之後同一項不再記錄。");
+            _ = Service.Framework.Run(() => Service.Chat.PrintError(
+                "[AutoHook] 釣到魚之後的處理（換餌、換預設組合、停手條件、計數）暫停，遊戲本身照常。若遊戲剛改版，請等插件更新。"));
+        }
+        catch
+        {
+            // 回報本身也不可以把例外送回原生框架。
+        }
     }
 }
