@@ -188,12 +188,13 @@ public class AutoHook : IDalamudPlugin
         }
 
         // 成功與已裝備不印：遊戲自己會顯示換餌結果，巨集反覆下 /bait 時也不洗版。
+        // Unavailable 也不印：BaitManager 已印過節流的停用說明，這裡再印就是同一件事兩則。
         var reason = Service.BaitManager.ChangeBait((uint)bait.Id) switch
         {
-            BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped => null,
+            BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped
+                or BaitManager.ChangeBaitReturn.Unavailable => null,
             BaitManager.ChangeBaitReturn.NotInInventory => @"背包裡沒有這個釣餌（換區／傳送途中也會讀成沒有，請稍後再試）。",
             BaitManager.ChangeBaitReturn.InvalidBait => @"這個道具不是可以使用的釣餌。",
-            BaitManager.ChangeBaitReturn.Unavailable => @"換餌功能目前停用（遊戲改版後對應的遊戲函式對不上），請等插件更新。",
             _ => @"遊戲沒有接受換餌指令，可能是目前的狀態不能更換釣餌（例如拋竿中）。",
         };
 
