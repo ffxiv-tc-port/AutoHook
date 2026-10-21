@@ -344,7 +344,8 @@ public static class PlayerRes
                 Service.PluginLog.Error(@$"Error getting delay between casts: {e}");
             }
 
-            await Task.Delay(delay + ConditionalDelay(actionId));
+            // 設定頁會夾到 ≥0，但設定檔讀進來的值沒有下限保證：Task.Delay(-1)＝永遠等待（之後不再拋竿）、其他負值擲例外。
+            await Task.Delay(Math.Max(0, delay + ConditionalDelay(actionId)));
         }
         catch (Exception e)
         {
