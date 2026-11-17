@@ -44723,5 +44723,4263 @@
       "OffTime": 0,
       "ShiftTime": 0
     }
+  },
+  {
+    "ItemId": 46188,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 46189,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 700000,
+      "OffTime": 3500000,
+      "ShiftTime": 2100000
+    },
+    "Weathers": [
+      4
+    ],
+    "WeathersFrom": [
+      2
+    ]
+  },
+  {
+    "ItemId": 46190,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 350000,
+      "OffTime": 3850000,
+      "ShiftTime": 1050000
+    },
+    "Weathers": [
+      7
+    ]
+  },
+  {
+    "ItemId": 46191,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 350000,
+      "OffTime": 3850000,
+      "ShiftTime": 2800000
+    },
+    "Weathers": [
+      7
+    ]
+  },
+  {
+    "ItemId": 46192,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43849,
+    "Mooches": [
+      43728
+    ],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 700000,
+      "OffTime": 3500000,
+      "ShiftTime": 0
+    },
+    "Weathers": [
+      3
+    ],
+    "WeathersFrom": [
+      2
+    ]
+  },
+  {
+    "ItemId": 46193,
+    "HookType": 4179,
+    "BiteType": 38,
+    "InitialBait": 43857,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1050000,
+      "OffTime": 3150000,
+      "ShiftTime": 7350000
+    },
+    "Weathers": [
+      6
+    ],
+    "WeathersFrom": [
+      2,
+      1
+    ]
+  },
+  {
+    "ItemId": 46194,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 700000,
+      "OffTime": 3500000,
+      "ShiftTime": 7700000
+    },
+    "Weathers": [
+      10
+    ]
+  },
+  {
+    "ItemId": 46195,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [
+      {
+        "itemId": 43781,
+        "qtd": 3
+      }
+    ],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 350000,
+      "OffTime": 3850000,
+      "ShiftTime": 700000
+    },
+    "Weathers": [
+      7
+    ]
+  },
+  {
+    "ItemId": 46196,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43859,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 700000,
+      "OffTime": 3500000,
+      "ShiftTime": 1400000
+    },
+    "Weathers": [
+      2
+    ],
+    "WeathersFrom": [
+      7
+    ]
+  },
+  {
+    "ItemId": 46249,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 43858,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 46779,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 43857,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47422,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47423,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47424,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47425,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47426,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47427,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47428,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47429,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47430,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47681,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47431,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47432,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47433,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47434,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47435,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47436,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47437,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47438,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47439,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47682,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47440,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47441,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47442,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47443,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47444,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47445,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47446,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47447,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47448,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47449,
+    "HookType": 0,
+    "BiteType": 37,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47450,
+    "HookType": 0,
+    "BiteType": 37,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47451,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47452,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47453,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47454,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47455,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47684,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47456,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47685,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47457,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47685,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47458,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47685,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47459,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47685,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47460,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47461,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47462,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47463,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47683,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47464,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47465,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47466,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47685,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47467,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47685,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47480,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47481,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47482,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47483,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47484,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47485,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47486,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47487,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47488,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47489,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47490,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47491,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47492,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47493,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47494,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47495,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47496,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47497,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47498,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47499,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47687,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47500,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47691,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47501,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47691,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47502,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47691,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47503,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47691,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47504,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47691,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47505,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47506,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47507,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47508,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47686,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47509,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47689,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47510,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47688,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47511,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47688,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47512,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47688,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47513,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47688,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47514,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47690,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47515,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47690,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47516,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47690,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47517,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47690,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47518,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47690,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47519,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47520,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47521,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47522,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47523,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47524,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [
+      {
+        "itemId": 47523,
+        "qtd": 2
+      }
+    ],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47525,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47526,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47527,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47528,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47529,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47530,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47531,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47532,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47533,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47534,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47535,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47697,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47536,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47697,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47537,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47697,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47538,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47697,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47539,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47697,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47540,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47541,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47542,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47543,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47544,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47545,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47694,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47546,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47694,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47547,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47694,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47548,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47694,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47549,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47694,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47550,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47694,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47551,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47552,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47553,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47554,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47555,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47556,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47557,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47558,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47559,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47560,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47693,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47561,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47562,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47563,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47564,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47565,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47566,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47695,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47567,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47568,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47569,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47570,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47571,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47572,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47573,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47574,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47575,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47576,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47577,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [
+      {
+        "itemId": 47576,
+        "qtd": 2
+      }
+    ],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47579,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47580,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47581,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47582,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47583,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47584,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47609,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47610,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47611,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47612,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47613,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47614,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47615,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47616,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47617,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47618,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47619,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47626,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47627,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47628,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47629,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47630,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47631,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47632,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47633,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47634,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47635,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47636,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47637,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47638,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47639,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47640,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47641,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47642,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47643,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 47692,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47650,
+    "HookType": 0,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47651,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47652,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47653,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47654,
+    "HookType": 0,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47655,
+    "HookType": 4179,
+    "BiteType": 38,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47656,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47657,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47658,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47659,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47660,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47661,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [
+      {
+        "itemId": 47659,
+        "qtd": 3
+      }
+    ],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47662,
+    "HookType": 0,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47663,
+    "HookType": 0,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47664,
+    "HookType": 0,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47665,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47666,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47667,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47668,
+    "HookType": 0,
+    "BiteType": 0,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47669,
+    "HookType": 0,
+    "BiteType": 0,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47670,
+    "HookType": 0,
+    "BiteType": 0,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47671,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47672,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47673,
+    "HookType": 4103,
+    "BiteType": 38,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47674,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 47702,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47675,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 47702,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47676,
+    "HookType": 0,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47677,
+    "HookType": 0,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47678,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47679,
+    "HookType": 4179,
+    "BiteType": 36,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
+  },
+  {
+    "ItemId": 47680,
+    "HookType": 4103,
+    "BiteType": 37,
+    "InitialBait": 0,
+    "Mooches": [],
+    "Nodes": [],
+    "Predators": [],
+    "IsSpearFish": false,
+    "Size": 255,
+    "Speed": 65535,
+    "SurfaceSlap": 0,
+    "OceanFish": false,
+    "Interval": {
+      "OnTime": 1,
+      "OffTime": 0,
+      "ShiftTime": 0
+    }
   }
 ]
