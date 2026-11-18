@@ -80,8 +80,9 @@ public class AutoHook : IDalamudPlugin
         Service.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
         Service.Language = Service.ClientState.ClientLanguage;
 
-        GameRes.Initialize(); 
+        GameRes.Initialize();
 
+        ConfigSaveQueue.Initialize();
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
 
@@ -240,6 +241,7 @@ public class AutoHook : IDalamudPlugin
         _autoGig.Dispose();
         HookManager.Dispose();
         Service.Save();
+        ConfigSaveQueue.Shutdown();
         Service.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
         Service.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
 

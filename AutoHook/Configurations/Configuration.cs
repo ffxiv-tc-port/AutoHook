@@ -147,10 +147,8 @@ public class Configuration : IPluginConfiguration
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 
-    public void Save()
-    {
-        Service.PluginInterface!.SavePluginConfig(this);
-    }
+    /// <summary>只要求存檔：回來時檔案還沒寫，合流後在框架執行緒序列化、背景寫入（見 <see cref="ConfigSaveQueue"/>）。</summary>
+    public void Save() => ConfigSaveQueue.Request(this);
 
     public void UpdateVersion()
     {

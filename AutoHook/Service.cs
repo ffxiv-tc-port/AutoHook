@@ -36,6 +36,9 @@ public class Service
     [PluginService] public static IPluginLog  PluginLog { get; private set; } = null!;
     [PluginService] public static ICondition Condition { get;private set; } = null!;
     [PluginService] public static ITargetManager TargetManager { get; private set; } = null!;
+#pragma warning disable Dalamud001
+    [PluginService] public static IReliableFileStorage FileStorage { get; private set; } = null!;
+#pragma warning restore Dalamud001
     
     public static BaitManager BaitManager { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;
