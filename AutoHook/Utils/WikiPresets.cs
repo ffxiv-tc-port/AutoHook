@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoHook.Classes;
 using AutoHook.Configurations;
@@ -21,29 +22,55 @@ public class WikiPresets
     private static string regex = @"```\s*(AH\s*[\s\S]*?)\s*```";
     private static string regexSf = @"```\s*(AHSF\s*[\s\S]*?)\s*```";
 
-    public static Dictionary<string, List<CustomPresetConfig>> Presets = new();
-    public static Dictionary<string, List<AutoGigConfig>> PresetsSf = new();
+    // 契約：發布出去的字典不再改動，每次更新都換一份新的；繪製執行緒每幀列舉的是讀到的那份快照。
+    // 寫入端在 await 之後跑在執行緒池上，「讀舊表 → 建新表 → 發布」用鎖串起來（鎖內不碰 ImGui、不做 I/O）。
+    private static readonly object PublishGate = new();
+    private static Dictionary<string, List<CustomPresetConfig>> _presets = new();
+    private static Dictionary<string, List<AutoGigConfig>> _presetsSf = new();
 
+    public static IReadOnlyDictionary<string, List<CustomPresetConfig>> Presets => Volatile.Read(ref _presets);
+    public static IReadOnlyDictionary<string, List<AutoGigConfig>> PresetsSf => Volatile.Read(ref _presetsSf);
+
+    private static void ResetPublished()
+    {
+        lock (PublishGate)
+        {
+            Volatile.Write(ref _presets, new());
+            Volatile.Write(ref _presetsSf, new());
+        }
+    }
+
+    /// <exception cref="ArgumentException">同名頁已發布過；兩份都不改（與原本 Dictionary.Add 的結果相同）。</exception>
+    private static void Publish(string key, List<CustomPresetConfig> list, List<AutoGigConfig> listSf)
+    {
+        lock (PublishGate)
+        {
+            var presets = new Dictionary<string, List<CustomPresetConfig>>(_presets);
+            presets.Add(key, list);
+            var presetsSf = new Dictionary<string, List<AutoGigConfig>>(_presetsSf);
+            presetsSf.Add(key, listSf);
+            Volatile.Write(ref _presets, presets);
+            Volatile.Write(ref _presetsSf, presetsSf);
+        }
+    }
 
     public static async Task ListWikiPages()
     {
         if (!EzThrottler.Throttle("WikiUpdate", 20000))
             return;
-        
-        Presets.Clear();
-        PresetsSf.Clear();
+
+        ResetPublished();
         var mdUrls = await GetWikiPageUrls(BaseUrl);
         foreach (var mdUrl in mdUrls)
         {
             try
             {
                 var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
-            
+
                 var list = base64.presets.Select(Configuration.ImportPreset).OfType<CustomPresetConfig>().ToList();
                 var listsf = base64.presetsSf.Select(Configuration.ImportPreset).OfType<AutoGigConfig>().ToList();
-            
-                Presets.Add(mdUrl.Replace(@"-", @" "), list);
-                PresetsSf.Add(mdUrl.Replace(@"-", @" "), listsf);
+
+                Publish(mdUrl.Replace(@"-", @" "), list, listsf);
             }
             catch (Exception e)
             {
