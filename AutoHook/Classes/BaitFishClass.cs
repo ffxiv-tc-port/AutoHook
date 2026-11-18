@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json.Serialization;
 using AutoHook.Enums;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using Lumina.Excel.Sheets;
+using Newtonsoft.Json;
 using FishRow = Lumina.Excel.Sheets.FishParameter;
 using ItemRow = Lumina.Excel.Sheets.Item;
 
 namespace AutoHook.Classes;
 
+// 設定檔與匯出字串都走 Newtonsoft，忽略標記必須是 Newtonsoft 的；只有 Id 落地。
+// 三則 Lure*Message 只在 GameRes.Fishes 的實例上有值，讀取端一律讀那份。
 public class BaitFishClass : IComparable<BaitFishClass>
 {
     [JsonIgnore] public string Name => Id switch
