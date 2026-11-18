@@ -49,7 +49,23 @@ public partial class FishingManager
 
     private const XivChatType FishingMessage = (XivChatType)2243;
     private const XivChatType SystemAlert = (XivChatType)2115; //idk what to call this
-    
+
+    // 只在框架執行緒（CheckMessageHandled）建與讀；表在插件生命週期內不變，建一次即可。
+    private Dictionary<string, uint>? _logMessageIndex;
+
+    private uint? LookupLogMessageId(string text)
+    {
+        if (_logMessageIndex == null)
+        {
+            var sheet = Service.DataManager.GetExcelSheet<LogMessage>();
+            if (sheet == null)
+                return null;
+            _logMessageIndex = LogMessageIndex.Build(sheet);
+        }
+
+        return LogMessageIndex.Find(_logMessageIndex, text);
+    }
+
     private void OnMessageDelegate(XivChatType type, int timeStamp, ref SeString sender, ref SeString messageSe,
         ref bool isHandled)
     {
@@ -58,8 +74,7 @@ public partial class FishingManager
             if (type is FishingMessage)
             {
                 var text = messageSe.TextValue;
-                var logId = Service.DataManager.GetExcelSheet<LogMessage>()
-                    ?.FirstOrDefault(x => x.Text.ToString() == text).RowId;
+                var logId = LookupLogMessageId(text);
 
                 // ── 魚影（跨拋竿）────────────────────────────────────────────────
                 // 三則訊息都來自 FishParameter：_1 出現、_2 消失、_3 釣起。
@@ -100,8 +115,7 @@ public partial class FishingManager
             else if (type is SystemAlert)
             {
                 var text = messageSe.TextValue;
-                var logId = Service.DataManager.GetExcelSheet<LogMessage>()
-                    ?.FirstOrDefault(x => x.Text.ToString() == text).RowId;
+                var logId = LookupLogMessageId(text);
 
                 if (logId is XivChatLog.CantFish)
                     Service.Status = UIStrings.CantFishHere;
