@@ -223,16 +223,18 @@ public class Configuration : IPluginConfiguration
         }
     }
 
-    public void Initiate()
+    /// <returns>有補上預設項（內容被改過）時為 true。</returns>
+    public bool Initiate()
     {
         if (HookPresets.DefaultPreset.ListOfBaits.Count != 0)
-            return;
+            return false;
 
         var bait = new BaitFishClass(UIStrings.All_Baits, 0);
         var mooch = new BaitFishClass(UIStrings.All_Mooches, 0);
 
         HookPresets.DefaultPreset.ListOfBaits.Add(new HookConfig(bait));
         HookPresets.DefaultPreset.ListOfMooch.Add(new HookConfig(mooch));
+        return true;
     }
 
     public static Configuration Load()
@@ -244,9 +246,12 @@ public class Configuration : IPluginConfiguration
         {
             if (Service.PluginInterface.GetPluginConfig() is Configuration config)
             {
-                config.Initiate();
+                // 只在載入過程改過內容時寫回：舊版遷移（版本號變了；v4→v5 靠這次存檔落地 Version）或補了預設項。
+                var loadedVersion = config.Version;
+                var initiated = config.Initiate();
                 config.UpdateVersion();
-                config.Save();
+                if (initiated || config.Version != loadedVersion)
+                    config.Save();
                 return config;
             }
 
