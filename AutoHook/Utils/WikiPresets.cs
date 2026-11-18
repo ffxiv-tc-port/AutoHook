@@ -23,7 +23,7 @@ public class WikiPresets
     private static string regexSf = @"```\s*(AHSF\s*[\s\S]*?)\s*```";
 
     // 契約：發布出去的字典不再改動，每次更新都換一份新的；繪製執行緒每幀列舉的是讀到的那份快照。
-    // 寫入端在 await 之後跑在執行緒池上，「讀舊表 → 建新表 → 發布」用鎖串起來（鎖內不碰 ImGui、不做 I/O）。
+    // 寫入端都在框架執行緒；「讀舊表 → 建新表 → 發布」仍用鎖串起來，不依賴這一點（鎖內不碰 ImGui、不做 I/O）。
     private static readonly object PublishGate = new();
     private static Dictionary<string, List<CustomPresetConfig>> _presets = new();
     private static Dictionary<string, List<AutoGigConfig>> _presetsSf = new();
@@ -54,23 +54,50 @@ public class WikiPresets
         }
     }
 
+    // IFramework.Run 排進去的工作不隨插件卸載取消 ⇒ 卸載時取消這個，還沒跑的匯入自己放棄。
+    private static readonly CancellationTokenSource Unloading = new();
+
+    public static void Shutdown() => Unloading.Cancel();
+
     public static async Task ListWikiPages()
     {
         if (!EzThrottler.Throttle("WikiUpdate", 20000))
             return;
 
         ResetPublished();
+        var token = Unloading.Token;
         var mdUrls = await GetWikiPageUrls(BaseUrl);
         foreach (var mdUrl in mdUrls)
         {
+            if (token.IsCancellationRequested)
+                return;
+
             try
             {
                 var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
 
-                var list = base64.presets.Select(Configuration.ImportPreset).OfType<CustomPresetConfig>().ToList();
-                var listsf = base64.presetsSf.Select(Configuration.ImportPreset).OfType<AutoGigConfig>().ToList();
+                // 下載留在背景；匯入排到框架執行緒：反序列化會經 BaseActionCast 建構子呼叫原生 GetActionCost。
+                // 一個 preset 一件工作（整頁一次做完會在框架執行緒上卡數十毫秒）；整頁匯入完才發布、才抓下一頁。
+                var list = new List<CustomPresetConfig>();
+                var listsf = new List<AutoGigConfig>();
+                foreach (var code in base64.presets)
+                    await Service.Framework.Run(() =>
+                    {
+                        if (!token.IsCancellationRequested && Configuration.ImportPreset(code) is CustomPresetConfig preset)
+                            list.Add(preset);
+                    }, token);
+                foreach (var code in base64.presetsSf)
+                    await Service.Framework.Run(() =>
+                    {
+                        if (!token.IsCancellationRequested && Configuration.ImportPreset(code) is AutoGigConfig gig)
+                            listsf.Add(gig);
+                    }, token);
 
-                Publish(mdUrl.Replace(@"-", @" "), list, listsf);
+                await Service.Framework.Run(() =>
+                {
+                    if (!token.IsCancellationRequested)
+                        Publish(mdUrl.Replace(@"-", @" "), list, listsf);
+                }, token);
             }
             catch (Exception e)
             {

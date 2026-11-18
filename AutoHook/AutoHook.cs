@@ -237,6 +237,7 @@ public class AutoHook : IDalamudPlugin
     public void Dispose()
     {
         _weatherWatcher.Dispose();
+        WikiPresets.Shutdown();
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();
