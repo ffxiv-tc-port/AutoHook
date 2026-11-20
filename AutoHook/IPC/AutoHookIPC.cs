@@ -385,15 +385,17 @@ public class AutoHookIPC
     /// <summary><see cref="DeleteAllAnonymousPresets"/> 的實體。<b>只在 Framework 執行緒上呼叫。</b></summary>
     private void DeleteAllAnonymousPresetsCore()
     {
-        _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith(AnonPrefix));
+        var removed = _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith(AnonPrefix));
 
         // 🔴 資料夾也要收。<see cref="CreateAndSelectAnonymousFolder"/> 會建一個 anon_ 前綴的資料夾，
         //    只刪 preset 的話那個（已經空掉的）資料夾會永遠留在使用者的設定檔裡，
         //    而 ICE 是**每接一次釣魚任務就呼叫一次**匯入 —— 那是會累積的。
         //    ⚠️ 只刪 anon_ 前綴的：使用者自己建的資料夾一個都不能碰。
-        _cfg.HookPresets.Folders.RemoveAll(f => f.FolderName != null && f.FolderName.StartsWith(AnonPrefix));
+        removed += _cfg.HookPresets.Folders.RemoveAll(f => f.FolderName != null && f.FolderName.StartsWith(AnonPrefix));
 
-        Service.Save();
+        // 沒刪到東西就不存：ICE 每交一個任務（不限釣魚）都會呼叫，整份設定重新序列化一次是數 MB 配置＋數十 ms。
+        if (removed > 0)
+            Service.Save();
     }
 
     /// <summary>
