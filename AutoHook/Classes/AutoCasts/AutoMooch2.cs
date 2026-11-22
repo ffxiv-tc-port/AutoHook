@@ -17,6 +17,8 @@ public class AutoMooch2 : BaseActionCast
     public override string GetName()
         => Name = UIStrings.UseMoochII;
 
+    protected override bool HonorsConditionSet => false;
+
     public override bool CastCondition()
     {
         return true;

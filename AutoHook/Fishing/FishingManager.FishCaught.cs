@@ -37,6 +37,14 @@ public partial class FishingManager
         if (lastFishCatchCfg.SurfaceSlap.IsAvailableToCast())
             cast = lastFishCatchCfg.SurfaceSlap;
 
+        // 與上游同順位：熟練妙招排在最後、成立就蓋過前兩個。預設關，既有 preset 走不到這裡。
+        if (lastFishCatchCfg.SparefulHand is { Enabled: true } spareful)
+        {
+            spareful.EvaluatingFishId = (uint)lastFishCatchCfg.Fish.Id;
+            if (spareful.IsAvailableToCast())
+                cast = spareful;
+        }
+
         if (cast != null)
         {
             PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name);
@@ -131,9 +139,19 @@ public partial class FishingManager
             }
         }
 
-        if (lastCatchCfg.SwapBait && !FishingHelper.SwappedBait(guid) && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
+        // 換餌與換 preset 同形狀：有條件就以條件為準（AH6_／AH7_），沒有就走 SwapBait＋SwapBaitCount。
+        var baitConditions = lastCatchCfg.SwapBaitConditionSet;
+        var useBaitConditions = ConditionEvaluator.HasAnyCondition(baitConditions);
+
+        if ((useBaitConditions || lastCatchCfg.SwapBait) && !FishingHelper.SwappedBait(guid) &&
+            !_lastStep.HasFlag(FishingSteps.BaitSwapped))
         {
-            if (caughtCount >= lastCatchCfg.SwapBaitCount &&
+            var baitThresholdMet = useBaitConditions
+                ? ConditionEvaluator.Passes(baitConditions, ConditionContext.AfterCatch(), unconfiguredResult: false,
+                    unsupportedResult: false, where: @"換餌")
+                : caughtCount >= lastCatchCfg.SwapBaitCount;
+
+            if (baitThresholdMet &&
                 lastCatchCfg.BaitToSwap.Id != Service.BaitManager.Current)
             {
                 var result = Service.BaitManager.ChangeBait(lastCatchCfg.BaitToSwap);
@@ -145,6 +163,10 @@ public partial class FishingManager
                     Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
                     Service.Save();
                 }
+
+                // 上游同位置：換過餌就把這條魚的計數歸零，下一次釣到才會再換一次（輪換餌）。
+                if (lastCatchCfg.SwapBaitResetCount)
+                    FishingHelper.ToBeRemoved.Add(guid);
             }
         }
     }

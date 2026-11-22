@@ -33,6 +33,7 @@ namespace AutoHook.Data
                 BigGameFishing = 37046,
                 AmbitiousLure = 37594,
                 ModestLure = 37595,
+                SparefulHand = 37045,
                 TruthOcean = 7911,
                 None = 0;
         }

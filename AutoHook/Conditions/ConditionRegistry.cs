@@ -9,7 +9,7 @@
 //    上游原始碼裡兩處都留著 "either migrate this or don't change it" 的註解。
 //    ICE 內建 preset 的「換 preset」條件用的是前者（FishCaughtCountCD）。
 //
-// 📌 只實作 ICE 內建 preset 出現過的型別（見下面的 Definitions）；
+// 📌 只實作 ICE 內建 preset／上游 ICE 宇宙 preset 出現過的型別（見下面的 Definitions）；
 //    沒出現過的型別（海釣、天氣、艾奧傑亞時間…）刻意不實作 —— 猜錯的代價是靜默給錯行為，
 //    而「不認得」有明確的保底路徑（見 ConditionEvaluator）。
 
@@ -45,6 +45,8 @@ public static class ConditionRegistry
         { @"StatusStacksCD", EvalStatusStacks },
         { @"GpCD", EvalGp },
         { @"CurrentBaitCD", EvalCurrentBait },
+        { @"MoochAvailableCD", EvalMoochAvailable },
+        { @"IntuitionActiveCD", EvalIntuitionActive },
     };
 
     public static bool IsKnown(string typeId) => Definitions.ContainsKey(typeId);
@@ -66,7 +68,7 @@ public static class ConditionRegistry
             @"FishCountCD" =>
                 @$"{FishName(id)} 計數器＝{FishCounter(id)}（需 {compare.Op}{compare.Value}）",
             @"SwimbaitCountCD" =>
-                @$"泳餌欄位裡的 {(id > 0 ? FishName(id) : @"魚")}＝{SwimbaitCount(id)}（需 {compare.Op}{compare.Value}）",
+                @$"泳餌欄位裡的 {(SwimbaitTarget(id, ctx) > 0 ? FishName(SwimbaitTarget(id, ctx)) : @"魚")}＝{SwimbaitCount(SwimbaitTarget(id, ctx))}（需 {compare.Op}{compare.Value}）",
             @"BaitCountCD" =>
                 @$"背包裡的餌 #{id}＝{(id > 0 ? PlayerRes.HasItem((uint)id) : 0)}（需 {compare.Op}{compare.Value}）",
             @"BiteTimerCD" =>
@@ -82,6 +84,8 @@ public static class ConditionRegistry
                 + @$"{ConditionParams.GetIntCompare(p, @"minStacks", 1).Op}{ConditionParams.GetIntCompare(p, @"minStacks", 1).Value}）",
             @"GpCD" => @$"GP＝{PlayerRes.GetCurrentGp()}（需 {compare.Op}{compare.Value}）",
             @"CurrentBaitCD" => @$"目前餌＝{Service.BaitManager.Current}（需為 {string.Join(@"/", ConditionParams.GetIds(p))}）",
+            @"MoochAvailableCD" => @$"可以以小釣大＝{MoochAvailable(p)}{(ConditionParams.GetBool(p, @"inv", false) ? @"（需為否）" : @"")}",
+            @"IntuitionActiveCD" => @$"漁師之識＝{PlayerRes.HasStatus(IDs.Status.FishersIntuition)}{(ConditionParams.GetBool(p, @"inv", false) ? @"（需為否）" : @"")}",
             _ => @"（不支援的條件型別）",
         };
     }
@@ -116,6 +120,8 @@ public static class ConditionRegistry
                 + @$"{ConditionParams.GetIntCompare(p, @"minStacks", 1).Op}{ConditionParams.GetIntCompare(p, @"minStacks", 1).Value}",
             @"GpCD" => @$"GP {compare.Op}{compare.Value}",
             @"CurrentBaitCD" => @$"目前的餌是 {string.Join(@"/", ConditionParams.GetIds(p))}",
+            @"MoochAvailableCD" => ConditionParams.GetBool(p, @"inv", false) ? @"不能以小釣大" : @"可以以小釣大",
+            @"IntuitionActiveCD" => ConditionParams.GetBool(p, @"inv", false) ? @"沒有漁師之識" : @"有漁師之識",
             _ => @$"（不支援的條件：{typeId}）",
         };
     }
@@ -210,8 +216,34 @@ public static class ConditionRegistry
         if (p?[@"op"] == null && p?[@"above"] != null)
             op = ConditionParams.GetBool(p, @"above", true) ? ">=" : "<=";
 
-        var fishId = ConditionParams.GetInt(p, @"id", 0);
+        var fishId = SwimbaitTarget(ConditionParams.GetInt(p, @"id", 0), ctx);
         return args.Apply(ConditionParams.CompareInt(SwimbaitCount(fishId), args.Value, op));
+    }
+
+    /// <summary>上游：id 0 時改數「正在判斷的那條魚」（熟練妙招／游動餌），沒有才數全部非空欄位。</summary>
+    private static int SwimbaitTarget(int fishId, ConditionContext ctx)
+        => fishId == 0 && ctx.SwimbaitFishId != 0 ? (int)ctx.SwimbaitFishId : fishId;
+
+    private static bool MoochAvailable(JObject? p)
+    {
+        var m1 = ConditionParams.GetBool(p, @"m1", true);
+        var m2 = ConditionParams.GetBool(p, @"m2", true);
+        return (m1 && PlayerRes.ActionTypeAvailable(IDs.Actions.Mooch))
+               || (m2 && PlayerRes.ActionTypeAvailable(IDs.Actions.Mooch2));
+    }
+
+    /// <summary>上游 <c>MoochAvailableCD</c>：以小釣大／以小釣大II 現在能不能放（m1／m2 預設都算）。</summary>
+    private static bool EvalMoochAvailable(JObject? p, ConditionContext ctx)
+    {
+        var result = MoochAvailable(p);
+        return ConditionParams.GetBool(p, @"inv", false) ? !result : result;
+    }
+
+    /// <summary>上游 <c>IntuitionActiveCD</c>：身上有沒有漁師之識。</summary>
+    private static bool EvalIntuitionActive(JObject? p, ConditionContext ctx)
+    {
+        var result = PlayerRes.HasStatus(IDs.Status.FishersIntuition);
+        return ConditionParams.GetBool(p, @"inv", false) ? !result : result;
     }
 
     private static bool EvalBaitCount(JObject? p, ConditionContext ctx)

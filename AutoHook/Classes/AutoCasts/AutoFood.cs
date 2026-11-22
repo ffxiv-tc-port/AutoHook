@@ -19,6 +19,8 @@ public class AutoFood : BaseActionCast //todo
     public override string GetName()
         => Name = UIStrings.Food_Buff;
 
+    protected override bool HonorsConditionSet => false;
+
     public override bool CastCondition()
     {
         if (PlayerRes.GetStatusTime(IDs.Status.FoodBuff) > SecondsRemaining)

@@ -24,10 +24,16 @@ public class FishConfig : BaseOption
     public AutoIdenticalCast IdenticalCast = new();
     public AutoSurfaceSlap SurfaceSlap = new();
     public AutoMooch Mooch = new();
+
+    /// <summary>熟練妙招（把剛釣起的大尺寸魚留成游動餌）。預設關；上游 v6+ 匯出靠它的條件控制留幾條。</summary>
+    public AutoSparefulHand SparefulHand = new();
     
     public bool SwapBait = false;
     public BaitFishClass BaitToSwap = new();
     public int SwapBaitCount = 1;
+
+    /// <summary>換過餌後把這條魚的計數與「已換過」記號清掉（上游欄位；AH4_ 起的匯出就有，以前被略過）。</summary>
+    public bool SwapBaitResetCount = false;
     
     public bool SwapPresets = false;
     public string PresetToSwap = "-";
@@ -42,6 +48,9 @@ public class FishConfig : BaseOption
     ///    兩者都有值時**以條件為準** —— 條件是比較晚出現、比較具體的那個表達方式。
     /// </summary>
     public ConditionSet? SwapPresetConditionSet { get; set; }
+
+    /// <summary>與 <see cref="SwapPresetConditionSet"/> 同形狀的換餌條件；null 時走 <see cref="SwapBait"/>＋<see cref="SwapBaitCount"/>。</summary>
+    public ConditionSet? SwapBaitConditionSet { get; set; }
     
     public bool NeverMooch = false;
     

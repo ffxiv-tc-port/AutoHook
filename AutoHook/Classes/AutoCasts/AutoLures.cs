@@ -1,4 +1,5 @@
-﻿using AutoHook.Data;
+﻿using AutoHook.Conditions;
+using AutoHook.Data;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
@@ -112,10 +113,17 @@ public class AutoLures : BaseActionCast
         DrawUtil.DrawTreeNodeEx(UIStrings.Identical_Cast_Options, DrawIdenticalCast);
     };
 
-    public void TryCasting(bool lureSuccess)
+    /// <summary>這一竿已經過了幾秒；只給條件裡的 BiteTimerCD／ChumTimerCD 用（上游在拋竿中用同一個計時）。</summary>
+    private double? _castElapsedSeconds;
+
+    protected override ConditionContext ActionConditionContext() => ConditionContext.ForAction(_castElapsedSeconds);
+
+    public void TryCasting(bool lureSuccess, double? castElapsedSeconds = null)
     {
         if (!EzThrottler.Check("CastingLure"))
             return;
+
+        _castElapsedSeconds = castElapsedSeconds;
 
         if (PlayerRes.GetStatusStacks(StatusId) >= LureStacks && CancelAttempt && !lureSuccess)
         {

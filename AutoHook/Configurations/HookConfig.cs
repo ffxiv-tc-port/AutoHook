@@ -11,6 +11,13 @@ using AutoHook.Utils;
 
 namespace AutoHook.Configurations;
 
+/// <summary>上游 v6+：釣到這條魚之後，下一竿要不要改用游動餌欄位裡的牠當餌。</summary>
+public class SwimbaitConfig
+{
+    public bool UseSwimbait = false;
+    public ConditionSet? ConditionSet { get; set; }
+}
+
 public class HookConfig : BaseOption
 {
     [DefaultValue(true)] public bool Enabled = true;
@@ -19,6 +26,12 @@ public class HookConfig : BaseOption
 
     public BaseHookset NormalHook = new(IDs.Status.None);
     public BaseHookset IntuitionHook = new(IDs.Status.FishersIntuition);
+
+    // 匯入字串可能寫 null；一律換成預設（不用游動餌），呼叫端不必再判 null。
+    public SwimbaitConfig SwimbaitNormal { get => _swimbaitNormal; set => _swimbaitNormal = value ?? new(); }
+    public SwimbaitConfig SwimbaitIntuition { get => _swimbaitIntuition; set => _swimbaitIntuition = value ?? new(); }
+    private SwimbaitConfig _swimbaitNormal = new();
+    private SwimbaitConfig _swimbaitIntuition = new();
 
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();
@@ -126,6 +139,12 @@ public class HookConfig : BaseOption
 
         return NormalHook;
     }
+
+    /// <summary>與 <see cref="GetHookset"/> 同一個「漁師之識中」判斷。</summary>
+    public SwimbaitConfig GetSwimbaitConfig()
+        => FishingManager.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook
+            ? SwimbaitIntuition
+            : SwimbaitNormal;
 
     public HookType? GetHook(BiteType bite, double timePassed)
     {

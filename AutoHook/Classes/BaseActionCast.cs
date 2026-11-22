@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using AutoHook.Data;
 using AutoHook.Utils;
 using Dalamud.Interface.Colors;
@@ -55,6 +56,26 @@ public abstract class BaseActionCast
 
     [NonSerialized] public ActionType ActionType;
 
+    /// <summary>
+    /// 上游 config v6 起「什麼時候放」寫成條件（AH6_／AH7_／資料夾匯出才有）。
+    /// null／空群組＝不參與，既有 preset 行為不變；含不認得的條件＝不放（多放一次會耗 GP、打斷以小釣大）。
+    /// </summary>
+    public ConditionSet? ConditionSet { get; set; }
+
+    /// <summary>上游這幾種技能本來就不看條件（以小釣大II、食物、全部放生）。</summary>
+    protected virtual bool HonorsConditionSet => true;
+
+    protected virtual ConditionContext ActionConditionContext() => ConditionContext.ForAction();
+
+    private bool ConditionSetAllows()
+    {
+        if (!HonorsConditionSet || !ConditionEvaluator.HasGroups(ConditionSet))
+            return true;
+
+        return ConditionEvaluator.Passes(ConditionSet, ActionConditionContext(), unconfiguredResult: true,
+            unsupportedResult: false, where: @$"自動施放 {GetName()}");
+    }
+
     public virtual void SetThreshold(int newCost)
     {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);
@@ -74,7 +95,7 @@ public abstract class BaseActionCast
             return false;
         }
 
-        var condition = CastCondition();
+        var condition = CastCondition() && ConditionSetAllows();
 
         var currentGp = PlayerRes.GetCurrentGp();
 

@@ -13,6 +13,8 @@ public class AutoReleaseFish : BaseActionCast
     public override int Priority { get; set; } = 14;
     public override bool IsExcludedPriority { get; set; } = false;
 
+    protected override bool HonorsConditionSet => false;
+
     public override bool CastCondition()
     {
         return true;

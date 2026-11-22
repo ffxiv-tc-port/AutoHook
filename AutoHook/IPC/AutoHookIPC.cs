@@ -42,6 +42,23 @@ public class AutoHookIPC
     public int GetFolderImportApiVersion() => FolderImportApiVersion;
 
     /// <summary>
+    /// 匯入 preset 能執行到哪一級（給呼叫端判斷「上游新版匯出的功能有沒有作用」）。0＝沒有這個 IPC 的舊版。
+    /// 1＝技能條件、規則（Triggers）、熟練妙招、游動餌、換餌條件、MoochAvailableCD／IntuitionActiveCD。
+    /// </summary>
+    /// <remarks>🔴 加了新的可執行功能就加號；回傳型別維持 int（跨插件 IPC 不可同名改型別）。</remarks>
+    [EzIPC]
+    public int GetPresetFeatureLevel() => PresetFeatureLevel;
+
+    private const int PresetFeatureLevel = 1;
+
+    /// <summary>
+    /// 這份匯出字串裡本插件吃不下的設定（匯入會成功，但這些行為不會發生）。空清單＝全部支援。
+    /// 純讀字串，不碰設定、不必在 Framework 執行緒。
+    /// </summary>
+    [EzIPC]
+    public List<string> GetUnsupportedPresetFeatures(string export) => PresetFeatureAudit.Audit(export);
+
+    /// <summary>
     /// 讀取目前的啟用狀態。與 <see cref="SetPluginState"/> 讀寫同一個欄位（<c>Configuration.PluginEnabled</c>）。
     /// </summary>
     /// <remarks>
@@ -139,9 +156,13 @@ public class AutoHookIPC
     private void SetPresetCore(string preset)
     {
         Service.Save();
-        _cfg.HookPresets.SelectedPreset =
-            _cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == preset);
+        var found = _cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == preset);
+        _cfg.HookPresets.SelectedPreset = found;
         Service.Save();
+
+        // 要使用者回報的診斷：找不到時選取被清空、退回預設 preset，呼叫端看不到。
+        if (found == null)
+            Service.PluginLog.Information(@$"[IPC] SetPreset：找不到名為「{preset}」的 preset，已改用預設 preset。");
     }
 
     // 🔴 [EzIPC] 不能漏：消費端（ICE 的 IPC/AutoHookIPC.cs）帶的是 SafeWrapper.AnyException，
@@ -168,7 +189,14 @@ public class AutoHookIPC
     private void CreateAndSelectAnonymousPresetCore(string preset)
     {
         var _import = Configuration.ImportPreset(preset);
-        if (_import == null) return;
+        if (_import == null)
+        {
+            // 要使用者回報的診斷：呼叫端拿不到回傳值，這裡是唯一看得到「沒匯進去」的地方。
+            Service.PluginLog.Information(@"[IPC] CreateAndSelectAnonymousPreset：字串解出來是空的，沒有匯入任何 preset。");
+            return;
+        }
+
+        LogUnsupportedFeatures(@"CreateAndSelectAnonymousPreset", _import.PresetName, preset);
         var name = $"anon_{_import.PresetName}";
         _import.RenamePreset(name);
         Service.Save();
@@ -226,6 +254,7 @@ public class AutoHookIPC
 
         var folder = imported.Value.Folder;
         var presets = imported.Value.Presets;
+        LogUnsupportedFeatures(@"CreateAndSelectAnonymousFolder", folder.FolderName, folderExport);
 
         if (presets.Count == 0)
         {
@@ -310,7 +339,24 @@ public class AutoHookIPC
             extra.PresetToSwapSpectralCurrentGain = Remap(extra.PresetToSwapSpectralCurrentGain, renames);
             extra.PresetToSwapSpectralCurrentLost = Remap(extra.PresetToSwapSpectralCurrentLost, renames);
             extra.PresetToSwapAnglersArt = Remap(extra.PresetToSwapAnglersArt, renames);
+
+            foreach (var trigger in extra.Triggers)
+            {
+                if (trigger is { SwapPreset: true })
+                    trigger.PresetToSwap = Remap(trigger.PresetToSwap, renames);
+            }
         }
+    }
+
+    /// <summary>匯入時把不支援的設定寫一行 Information（要使用者回報的診斷）。</summary>
+    private static void LogUnsupportedFeatures(string endpoint, string? name, string export)
+    {
+        var missing = PresetFeatureAudit.Audit(export);
+        if (missing.Count == 0)
+            return;
+
+        Service.PluginLog.Information(
+            @$"[IPC] {endpoint}：「{name}」有 {missing.Count} 項設定本插件不支援，匯入後不會生效：{string.Join(@"；", missing)}");
     }
 
     /// <summary>列出 preset 裡所有的換 preset 目標名稱（僅供診斷用，不改任何狀態）。</summary>
@@ -334,6 +380,12 @@ public class AutoHookIPC
         yield return extra.PresetToSwapSpectralCurrentGain;
         yield return extra.PresetToSwapSpectralCurrentLost;
         yield return extra.PresetToSwapAnglersArt;
+
+        foreach (var trigger in extra.Triggers)
+        {
+            if (trigger is { SwapPreset: true })
+                yield return trigger.PresetToSwap;
+        }
     }
 
     private static string Remap(string? target, Dictionary<string, string> renames)

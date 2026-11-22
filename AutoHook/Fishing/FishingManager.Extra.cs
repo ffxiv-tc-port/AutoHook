@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using AutoHook.Conditions;
 using AutoHook.Configurations;
 using AutoHook.Data;
 using AutoHook.Enums;
@@ -21,6 +23,131 @@ public partial class FishingManager
         CheckIntuition(extraCfg);
         CheckSpectral(extraCfg);
         CheckAnglersArt(extraCfg);
+        CheckTriggers();
+    }
+
+    /// <summary>規則觸發的換 preset 在同一輪內最多連鎖幾次（上游同值）。</summary>
+    private const int TriggerSwapCap = 8;
+
+    /// <summary>同一句規則診斷只寫一次（找不到 preset、連鎖過長）。</summary>
+    private readonly HashSet<string> _reportedTriggerIssues = new();
+
+    /// <summary>「仍需換餌」會每輪重觸發；同一句不重寫。</summary>
+    private string _lastTriggerLine = @"";
+
+    /// <summary>
+    /// 上游 v6+ 的 ExtraCfg.Triggers。語意照上游：條件由假轉真時觸發；仍成立而且換 preset／換餌還沒達成時再觸發。
+    /// 換了 preset 就在同一輪改看新 preset 的規則（資料夾狀態機一輪內走完）。
+    /// </summary>
+    private void CheckTriggers()
+    {
+        for (var iteration = 0; iteration < TriggerSwapCap; iteration++)
+        {
+            var extraCfg = GetExtraCfg();
+            if (extraCfg.Triggers.Count == 0)
+                return;
+
+            var before = Presets.SelectedPreset;
+            RunTriggersOnce(extraCfg);
+
+            if (ReferenceEquals(before, Presets.SelectedPreset))
+                return;
+        }
+
+        ReportTriggerIssueOnce(@$"[規則] 換 preset 連鎖超過 {TriggerSwapCap} 次（規則互相觸發），這一輪停在「{Presets.SelectedPreset?.PresetName ?? @"（未選取）"}」。");
+    }
+
+    private void RunTriggersOnce(ExtraConfig extraCfg)
+    {
+        var states = extraCfg.LastTriggerStates;
+        var ctx = ConditionContext.AfterCatch();
+
+        for (var i = 0; i < extraCfg.Triggers.Count; i++)
+        {
+            var trig = extraCfg.Triggers[i];
+            if (trig is not { Enabled: true, ConditionSet: not null })
+                continue;
+
+            var current = ConditionEvaluator.Passes(trig.ConditionSet, ctx, unconfiguredResult: false,
+                unsupportedResult: false, where: @"規則");
+            var last = i < states.Count && states[i];
+
+            while (states.Count <= i)
+                states.Add(false);
+            states[i] = current;
+
+            if (!current || (last && !TriggerSwapStillNeeded(trig)))
+                continue;
+
+            var line = @$"[規則] 「{Presets.SelectedPreset?.PresetName ?? @"（未選取）"}」第 {i + 1} 條成立："
+                       + ConditionEvaluator.Describe(trig.ConditionSet, ctx);
+            if (line != _lastTriggerLine)
+            {
+                _lastTriggerLine = line;
+                Service.PrintInfo(line);
+            }
+
+            ApplyTrigger(trig);
+        }
+    }
+
+    private bool TriggerSwapStillNeeded(ExtraTrigger trig)
+    {
+        if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-"
+            && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
+            return true;
+
+        return trig.SwapBait && trig.BaitToSwap.Id > 0 && Service.BaitManager.Current != trig.BaitToSwap.Id
+               && PlayerRes.HasItem((uint)trig.BaitToSwap.Id) > 0;
+    }
+
+    private void ApplyTrigger(ExtraTrigger trig)
+    {
+        if (trig.StopAction != ExtraStopAction.None)
+        {
+            // 對應既有的「漁師之識結束時停止／收竿」：StopOnly＝不再拋竿，其餘＝收竿。
+            _lastStep = trig.StopAction == ExtraStopAction.StopOnly ? FishingSteps.None : FishingSteps.Quitting;
+            Service.PrintChat(trig.StopAction == ExtraStopAction.StopOnly ? @"[Extra] 規則：停止拋竿" : @"[Extra] 規則：收竿");
+        }
+
+        if (trig.ResetFishCaughtCounter)
+        {
+            var owner = Presets.SelectedPreset?.ExtraCfg.Enabled == true ? Presets.SelectedPreset : Presets.DefaultPreset;
+            owner.ResetCounter();
+        }
+
+        if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-"
+            && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
+        {
+            var preset = Presets.CustomPresets.FirstOrDefault(p => p.PresetName == trig.PresetToSwap);
+            if (preset == null)
+            {
+                ReportTriggerIssueOnce(@$"[規則] 找不到名為「{trig.PresetToSwap}」的 preset（目前在「{Presets.SelectedPreset?.PresetName ?? @"（未選取）"}」）。");
+            }
+            else
+            {
+                preset.ExtraCfg.LastTriggerStates.Clear();
+                Presets.SelectedPreset = preset;
+                Service.PrintChat(@$"[Extra] 規則：換成 preset「{trig.PresetToSwap}」");
+                Service.Save();
+            }
+        }
+
+        if (trig.SwapBait && trig.BaitToSwap.Id > 0 && Service.BaitManager.Current != trig.BaitToSwap.Id)
+        {
+            var result = Service.BaitManager.ChangeBait(trig.BaitToSwap);
+            var line = @$"[規則] 換餌 → {trig.BaitToSwap.Name} (#{trig.BaitToSwap.Id})：{result}";
+            if (result == BaitManager.ChangeBaitReturn.Success)
+                Service.PrintInfo(line);
+            else
+                ReportTriggerIssueOnce(line);
+        }
+    }
+
+    private void ReportTriggerIssueOnce(string line)
+    {
+        if (_reportedTriggerIssues.Add(line))
+            Service.PrintInfo(line);
     }
 
     private void CheckSpectral(ExtraConfig extraCfg)

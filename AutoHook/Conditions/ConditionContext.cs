@@ -31,8 +31,18 @@ public sealed class ConditionContext
     /// </remarks>
     public bool IgnoreBiteTimers { get; init; }
 
+    /// <summary>
+    /// <c>SwimbaitCountCD</c> 沒指定魚（id 0）時要數的魚：上游在判斷熟練妙招／游動餌時補上「正在判斷的那條魚」。
+    /// 0＝沒有，退回「數所有非空欄位」。
+    /// </summary>
+    public uint SwimbaitFishId { get; init; }
+
     /// <summary>釣起之後的判斷（換 preset／換餌）用：沒有咬鉤秒數，也不涉及時間窗。</summary>
     public static ConditionContext AfterCatch() => new();
+
+    /// <summary>自動施放技能／游動餌的判斷用。<paramref name="elapsedSeconds"/>＝這一竿已經過了幾秒（引誘才有）。</summary>
+    public static ConditionContext ForAction(double? elapsedSeconds = null, uint swimbaitFishId = 0)
+        => new() { BiteSeconds = elapsedSeconds, SwimbaitFishId = swimbaitFishId };
 
     /// <summary>咬鉤當下的判斷（要不要提鉤）用。</summary>
     public static ConditionContext OnBite(double biteSeconds, bool ignoreBiteTimers)
