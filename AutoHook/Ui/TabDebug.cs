@@ -124,11 +124,12 @@ public class TabDebug : BaseTab
                 }
             }
 
-            ImGui.InputInt("Swimbait Id", ref _swimbaitId);
+            ImGui.InputInt("Swimbait slot (0-2)", ref _swimbaitSlot);
 
+            // 游動餌是「欄位索引」不是道具 ID；ChangeBait 只換一般魚餌，拿魚的 ID 去呼叫必回 InvalidBait。
             if (ImGui.Button("Swap Swimbait"))
             {
-                Service.BaitManager.ChangeBait((uint)_swimbaitId);
+                Service.BaitManager.ChangeSwimbait((uint)Math.Clamp(_swimbaitSlot, 0, 2), @"除錯頁");
             }
 
 
@@ -181,7 +182,7 @@ public class TabDebug : BaseTab
     private static readonly HttpClient client = new HttpClient();
 
     private static Dictionary<string, List<string>> Presets = new();
-    private int _swimbaitId = 45949;
+    private int _swimbaitSlot;
 
     /// <summary>WKSManager 偏移掃描要找的值。預設 45949 是「宇宙大蚊」的 item ID。</summary>
     private int _wksScanValue = 45949;
