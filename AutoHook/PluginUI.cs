@@ -33,6 +33,7 @@ public class PluginUi : Window, IDisposable
         new TabFishingPresets(),
         new TabAutoGig(),
         new TabWeather(),
+        new TabOceanTrip(),
         new TabCommunity(),
         new TabSettings()
     };
