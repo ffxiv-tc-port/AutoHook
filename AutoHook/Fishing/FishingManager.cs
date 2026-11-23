@@ -209,6 +209,7 @@ public partial class FishingManager : IDisposable
         if (extraCfg is { ForceBaitSwap: true, Enabled: true })
         {
             var result = Service.BaitManager.ChangeBait((uint)extraCfg.ForcedBaitId);
+            LogBaitSwap(@"起始餌（ForcedBaitId）", extraCfg.ForcedBaitId, result);
 
             if (result == BaitManager.ChangeBaitReturn.Success)
             {
@@ -222,6 +223,14 @@ public partial class FishingManager : IDisposable
         UseAutoCasts();
         //Service.TaskManager.Enqueue(() => UseAutoCasts());
     }
+
+    /// <summary>
+    /// 每次換餌一行 Information，寫明由哪個設定觸發：聊天視窗那則會被 ShowChatLogs 關掉、也不進插件紀錄。
+    /// 聊天視窗的行為不變。
+    /// </summary>
+    private void LogBaitSwap(string trigger, int baitId, BaitManager.ChangeBaitReturn result)
+        => Service.PrintInfo(@$"[換餌] {trigger} → {MultiString.GetItemName(baitId)} (#{baitId})：{result}"
+                             + @$"｜目前 preset「{Presets.SelectedPreset?.PresetName ?? @"（未選取）"}」");
 
     private int GetCurrentBaitMoochId()
     {

@@ -155,6 +155,10 @@ public partial class FishingManager
                 !Service.BaitManager.IsBaitEquipped((uint)lastCatchCfg.BaitToSwap.Id))
             {
                 var result = Service.BaitManager.ChangeBait(lastCatchCfg.BaitToSwap);
+                LogBaitSwap(@$"釣到 {lastCatchCfg.Fish.Name} 後換餌（"
+                            + (useBaitConditions ? ConditionEvaluator.Describe(baitConditions, ConditionContext.AfterCatch())
+                                : @$"計數 {caughtCount} >= {lastCatchCfg.SwapBaitCount}") + @"）",
+                    lastCatchCfg.BaitToSwap.Id, result);
 
                 FishingHelper.AddBaitSwap(guid); // one try per catch
                 _lastStep |= FishingSteps.BaitSwapped;

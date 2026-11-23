@@ -186,6 +186,7 @@ public partial class FishingManager
             if (extraCfg.SwapBaitSpectralCurrentGain && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
             {
                 var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapSpectralCurrentGain);
+                LogBaitSwap(@"ExtraCfg：幻海流出現", extraCfg.BaitToSwapSpectralCurrentGain.Id, result);
 
                 _lastStep |= FishingSteps.BaitSwapped; // one try
                 if (result == BaitManager.ChangeBaitReturn.Success)
@@ -232,6 +233,7 @@ public partial class FishingManager
             if (extraCfg.SwapBaitSpectralCurrentLost && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
             {
                 var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapSpectralCurrentLost);
+                LogBaitSwap(@"ExtraCfg：幻海流結束", extraCfg.BaitToSwapSpectralCurrentLost.Id, result);
 
                 _lastStep |= FishingSteps.BaitSwapped; // one try
 
@@ -299,6 +301,7 @@ public partial class FishingManager
         if (extraCfg.SwapBaitIntuitionGain && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
         {
             var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapIntuitionGain);
+            LogBaitSwap(@"ExtraCfg：獲得漁師之識", extraCfg.BaitToSwapIntuitionGain.Id, result);
 
             _lastStep |= FishingSteps.BaitSwapped; // one try per catch
 
@@ -338,6 +341,7 @@ public partial class FishingManager
         if (extraCfg.SwapBaitIntuitionLost && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
         {
             var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapIntuitionLost);
+            LogBaitSwap(@"ExtraCfg：漁師之識結束", extraCfg.BaitToSwapIntuitionLost.Id, result);
 
             // one try per catch
             _lastStep |= FishingSteps.BaitSwapped;
@@ -388,6 +392,7 @@ public partial class FishingManager
         if (extraCfg.SwapBaitAnglersArt && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
         {
             var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapAnglersArt);
+            LogBaitSwap(@$"ExtraCfg：漁師之計達 {extraCfg.AnglerStackQtd} 層", extraCfg.BaitToSwapAnglersArt.Id, result);
             _lastStep |= FishingSteps.BaitSwapped;
             if (result == BaitManager.ChangeBaitReturn.Success)
             {
