@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using AutoHook.Configurations;
 using AutoHook.Fishing;
+using AutoHook.Fishing.Ocean;
 using AutoHook.IPC;
 using AutoHook.Resources.Localization;
 using AutoHook.SeFunctions;
@@ -33,6 +34,7 @@ public class AutoHook : IDalamudPlugin
     private const string CmdAhBait = "/ahbait";
     private const string CmdBait = "/bait";
     private const string CmdAgPreset = "/agpreset";
+    private const string CmdAhOcean = "/ahocean";
 
     private static readonly Dictionary<string, string> CommandHelp = new()
     {
@@ -45,7 +47,8 @@ public class AutoHook : IDalamudPlugin
         { CmdAhStart, UIStrings.Starts_AutoHook },
         { CmdAhBait, UIStrings.SwitchFishBait },
         { CmdBait, UIStrings.SwitchFishBait },
-        { CmdAgPreset, UIStrings.Set_agpreset_command }
+        { CmdAgPreset, UIStrings.Set_agpreset_command },
+        { CmdAhOcean, @"出海垂釣整趟自動化：/ahocean start 開始、/ahocean stop 停止（每趟都要手動開始）" }
     };
 
     private static PluginUi _pluginUi = null!;
@@ -57,6 +60,8 @@ public class AutoHook : IDalamudPlugin
     public readonly FishingManager HookManager;
 
     public AutoHookIPC AutoHookIpc;
+
+    internal readonly OceanTrip OceanTrip;
 
     public AutoHook(IDalamudPluginInterface pluginInterface)
     {
@@ -104,6 +109,7 @@ public class AutoHook : IDalamudPlugin
         
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
+        OceanTrip = new OceanTrip();
 
         // 「前一個時段的天氣」問不到遊戲（負 offset 會靜默算錯、API13 沒有 GetPreviousWeather），
         // 只能趁它還是「目前時段」的時候抄下來。每幀先比一次 TickCount64 就返回，
@@ -169,6 +175,25 @@ public class AutoHook : IDalamudPlugin
                 break;
             case CmdAgPreset:
                 SetGigPreset(args);
+                break;
+            case CmdAhOcean:
+                OnOceanCommand(args);
+                break;
+        }
+    }
+
+    private void OnOceanCommand(string args)
+    {
+        switch (args.Trim().ToLowerInvariant())
+        {
+            case @"start":
+                OceanTrip.RequestStart();
+                break;
+            case @"stop":
+                OceanTrip.RequestStop(@"你下了 /ahocean stop");
+                break;
+            default:
+                ChatQueue.Print(@$"[AutoHook] 出海垂釣：{(OceanTrip.Phase == OceanTripPhase.Idle ? @"沒有在執行" : @"執行中")}。用法：/ahocean start｜/ahocean stop");
                 break;
         }
     }
@@ -240,6 +265,7 @@ public class AutoHook : IDalamudPlugin
         WikiPresets.Shutdown();
         _pluginUi.Dispose();
         _autoGig.Dispose();
+        OceanTrip.Dispose();
         HookManager.Dispose();
         Service.Save();
         ConfigSaveQueue.Shutdown();

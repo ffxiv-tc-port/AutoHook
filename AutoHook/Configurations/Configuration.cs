@@ -93,6 +93,8 @@ public class Configuration : IPluginConfiguration
 
     public SpearFishingPresets AutoGigConfig = new();
 
+    public OceanTripConfig OceanTrip = new();
+
     public bool ShowDebugConsole = false;
 
     [DefaultValue(true)] public bool ShowChatLogs = true;

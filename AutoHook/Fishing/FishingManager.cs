@@ -231,6 +231,26 @@ public partial class FishingManager : IDisposable
     }
 
     /// <summary>
+    /// 出海垂釣自動化用的拋竿：preset 開了自動拋竿就走 <see cref="StartFishing"/>（以小釣大、游動餌、技能照 preset），
+    /// 沒開就直接拋竿。拋不出去時安靜返回，由呼叫端的重試與停手條件處理。
+    /// </summary>
+    internal void TripCast()
+    {
+        if (UnavailableReason != null || !PlayerRes.IsCastAvailable())
+            return;
+
+        var acCfg = GetAutoCastCfg();
+        if (acCfg.EnableAll && acCfg.CastLine.Enabled)
+        {
+            StartFishing();
+            return;
+        }
+
+        _lastStep = FishingSteps.StartedCasting;
+        PlayerRes.CastActionNoDelay(IDs.Actions.Cast, ActionType.Action, @"拋竿");
+    }
+
+    /// <summary>
     /// 每次換餌一行 Information，寫明由哪個設定觸發：聊天視窗那則會被 ShowChatLogs 關掉、也不進插件紀錄。
     /// 聊天視窗的行為不變。
     /// </summary>
