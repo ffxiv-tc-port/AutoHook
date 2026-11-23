@@ -257,6 +257,31 @@ public static class PlayerRes
     }
 
 
+    /// <summary>
+    /// log 用的名稱。技能一律讀 Action 表：呼叫端給的常是空字串（例如引誘）、英文列舉名或別的技能名（歇竿傳成提鉤）。
+    /// 道具沿用呼叫端給的名稱，沒給才讀 Item 表（HQ 旗標 +1,000,000 先去掉）；其他類型用呼叫端給的。只供 log，查不到不擲。
+    /// </summary>
+    private static string CastLogName(uint id, ActionType actionType, string passed)
+    {
+        try
+        {
+            if (actionType == ActionType.Action)
+            {
+                var name = MultiString.GetActionName(id);
+                if (name.Length > 0)
+                    return name;
+            }
+            else if (actionType == ActionType.Item && passed.Length == 0)
+                return MultiString.GetItemName(id % 1_000_000);
+        }
+        catch (Exception)
+        {
+            // 名稱只進 log；查表失敗不能讓呼叫端的拋竿／用道具流程中斷。
+        }
+
+        return passed.Length > 0 ? passed : @"?";
+    }
+
     private static bool _blockCasting = false;
 
     public static void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action,
@@ -271,14 +296,14 @@ public static class PlayerRes
                 return;
 
             _blockCasting = true;
-            Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
+            Service.PrintDebug(@$"[PlayerResources] Casting Action: {CastLogName(actionId, actionType, actionName)}, Id: {actionId}");
             try
             {
                 CastAction(actionId);
             }
             catch (Exception e)
             {
-                Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}");
+                Service.PrintDebug(@$"Error casting action: {CastLogName(actionId, actionType, actionName)}, Id: {actionId}, {e}");
             }
 
             _ = DelayNextCast(actionId);
@@ -286,14 +311,14 @@ public static class PlayerRes
         else if (actionType == ActionType.Item)
         {
             _blockCasting = true;
-            Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
+            Service.PrintDebug(@$"[PlayerResources] Using Item: {CastLogName(actionId, actionType, actionName)}, Id: {actionId}");
             try
             {
                 UseItems(actionId);
             }
             catch (Exception e)
             {
-                Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}");
+                Service.PrintDebug(@$"Error casting action: {CastLogName(actionId, actionType, actionName)}, Id: {actionId}, {e}");
             }
 
             _ = DelayNextCast(actionId);
@@ -316,12 +341,12 @@ public static class PlayerRes
             {
                 var casted = CastAction(actionId);
                 if (casted)
-                    Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
+                    Service.PrintDebug(@$"[PlayerResources] Casting Action: {CastLogName(actionId, actionType, actionName)}, Id: {actionId}");
             }
         }
         else if (actionType == ActionType.Item)
         {
-            Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
+            Service.PrintDebug(@$"[PlayerResources] Using Item: {CastLogName(actionId, actionType, actionName)}, Id: {actionId}");
             UseItems(actionId);
         }
 
