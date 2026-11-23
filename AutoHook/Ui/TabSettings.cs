@@ -91,6 +91,15 @@ public class TabSettings : BaseTab
 
         DrawCosmicPatience();
 
+        DrawUtil.Checkbox(@"宇宙探索：每條魚都算分的任務，preset 沒開的咬鉤也提",
+            ref Service.Configuration.HookUnconfiguredBitesWhenEveryFishCounts,
+            @"只作用在任務說明寫「任意水產品」或「每條魚均給予評價」的宇宙探索釣魚任務。" + "\n" +
+            @"preset 把某種咬鉤（例如弱咬）的提鉤全部關掉時，這類任務改用一般提鉤、不歇竿：" +
+            @"任何一條魚都算數，歇竿等於白等一竿。" + "\n" +
+            @"身上有大魚獵手或大魚知識時照 preset 放掉（魚一上岸效果就用掉，留給 preset 要的咬鉤）。" + "\n" +
+            @"其他原因的跳過照舊（提鉤條件不符、preset 設定 GP 不夠時放掉魚）。" + "\n" +
+            @"關掉＝完全照 preset。");
+
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);

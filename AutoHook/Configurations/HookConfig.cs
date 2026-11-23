@@ -146,8 +146,12 @@ public class HookConfig : BaseOption
             ? SwimbaitIntuition
             : SwimbaitNormal;
 
-    public HookType? GetHook(BiteType bite, double timePassed)
+    public HookType? GetHook(BiteType bite, double timePassed) => GetHook(bite, timePassed, out _);
+
+    /// <param name="noHookReason">回傳 <see cref="HookType.None"/> 時「為什麼不提」的說明（進 log 用）；有提鉤時為 null。</param>
+    public HookType? GetHook(BiteType bite, double timePassed, out string? noHookReason)
     {
+        noHookReason = null;
         var hookset = GetHookset();
 
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
@@ -179,8 +183,33 @@ public class HookConfig : BaseOption
 
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
+            var hookedAtAll = IsBiteHookedAtAll(hookset, hook);
+            var unconfiguredNote = string.Empty;
+
+            if (!hookedAtAll)
+            {
+                var blocker = UnconfiguredBiteBlocker();
+                if (blocker == null)
+                {
+                    Service.PrintInfo(
+                        @$"[HookManager] 每條魚都算分的任務（任務#{CosmicMissionInfo.GetCurrentMissionId()}）：" +
+                        @$"preset 沒開{CosmicCatchLog.BiteLabel(bite)}的提鉤，改用一般提鉤、不歇竿" +
+                        @$"｜拋竿後 {timePassed.ToString(@"0.00", System.Globalization.CultureInfo.InvariantCulture)} 秒");
+                    return HookType.Normal;
+                }
+
+                unconfiguredNote = blocker;
+            }
+
             if (CosmicPatience.ShouldGuardHooks())
-                return GetPatienceSafeHook(hookset, hook, stellar, bite, timePassed, ignoreTimers);
+            {
+                var guarded = GetPatienceSafeHook(hookset, hook, stellar, bite, timePassed, ignoreTimers);
+                if (guarded == HookType.None)
+                    noHookReason = DescribeSkip(hookedAtAll, false, unconfiguredNote);
+                return guarded;
+            }
+
+            var multiHookUnavailable = false;
 
             // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前。
             if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
@@ -190,12 +219,16 @@ public class HookConfig : BaseOption
             if (hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.th, timePassed, ignoreTimers))
+                {
                     if (IsHookAvailable(hook.th))
                         return hook.th.HooksetType;
+                    multiHookUnavailable = true;
+                }
 
-                if (hookset.LetFishEscapeTripleHook && PlayerRes.GetCurrentGp() < 700)
+                if (hookset.LetFishEscapeTripleHook && PlayerRes.GetCurrentGp() is var gp3 && gp3 < 700)
                 {
                     Service.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
+                    noHookReason = @$"GP 不夠放三重提鉤（{gp3}＜700），preset 設定這時放掉魚";
                     return HookType.None;
                 }
 
@@ -206,12 +239,16 @@ public class HookConfig : BaseOption
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.dh, timePassed, ignoreTimers))
+                {
                     if (IsHookAvailable(hook.dh))
                         return hook.dh.HooksetType;
+                    multiHookUnavailable = true;
+                }
 
-                if (hookset.LetFishEscapeDoubleHook && PlayerRes.GetCurrentGp() < 400)
+                if (hookset.LetFishEscapeDoubleHook && PlayerRes.GetCurrentGp() is var gp2 && gp2 < 400)
                 {
                     Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
+                    noHookReason = @$"GP 不夠放雙重提鉤（{gp2}＜400），preset 設定這時放掉魚";
                     return HookType.None;
                 }
                 
@@ -233,10 +270,62 @@ public class HookConfig : BaseOption
             }
             else if (Service.Status == "")
                 Service.Status = UIStrings.Status_NoHookEnabled;
+
+            noHookReason = DescribeSkip(hookedAtAll, multiHookUnavailable && !hook.ph.HooksetEnabled, unconfiguredNote);
+            return HookType.None;
         }
 
+        noHookReason = @$"讀不到咬鉤力道（{bite}），沒有對應的提鉤設定";
         //Service.Status = "Skipping bite - No hook for this bite is enabled";
         return HookType.None;
+    }
+
+    /// <summary>preset 對這種咬鉤力道有沒有開任何一種提鉤（雙重／三重要連同總開關一起看）。</summary>
+    private static bool IsBiteHookedAtAll(BaseHookset hookset,
+        (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph) hook)
+        => hook.ph.HooksetEnabled
+           || (hookset.UseTripleHook && hook.th.HooksetEnabled)
+           || (hookset.UseDoubleHook && hook.dh.HooksetEnabled);
+
+    /// <summary>
+    /// preset 完全沒開的咬鉤要不要改用一般提鉤：null＝要；否則是不改的理由（給 log，空字串＝不是這類任務）。
+    /// 只在每條魚都算分的任務（WKSMissionText 115、121）放寬；條件不符、GP 不足放掉魚照舊。
+    /// 身上有大魚獵手／大魚知識時不放寬：魚一上岸效果就用掉，preset 可能正留給它要的咬鉤。
+    /// </summary>
+    private static string? UnconfiguredBiteBlocker()
+    {
+        var everyFish = CosmicMissionInfo.GetCurrentProfile().EveryFishCounts;
+        var enabled = Service.Configuration.HookUnconfiguredBitesWhenEveryFishCounts;
+        var bigFishBuff = everyFish && enabled
+                          && (PlayerRes.HasStatus(IDs.Status.PrizeCatch) || PlayerRes.HasStatus(IDs.Status.BigGameFishing));
+        return UnconfiguredBiteDecision(everyFish, enabled, bigFishBuff);
+    }
+
+    /// <summary><see cref="UnconfiguredBiteBlocker"/> 的純判斷（不讀遊戲），離線探針也走這裡。</summary>
+    internal static string? UnconfiguredBiteDecision(bool everyFishCounts, bool enabled, bool bigFishBuff)
+    {
+        if (!everyFishCounts)
+            return string.Empty;
+
+        if (!enabled)
+            return @"（每條魚都算分的任務，但「preset 沒開的咬鉤也提」已關閉）";
+
+        if (bigFishBuff)
+            return @"（每條魚都算分的任務，但身上有大魚獵手／大魚知識，留給 preset 要的咬鉤）";
+
+        return null;
+    }
+
+    private static string DescribeSkip(bool hookedAtAll, bool multiHookUnavailable, string unconfiguredNote)
+    {
+        if (!hookedAtAll)
+            return @$"preset 沒開這種咬鉤（一般／雙重／三重提鉤都關）{unconfiguredNote}";
+
+        if (multiHookUnavailable)
+            return @$"雙重／三重提鉤現在放不出來（GP {PlayerRes.GetCurrentGp()}），這種咬鉤又沒開一般提鉤";
+
+        var status = string.IsNullOrEmpty(Service.Status) ? @"?" : Service.Status;
+        return @$"preset 有開這種咬鉤但條件不符：{status}";
     }
 
     /// <summary>
@@ -284,11 +373,7 @@ public class HookConfig : BaseOption
         //    意思是「這一咬**故意**放它跑」（例如只要傳說級、小咬一律不理）。
         //    華麗提鉤預設是開的，少了這道閘門就會把本來該放走的魚也勾起來 ——
         //    這是回退既有行為，而且對使用者表現成「怎麼一直釣到不要的魚」。
-        var biteIsHookedAtAll = hook.ph.HooksetEnabled
-                                || (hookset.UseTripleHook && hook.th.HooksetEnabled)
-                                || (hookset.UseDoubleHook && hook.dh.HooksetEnabled);
-
-        if (!biteIsHookedAtAll)
+        if (!IsBiteHookedAtAll(hookset, hook))
             return false;
 
         // 先問可用性再檢查條件：CheckHookCondition 失敗時會寫 Service.Status，

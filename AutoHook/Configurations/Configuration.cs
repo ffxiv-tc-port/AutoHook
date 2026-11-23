@@ -150,6 +150,12 @@ public class Configuration : IPluginConfiguration
     /// <summary>自動放耐心II之前，除了 560 GP 之外還要留多少給耐心期間的精準／強力提鉤（每竿 50）。</summary>
     public int CosmicPatienceHookGpReserve = CosmicPatience.DefaultHookGpReserve;
 
+    /// <summary>
+    /// 任務說明講明「任意／每條魚都算分」（WKSMissionText 115、121）時，preset 完全沒開的咬鉤力道改用一般提鉤、不歇竿。
+    /// 只放寬咬鉤篩選（可逆，最壞損失效率）；條件不符、GP 不足放掉魚、身上有大魚獵手／大魚知識時照舊。
+    /// </summary>
+    [DefaultValue(true)] public bool HookUnconfiguredBitesWhenEveryFishCounts = true;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 

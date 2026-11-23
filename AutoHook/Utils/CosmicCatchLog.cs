@@ -191,7 +191,7 @@ public static class CosmicCatchLog
         _ => 3,
     };
 
-    private static string BiteLabel(BiteType bite) => bite switch
+    public static string BiteLabel(BiteType bite) => bite switch
     {
         BiteType.Weak => @"弱咬",
         BiteType.Strong => @"強咬",

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -561,7 +562,7 @@ public partial class FishingManager : IDisposable
 
         var timePassed = Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
 
-        var hook = currentHook.GetHook(bite, timePassed);
+        var hook = currentHook.GetHook(bite, timePassed, out var noHookReason);
         _lastHookDecision = hook ?? HookType.None;
 
         if (hook is null or HookType.None)
@@ -572,7 +573,7 @@ public partial class FishingManager : IDisposable
             Service.TaskManager.EnqueueDelay(delay);
             Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Rest));
             //_lastStep = FishingSteps.Reeling;
-            Service.PrintDebug(@$"[HookManager] No hook found, using Rest");
+            LogNoHook(bite, timePassed, noHookReason);
             return;
         }
 
@@ -580,6 +581,30 @@ public partial class FishingManager : IDisposable
         Service.TaskManager.Enqueue(() =>
             PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook.ToString()}"));
         Service.Status = (@$"Using {hook.ToString()} hook. (Bite: {bite})");
+    }
+
+    /// <summary>
+    /// 歇竿的診斷（Information，每竿最多一行）：咬鉤力道、拋竿後秒數、為什麼沒提、GP 與狀態。
+    /// 開頭的英文字串不可改：分析工具以「No hook found, using Rest」辨認歇竿。
+    /// </summary>
+    private void LogNoHook(BiteType bite, double timePassed, string? reason)
+    {
+        var line = @$"[HookManager] No hook found, using Rest｜咬鉤={CosmicCatchLog.BiteLabel(bite)}" +
+                   @$" 拋竿後 {timePassed.ToString(@"0.00", CultureInfo.InvariantCulture)} 秒" +
+                   @$"｜原因：{reason ?? @"?"}｜GP {_biteSnapshot.GpText}｜狀態 {_biteSnapshot.StatusText}";
+        try
+        {
+            var mission = CosmicMissionInfo.GetCurrentMissionId();
+            if (mission != 0)
+                line += @$"｜任務#{mission}{(CosmicMissionInfo.GetCurrentProfile().EveryFishCounts ? @"（每條魚都算分）" : string.Empty)}";
+        }
+        catch (Exception e)
+        {
+            // 歇竿已經排進佇列；任務資訊讀不到只少這一段，不讓例外傳回提鉤流程。
+            line += @$"｜任務資訊讀取失敗：{e.Message}";
+        }
+
+        Service.PrintInfo(line);
     }
 
     /// <param name="large">遊戲傳來的「大型」旗標。目前只給量測用，不影響任何決策。</param>
