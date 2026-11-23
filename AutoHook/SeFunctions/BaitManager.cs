@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Runtime.InteropServices;
 using AutoHook.Classes;
+using AutoHook.Data;
 using AutoHook.Enums;
 using AutoHook.Utils;
 using Dalamud.Game;
@@ -177,9 +178,22 @@ public unsafe class BaitManager
             : @$"[BaitManager] 宇宙探索：目前掛的餌 ID = {baitId}（{MultiString.GetItemName((int)baitId)}）。");
     }
 
+    /// <summary>每次重讀目前選的游動餌（沒選、或讀不到時回 <see cref="SwimbaitRules.NoSwimbaitSelected"/>）。</summary>
+    private byte SelectedSwimbait
+    {
+        get
+        {
+            var ptr = FishingMan;
+            return ptr == null ? SwimbaitRules.NoSwimbaitSelected : ptr->CurrentSelectedSwimBait;
+        }
+    }
+
+    /// <summary>同一顆餌、而且沒有選游動餌，才算已經掛著（與遊戲的判定相同）。</summary>
+    public bool IsBaitEquipped(uint baitId) => SwimbaitRules.IsBaitEquipped(baitId, Current, SelectedSwimbait);
+
     public ChangeBaitReturn ChangeBait(uint baitId)
     {
-        if (baitId == Current)
+        if (IsBaitEquipped(baitId))
             return ChangeBaitReturn.AlreadyEquipped;
 
         if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId))
@@ -212,17 +226,91 @@ public unsafe class BaitManager
     }
 
 
-    public ChangeBaitReturn ChangeSwimbait(uint id)
-    {
-        if (id > 2)
-            return ChangeBaitReturn.InvalidBait;
+    private readonly record struct PendingSwimbait(byte Index, uint FishId, long SentTick);
 
-        return SendChangeBait(25, id);
+    private PendingSwimbait? _pendingSwimbait;
+    private SwimbaitRules.ConfirmResult _swimbaitConfirm = SwimbaitRules.ConfirmResult.None;
+    private string _lastSwimbaitSkipLine = @"";
+
+    /// <summary>每送出一次游動餌切換就 +1；等待確認的一方用它判斷結果是不是自己那一次的。</summary>
+    public int SwimbaitSendSeq { get; private set; }
+
+    /// <summary>
+    /// 切換游動餌到欄位 <paramref name="index"/>（0..2）。不送時回理由：<see cref="ChangeBaitReturn.InvalidBait"/>（索引超出）、
+    /// <see cref="ChangeBaitReturn.EmptySlot"/>、<see cref="ChangeBaitReturn.BlockedByStatus"/>（拍擊水面／專一垂釣）、
+    /// <see cref="ChangeBaitReturn.AlreadyEquipped"/>（已選中）。<see cref="ChangeBaitReturn.Success"/> 只代表指令送出，
+    /// 伺服器接受與否要看 <see cref="PollSwimbaitConfirm"/>。
+    /// </summary>
+    public ChangeBaitReturn ChangeSwimbait(uint index, string source = @"其他插件（IPC）")
+    {
+        var ptr = FishingMan;
+        uint[] slots = ptr == null ? [] : [ptr->SwimBaitId1, ptr->SwimBaitId2, ptr->SwimBaitId3];
+        var selected = ptr == null ? SwimbaitRules.NoSwimbaitSelected : ptr->CurrentSelectedSwimBait;
+        var blocked = PlayerRes.HasStatus(IDs.Status.SurfaceSlap) || PlayerRes.HasStatus(IDs.Status.IdenticalCast);
+
+        var fishId = index < slots.Length ? slots[index] : 0u;
+        var slotText = fishId == 0 ? @$"欄位 {index + 1}（空）" : @$"欄位 {index + 1}（{MultiString.GetItemName(fishId)} #{fishId}）";
+
+        if (SwimbaitRules.SwimbaitPrecheck(index, slots, blocked, selected) is { } reject)
+        {
+            var reason = reject switch
+            {
+                ChangeBaitReturn.EmptySlot => @"這一格沒有魚",
+                ChangeBaitReturn.BlockedByStatus => @"身上有拍擊水面或專一垂釣（遊戲此時也不接受游動餌）",
+                ChangeBaitReturn.AlreadyEquipped => @"已經選中",
+                _ => @"欄位索引超出 0～2",
+            };
+            var line = @$"[游動餌] 不送：{slotText}｜{reason}｜來源：{source}";
+            if (line != _lastSwimbaitSkipLine)
+            {
+                _lastSwimbaitSkipLine = line;
+                Service.PrintInfo(line);
+            }
+            return reject;
+        }
+
+        var result = SendChangeBait(25, index);
+        _lastSwimbaitSkipLine = @"";
+        Service.PrintInfo(@$"[游動餌] 送出切換：{slotText} → {result}｜來源：{source}");
+
+        if (result == ChangeBaitReturn.Success)
+        {
+            SwimbaitSendSeq++;
+            _pendingSwimbait = new PendingSwimbait((byte)index, fishId, System.Environment.TickCount64);
+            _swimbaitConfirm = SwimbaitRules.ConfirmResult.Pending;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 最近一次游動餌切換的確認狀態；每次呼叫都重讀遊戲狀態，定案那一刻寫一行 Information，之後重複回同一個結果。
+    /// 只在 Framework 執行緒呼叫。
+    /// </summary>
+    public SwimbaitRules.ConfirmResult PollSwimbaitConfirm()
+    {
+        if (_pendingSwimbait is not { } p)
+            return _swimbaitConfirm;
+
+        var ptr = FishingMan;
+        byte? selected = ptr == null ? null : ptr->CurrentSelectedSwimBait;
+        var elapsed = System.Environment.TickCount64 - p.SentTick;
+        var result = SwimbaitRules.Confirm(p.Index, selected, elapsed);
+        if (result == SwimbaitRules.ConfirmResult.Pending)
+            return result;
+
+        _pendingSwimbait = null;
+        _swimbaitConfirm = result;
+        var slotText = @$"欄位 {p.Index + 1}（{MultiString.GetItemName(p.FishId)} #{p.FishId}）";
+        Service.PrintInfo(result == SwimbaitRules.ConfirmResult.Confirmed
+            ? @$"[游動餌] 確認已選中：{slotText}，送出後 {elapsed} ms"
+            : @$"[游動餌] 確認失敗：送出 {elapsed} ms 內沒有選中{slotText}（目前選取值 {(selected is { } v ? @$"0x{v:X2}" : @"讀不到")}）");
+        return result;
     }
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait)
     {
-        if (bait.Id == Current)
+        if (IsBaitEquipped((uint)bait.Id))
         {
             Service.PrintChat($"釣餌「{bait.Name}」已經裝在身上了。");
             return ChangeBaitReturn.AlreadyEquipped;
@@ -252,5 +340,7 @@ public unsafe class BaitManager
         InvalidBait,
         UnknownError,
         Unavailable,
+        EmptySlot,
+        BlockedByStatus,
     }
 }

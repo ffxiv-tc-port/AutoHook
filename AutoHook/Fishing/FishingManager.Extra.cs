@@ -97,7 +97,7 @@ public partial class FishingManager
             && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
             return true;
 
-        return trig.SwapBait && trig.BaitToSwap.Id > 0 && Service.BaitManager.Current != trig.BaitToSwap.Id
+        return trig.SwapBait && trig.BaitToSwap.Id > 0 && !Service.BaitManager.IsBaitEquipped((uint)trig.BaitToSwap.Id)
                && PlayerRes.HasItem((uint)trig.BaitToSwap.Id) > 0;
     }
 
@@ -133,7 +133,7 @@ public partial class FishingManager
             }
         }
 
-        if (trig.SwapBait && trig.BaitToSwap.Id > 0 && Service.BaitManager.Current != trig.BaitToSwap.Id)
+        if (trig.SwapBait && trig.BaitToSwap.Id > 0 && !Service.BaitManager.IsBaitEquipped((uint)trig.BaitToSwap.Id))
         {
             var result = Service.BaitManager.ChangeBait(trig.BaitToSwap);
             var line = @$"[規則] 換餌 → {trig.BaitToSwap.Name} (#{trig.BaitToSwap.Id})：{result}";

@@ -308,6 +308,9 @@ public partial class FishingManager : IDisposable
         //    那一句卡在佇列裡（判準是在釣獲的當下成立的，跟現在還在不在釣魚無關）。
         FlushPendingPraises();
 
+        // 讓 IPC 送出的游動餌切換也有確認紀錄；沒有待確認時不讀遊戲狀態。
+        Service.BaitManager.PollSwimbaitConfirm();
+
         var currentState = Service.BaitManager.FishingState;
 
         // 🔴 讀的是<b>疊加後</b>的值：別的外掛可以用暫停租約要求 AutoHook 先停手。

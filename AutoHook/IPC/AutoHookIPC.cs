@@ -504,8 +504,9 @@ public class AutoHookIPC
 
     /// <summary>換泳餌槽位（索引 0、1、2）。</summary>
     /// <remarks>
-    /// ⚠️ 索引大於 2 時 <c>BaitManager.ChangeSwimbait</c> 會回 <c>InvalidBait</c> ⇒ 本函式回
-    /// <see langword="false"/>，不會送任何指令。執行緒閘門的理由同 <see cref="SwapBaitById"/>。
+    /// ⚠️ 索引大於 2、那一格沒有魚、身上有拍擊水面／專一垂釣時不送任何指令、回 <see langword="false"/>；
+    /// 已選中那一格回 <see langword="true"/> 不重送。<see langword="true"/> 只代表指令送出，不代表伺服器接受。
+    /// 執行緒閘門的理由同 <see cref="SwapBaitById"/>。
     /// </remarks>
     [EzIPC]
     public bool SwapSwimbaitByIndex(byte index)

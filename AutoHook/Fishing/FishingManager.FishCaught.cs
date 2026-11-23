@@ -152,7 +152,7 @@ public partial class FishingManager
                 : caughtCount >= lastCatchCfg.SwapBaitCount;
 
             if (baitThresholdMet &&
-                lastCatchCfg.BaitToSwap.Id != Service.BaitManager.Current)
+                !Service.BaitManager.IsBaitEquipped((uint)lastCatchCfg.BaitToSwap.Id))
             {
                 var result = Service.BaitManager.ChangeBait(lastCatchCfg.BaitToSwap);
 

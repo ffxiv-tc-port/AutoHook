@@ -89,14 +89,26 @@ public partial class FishingManager
         }, "AutoCasting");
     }
 
-    private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg)
+    private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool allowSwimbait = true)
     {
         var blockMooch = lastFishCatchCfg is { Enabled: true, NeverMooch: true };
 
-        if (TryUseSwimbait(acCfg, lastFishCatchCfg, blockMooch))
+        if (allowSwimbait)
         {
-            acCfg.TryCastAction(acCfg.CastLine, true);
-            return;
+            var attempt = TryUseSwimbait(acCfg, lastFishCatchCfg, blockMooch, out var slot, out var slots);
+            if (attempt == SwimbaitAttempt.AlreadySelected)
+            {
+                acCfg.TryCastAction(acCfg.CastLine, true);
+                return;
+            }
+
+            if (attempt == SwimbaitAttempt.Sent)
+            {
+                var seq = Service.BaitManager.SwimbaitSendSeq;
+                Service.TaskManager.Insert(() => WaitSwimbaitThenCast(acCfg, lastFishCatchCfg, seq, slot, slots),
+                    @"游動餌：等選中再拋竿");
+                return;
+            }
         }
 
         if (!blockMooch)
@@ -116,6 +128,15 @@ public partial class FishingManager
             return;
     }
 
+    private enum SwimbaitAttempt
+    {
+        NotUsed,
+        Sent,
+        AlreadySelected,
+    }
+
+    private readonly SwimbaitFailureGate _swimbaitFailures = new();
+
     /// <summary>
     /// 上游 v6+ 的「游動餌」：欄位裡有魚、而且這條魚的以小釣大設定勾了 UseSwimbait、條件成立 ⇒ 改用牠當這一竿的餌。
     /// </summary>
@@ -123,42 +144,34 @@ public partial class FishingManager
     /// 第一行先看 preset 有沒有任何 UseSwimbait：沒有就不碰原生狀態（既有 preset 全部走這條）。
     /// 上游順位：剛釣起的魚本身就在欄位裡、而且以小釣大這一竿放得出去時，讓給以小釣大。
     /// </remarks>
-    private static readonly bool SwimbaitCommandVerified = false;
-    private bool _swimbaitGateLogged;
-
-    private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch)
+    private SwimbaitAttempt TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch,
+        out int sentSlot, out uint[] slots)
     {
+        sentSlot = -1;
+        slots = [];
         var preset = Presets.SelectedPreset;
         if (preset == null || !preset.ListOfMooch.Any(h => h.Enabled && (h.SwimbaitNormal.UseSwimbait || h.SwimbaitIntuition.UseSwimbait)))
-            return false;
+            return SwimbaitAttempt.NotUsed;
 
-        // 刻意先不送：游動餌切換指令（ExecuteCommand 701／25）還沒對台服執行檔驗證，驗過再改成 true。
-        if (!SwimbaitCommandVerified)
-        {
-            if (!_swimbaitGateLogged)
-            {
-                _swimbaitGateLogged = true;
-                Service.PluginLog.Information(@"[游動餌] 這個 preset 想用游動餌，但切換指令尚未對台服驗證，暫不自動切換（其餘照常）");
-            }
-            return false;
-        }
-
-        var slots = Service.BaitManager.SwimBaitIds;
+        slots = Service.BaitManager.SwimBaitIds;
         if (slots.All(id => id == 0))
-            return false;
+            return SwimbaitAttempt.NotUsed;
+
+        if (_swimbaitFailures.Refresh(slots))
+            Service.PrintInfo(@"[游動餌] 游動餌清單變了，恢復嘗試先前停用的那一格");
 
         if (!blockMooch && _lastCatch is { Id: > 0 } last && slots.Contains((uint)last.Id))
         {
             var moochWouldCast = (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast())
                                  || (acCfg.EnableAll && acCfg.CastMooch.Enabled && acCfg.CastMooch.IsAvailableToCast());
             if (moochWouldCast)
-                return false;
+                return SwimbaitAttempt.NotUsed;
         }
 
         for (var i = 0; i < slots.Length; i++)
         {
             var fishId = slots[i];
-            if (fishId == 0)
+            if (fishId == 0 || _swimbaitFailures.IsSuppressed(i))
                 continue;
 
             var cfg = preset.GetCfgById((int)fishId, true);
@@ -174,16 +187,51 @@ public partial class FishingManager
                     unsupportedResult: false, where: @"游動餌"))
                 continue;
 
-            var result = Service.BaitManager.ChangeSwimbait((uint)i);
+            var result = Service.BaitManager.ChangeSwimbait((uint)i,
+                @$"自動（條件：{ConditionEvaluator.Describe(swimbait.ConditionSet, ctx)}）");
 
-            // 要使用者回報的診斷：游動餌的切換指令沒有在台服實機驗過，成敗都要看得到。
-            Service.PrintInfo(@$"[游動餌] 欄位 {i + 1}（{MultiString.GetItemName(fishId)} #{fishId}）→ {result}"
-                              + @$"｜條件：{ConditionEvaluator.Describe(swimbait.ConditionSet, ctx)}");
-
-            if (result == SeFunctions.BaitManager.ChangeBaitReturn.Success)
-                return true;
+            switch (result)
+            {
+                case SeFunctions.BaitManager.ChangeBaitReturn.Success:
+                    sentSlot = i;
+                    return SwimbaitAttempt.Sent;
+                case SeFunctions.BaitManager.ChangeBaitReturn.AlreadyEquipped:
+                    return SwimbaitAttempt.AlreadySelected;
+                case SeFunctions.BaitManager.ChangeBaitReturn.BlockedByStatus:
+                    return SwimbaitAttempt.NotUsed;
+            }
         }
 
-        return false;
+        return SwimbaitAttempt.NotUsed;
+    }
+
+    /// <summary>
+    /// 拋竿前等游動餌確認選中（上限 <see cref="SwimbaitRules.ConfirmTimeoutMs"/>）；確認不到就不用游動餌、照常拋竿。
+    /// </summary>
+    private bool? WaitSwimbaitThenCast(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, int seq, int slot, uint[] slots)
+    {
+        var mine = Service.BaitManager.SwimbaitSendSeq == seq;
+        var result = mine ? Service.BaitManager.PollSwimbaitConfirm() : SwimbaitRules.ConfirmResult.None;
+        if (result == SwimbaitRules.ConfirmResult.Pending)
+            return false;
+
+        if (_lastStep.HasFlag(FishingSteps.None) || _lastStep.HasFlag(FishingSteps.BeganFishing)
+                                                 || _lastStep.HasFlag(FishingSteps.Quitting)
+                                                 || !Service.Configuration.EffectivePluginEnabled)
+            return true;
+
+        if (result == SwimbaitRules.ConfirmResult.Confirmed)
+        {
+            _swimbaitFailures.RecordSuccess();
+            acCfg.TryCastAction(acCfg.CastLine, true);
+            return true;
+        }
+
+        var suppressed = mine && _swimbaitFailures.RecordFailure(slot, slots);
+        Service.PrintInfo(@$"[游動餌] 沒確認到選中欄位 {slot + 1}，這一竿照常拋竿（不用游動餌）"
+                          + (suppressed ? @$"｜連續 {SwimbaitFailureGate.Threshold} 次失敗，清單改變前不再自動切換這一格" : @"")
+                          + (mine ? @"" : @"｜等待中有別的切換送出"));
+        CastLineMoochOrRelease(acCfg, lastFishCatchCfg, allowSwimbait: false);
+        return true;
     }
 }
