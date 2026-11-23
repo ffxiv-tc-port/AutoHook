@@ -13,18 +13,13 @@ namespace AutoHook.Utils;
 /// 「跳過弱咬」會讓分數變低而且**完全沒有徵兆**，所以先量測、後改行為。
 /// 🔴 **權威邊界：這裡不讀、也永遠不會讀任務分數。**任務進度／分數是 ICE 的職權，
 ///    AutoHook 只負責「這一竿發生了什麼」；要把兩邊兜起來請走 IPC。
-/// 輸出：每個「魚 × 咬鉤力道 × 尺寸」新組合一行明細，與每 <see cref="SummaryIntervalMs"/> 毫秒三種咬鉤力道並排的彙總行。
+/// 輸出：每一竿一行明細（含拋竿／提鉤前的 GP 與狀態），與每 <see cref="SummaryIntervalMs"/> 毫秒三種咬鉤力道並排的彙總行。
+/// 明細刻意每竿都印（每竿一行）：GP 換分數的分析要逐竿資料，只印新組合會讓樣本有偏差。
 /// </summary>
 public static class CosmicCatchLog
 {
     /// <summary>彙總行的間隔。太短會洗版，太長則短任務結束前印不出來。</summary>
     private const int SummaryIntervalMs = 60_000;
-
-    /// <summary>
-    /// 每種魚最多印幾行明細。尺寸是連續值，不設上限的話長時間掛機會把 log 洗掉；
-    /// 超過上限之後仍然**照常統計**，只是不再印明細行。
-    /// </summary>
-    private const int MaxDetailLinesPerFish = 24;
 
     private sealed class TugStats
     {
@@ -39,9 +34,7 @@ public static class CosmicCatchLog
     private sealed class FishStats
     {
         public readonly Dictionary<BiteType, TugStats> ByTug = new();
-        public readonly HashSet<(BiteType Bite, ushort Size)> SeenCombos = new();
         public CosmicScoreFocus Focus = CosmicScoreFocus.Unknown;
-        public int DetailLines;
         public bool Dirty;
     }
 
@@ -68,7 +61,11 @@ public static class CosmicCatchLog
     /// <param name="size">遊戲傳來的尺寸。單位沒有離線證據，先照原值記錄。</param>
     /// <param name="collectible">這一竿是不是以收藏品形式入手（fishId 原值 &gt; 500000）。</param>
     /// <param name="bite">咬鉤力道。⚠️ 必須是**咬鉤當下**存下來的值，不能在這裡現讀。</param>
-    public static void Record(uint fishId, uint amount, bool large, ushort size, bool collectible, BiteType bite)
+    /// <param name="atCast">拋竿那一刻（拋竿動作送出前）的 GP 與狀態。</param>
+    /// <param name="atBite">咬鉤後、提鉤動作送出前的 GP 與狀態。</param>
+    /// <param name="hook">AutoHook 這一竿決定用的提鉤；null＝沒經過 AutoHook 的提鉤判斷。</param>
+    public static void Record(uint fishId, uint amount, bool large, ushort size, bool collectible, BiteType bite,
+        FishingSnapshot atCast, FishingSnapshot atBite, HookType? hook)
     {
         List<string>? pending = null;
 
@@ -113,15 +110,14 @@ public static class CosmicCatchLog
                 if (large) tug.LargeCount++;
                 if (collectible) tug.CollectibleCount++;
 
-                var novelCombo = fish.SeenCombos.Add((bite, size));
-                if (novelCombo && fish.DetailLines < MaxDetailLinesPerFish)
-                {
-                    fish.DetailLines++;
-                    QueueLine(ref pending,
-                        $"[宇宙釣魚量測] 任務#{mission} 計分={FocusLabel(focus)}" +
-                        $" ｜ 魚#{fishId} {MultiString.GetItemName(fishId)}" +
-                        $" ｜ 咬鉤={BiteLabel(bite)} 尺寸={size} 大型={YesNo(large)} 收藏={YesNo(collectible)} 起獲={amount}");
-                }
+                // 前段格式不可改：分析工具以「…起獲=N」為前綴解析，新欄位一律接在後面。
+                QueueLine(ref pending,
+                    $"[宇宙釣魚量測] 任務#{mission} 計分={FocusLabel(focus)}" +
+                    $" ｜ 魚#{fishId} {MultiString.GetItemName(fishId)}" +
+                    $" ｜ 咬鉤={BiteLabel(bite)} 尺寸={size} 大型={YesNo(large)} 收藏={YesNo(collectible)} 起獲={amount}" +
+                    $" ｜ 提鉤={FishingSnapshot.HookLabel(hook)}" +
+                    $" ｜ GP 拋竿={atCast.GpText} 提鉤前={atBite.GpText}" +
+                    $" ｜ 拋竿時狀態={atCast.StatusText} ｜ 提鉤前狀態={atBite.StatusText}");
 
                 if (Environment.TickCount64 - _lastSummaryTick >= SummaryIntervalMs)
                     FlushLocked(ref pending);

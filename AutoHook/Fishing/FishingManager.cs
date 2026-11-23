@@ -98,6 +98,11 @@ public partial class FishingManager : IDisposable
     /// </summary>
     private BiteType _lastBiteType = BiteType.Unknown;
 
+    /// <summary>純量測用（同 <see cref="_lastBiteType"/>）：拋竿／提鉤前的 GP 與狀態、這一竿決定用的提鉤。釣起時用完就清。</summary>
+    private FishingSnapshot _castSnapshot;
+    private FishingSnapshot _biteSnapshot;
+    private HookType? _lastHookDecision;
+
     private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, ulong targetId,
         uint a4, uint a5,
         uint a6, IntPtr a7);
@@ -483,6 +488,10 @@ public partial class FishingManager : IDisposable
         _isMooching = mooching;
         _lureSuccess = false;
 
+        _castSnapshot = FishingSnapshot.Take();
+        _biteSnapshot = default;
+        _lastHookDecision = null;
+
         // 純蒐證：重設「距拋竿／距上一則階梯訊息」的基準。不影響任何行為。
         LureLadderLog.OnCastStarted();
 
@@ -537,6 +546,7 @@ public partial class FishingManager : IDisposable
 
         // 只讀一次 TugType，順手留一份給量測用（見 _lastBiteType）。
         _lastBiteType = Service.TugType?.Bite ?? BiteType.Unknown;
+        _biteSnapshot = FishingSnapshot.Take();
         HookFish(_lastBiteType, currentHook);
 
     }
@@ -552,6 +562,7 @@ public partial class FishingManager : IDisposable
         var timePassed = Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
 
         var hook = currentHook.GetHook(bite, timePassed);
+        _lastHookDecision = hook ?? HookType.None;
 
         if (hook is null or HookType.None)
         {
@@ -583,7 +594,13 @@ public partial class FishingManager : IDisposable
         //    而且完全看不出來。清成 Unknown 至少讓「不知道」在 log 裡看得見。
         var biteType = _lastBiteType;
         _lastBiteType = BiteType.Unknown;
-        CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType);
+        var castSnapshot = _castSnapshot;
+        var biteSnapshot = _biteSnapshot;
+        var hookDecision = _lastHookDecision;
+        _castSnapshot = default;
+        _biteSnapshot = default;
+        _lastHookDecision = null;
+        CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType, castSnapshot, biteSnapshot, hookDecision);
 
         _lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         var lastFishCatchCfg = GetLastCatchConfig();
