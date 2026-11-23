@@ -77,6 +77,9 @@ public class AutoCastsConfig
         return cast;
     }
 
+    /// <summary>「只在指定時段施放」沒開，或現在在時段內。</summary>
+    public bool AllowsTimedCast() => !OnlyCastDuringSpecificTime || InsideCastWindow();
+
     private unsafe bool InsideCastWindow()
     {
         // 🔴 Framework.Instance() 是 [StaticAddress(..., isPointer: true)]：產生器讀「指標的位址」

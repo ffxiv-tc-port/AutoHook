@@ -144,6 +144,12 @@ public class Configuration : IPluginConfiguration
     /// <summary>兩次出聲之間的本機最短間隔（秒）。判準寫壞時的保險絲，不是功能本身。</summary>
     public int TataruPraiseMinIntervalSeconds = 60;
 
+    /// <summary>宇宙探索尺寸計分任務的耐心策略（見 <see cref="CosmicPatience"/>）。</summary>
+    public CosmicPatienceMode CosmicPatienceMode = CosmicPatienceMode.Auto;
+
+    /// <summary>自動放耐心II之前，除了 560 GP 之外還要留多少給耐心期間的精準／強力提鉤（每竿 50）。</summary>
+    public int CosmicPatienceHookGpReserve = CosmicPatience.DefaultHookGpReserve;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 

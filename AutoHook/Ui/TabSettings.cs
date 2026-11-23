@@ -89,6 +89,8 @@ public class TabSettings : BaseTab
 
         DrawTataruPraise();
 
+        DrawCosmicPatience();
+
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);
@@ -150,6 +152,52 @@ public class TabSettings : BaseTab
                 Service.Save();
             }
         }, @"需要另外安裝 TataruPraise（塔塔露誇獎）插件；沒裝的話這裡勾了也不會有任何事發生，也不會影響釣魚。");
+    }
+
+    /// <summary>宇宙探索尺寸計分任務的耐心策略。字面繁中的理由同 <see cref="DrawTataruPraise"/>。</summary>
+    private static void DrawCosmicPatience()
+    {
+        if (!ImGui.TreeNodeEx(@"宇宙探索：尺寸計分任務的耐心###CosmicPatience", ImGuiTreeNodeFlags.FramePadding))
+            return;
+
+        ImGui.TextWrapped(@"只作用在任務說明寫「根據大小／最大尺寸給予評價」的宇宙探索釣魚任務；其他釣魚完全不受影響。");
+
+        DrawCosmicPatienceRadio(@"自動（建議）", CosmicPatienceMode.Auto,
+            @"preset 已經用耐心、大魚獵手或雙重／三重提鉤時照 preset；" + "\n" +
+            @"preset 沒在尺寸上花 GP 時，GP 夠就放耐心II。" + "\n" +
+            @"耐心期間：雙重／三重提鉤暫停，弱咬用精準提鉤、強咬／傳說咬用強力提鉤，華麗提鉤冷卻好時優先。");
+        DrawCosmicPatienceRadio(@"尺寸總和型任務優先耐心II", CosmicPatienceMode.PreferForSizeSum,
+            @"「根據大小給予評價」（每條魚尺寸加總）的任務，即使 preset 用大魚獵手或雙重／三重提鉤也先放耐心II。" + "\n" +
+            @"⚠️ 耐心期間大魚獵手不會施放、雙重／三重提鉤會暫停；雙重提鉤每竿起 2 條、分數直接翻倍，這個模式不一定比較高分。" + "\n" +
+            @"「最大尺寸」型任務仍照「自動」。");
+        DrawCosmicPatienceRadio(@"關閉（完全照 preset）", CosmicPatienceMode.Off,
+            @"不自動放耐心，耐心期間也不換提鉤。");
+
+        if (Service.Configuration.CosmicPatienceMode != CosmicPatienceMode.Off)
+        {
+            var reserve = Service.Configuration.CosmicPatienceHookGpReserve;
+            if (DrawUtil.EditNumberField(@"放耐心II前另外保留給提鉤的 GP", 60f, ref reserve,
+                    @"耐心II 本身 560 GP；耐心期間每次精準／強力提鉤再 50 GP，不夠就只能用一般提鉤（成功率降低）。" + "\n" +
+                    @"預設 150＝大約三竿。"))
+            {
+                Service.Configuration.CosmicPatienceHookGpReserve = Math.Clamp(reserve, 0, 1000);
+                Service.Save();
+            }
+        }
+
+        ImGui.TreePop();
+    }
+
+    private static void DrawCosmicPatienceRadio(string label, CosmicPatienceMode mode, string help)
+    {
+        if (ImGui.RadioButton(label, Service.Configuration.CosmicPatienceMode == mode))
+        {
+            Service.Configuration.CosmicPatienceMode = mode;
+            Service.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(help);
     }
 
     private static void DrawDelayHook()

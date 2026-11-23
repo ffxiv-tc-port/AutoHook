@@ -46,6 +46,7 @@ namespace AutoHook.Data
                 SurfaceSlap = 1803,
                 IdenticalCast = 1804,
                 AnglersFortune = 850,
+                InefficientHooking = 764,
                 AnglersArt = 2778,
                 MakeshiftBait = 2779,
                 PrizeCatch = 2780,

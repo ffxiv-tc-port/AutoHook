@@ -179,6 +179,9 @@ public class HookConfig : BaseOption
 
         if (hookDictionary.TryGetValue(bite, out var hook))
         {
+            if (CosmicPatience.ShouldGuardHooks())
+                return GetPatienceSafeHook(hookset, hook, stellar, bite, timePassed, ignoreTimers);
+
             // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前。
             if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
                 return HookType.Stellar;
@@ -234,6 +237,33 @@ public class HookConfig : BaseOption
 
         //Service.Status = "Skipping bite - No hook for this bite is enabled";
         return HookType.None;
+    }
+
+    /// <summary>
+    /// 宇宙尺寸計分任務、耐心期間的提鉤：preset「要不要提這一咬」照舊（三格任一啟用且條件成立），
+    /// 「用哪一招」換成不受提鉤成功率降低影響的那一種。華麗提鉤不耗 GP，可用時優先；
+    /// 雙重／三重提鉤在耐心期間會失敗，改成單鉤 —— 少起幾條，但不會整竿落空。
+    /// </summary>
+    private HookType GetPatienceSafeHook(BaseHookset hookset,
+        (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph) hook,
+        BaseBiteConfig? stellar, BiteType bite, double timePassed, bool ignoreTimers)
+    {
+        if (ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
+            return HookType.Stellar;
+
+        var wanted = (hookset.UseTripleHook && hook.th.HooksetEnabled && CheckHookCondition(hook.th, timePassed, ignoreTimers))
+                     || (hookset.UseDoubleHook && hook.dh.HooksetEnabled && CheckHookCondition(hook.dh, timePassed, ignoreTimers))
+                     || (hook.ph.HooksetEnabled && CheckHookCondition(hook.ph, timePassed, ignoreTimers));
+
+        if (!wanted)
+        {
+            if (Service.Status == "")
+                Service.Status = UIStrings.Status_NoHookEnabled;
+            return HookType.None;
+        }
+
+        Service.Status = "";
+        return CosmicPatience.SafeSingleHook(bite);
     }
 
     /// <summary>

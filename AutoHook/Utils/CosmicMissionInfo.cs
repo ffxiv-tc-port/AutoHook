@@ -26,6 +26,22 @@ public enum CosmicScoreFocus
     Evaluation = 2,
 }
 
+/// <summary>任務分數怎麼吃「尺寸」。跟 <see cref="CosmicScoreFocus"/> 是兩件事：這一格只給耐心策略用。</summary>
+public enum CosmicSizeScoring
+{
+    /// <summary>分數跟尺寸無關，或判不出來。</summary>
+    None = 0,
+
+    /// <summary>每一條魚的尺寸加總（雙重／三重提鉤起幾條就算幾次）。</summary>
+    Sum = 1,
+
+    /// <summary>只看釣到的最大尺寸，限定時間。</summary>
+    Max = 2,
+
+    /// <summary>只看釣到的最大尺寸，釣餌有限：提鉤失敗等於白白用掉一個餌。</summary>
+    MaxLimitedBait = 3,
+}
+
 /// <summary>目前任務的計分側寫。</summary>
 /// <param name="Focus">靠數量還是靠品質拿分。</param>
 /// <param name="EveryFishCounts">
@@ -35,7 +51,11 @@ public enum CosmicScoreFocus
 ///    preset 的提鉤時間窗正是拿來挑那條魚的，繞過去只會一直釣到不要的魚。
 ///    只有「任意魚都算」的任務才適合忽略時間窗。
 /// </param>
-public readonly record struct CosmicMissionProfile(CosmicScoreFocus Focus, bool EveryFishCounts);
+/// <param name="Size">分數怎麼吃尺寸；只給耐心策略用，不影響華麗提鉤順位與時間窗。</param>
+public readonly record struct CosmicMissionProfile(
+    CosmicScoreFocus Focus,
+    bool EveryFishCounts,
+    CosmicSizeScoring Size = CosmicSizeScoring.None);
 
 /// <summary>
 /// 判斷目前的宇宙探索任務是「要數量」還是「要評價」，用來決定華麗提鉤的順位。
@@ -69,9 +89,14 @@ public static class CosmicMissionInfo
         [118] = new(CosmicScoreFocus.Evaluation, false), // 用有限的釣餌釣到收藏品…根據收藏價值給予評價。
         [122] = new(CosmicScoreFocus.Evaluation, false), // 在限定時間內盡可能釣起收藏品…根據收藏價值給予評價。
 
+        // ── 尺寸計分：Focus 刻意留 Unknown（「完好無損」跟尺寸是不是同一件事沒有證據），
+        //    只標尺寸型別給耐心策略用。分數＝尺寸×10（119 再乘起獲條數），以任務當下分數對過。
+        [119] = new(CosmicScoreFocus.Unknown, false, CosmicSizeScoring.Sum),            // 在限定時間內達成目標評價，根據大小給予評價。
+        [117] = new(CosmicScoreFocus.Unknown, false, CosmicSizeScoring.MaxLimitedBait), // 用有限的釣餌…根據最大尺寸給予評價。
+        [120] = new(CosmicScoreFocus.Unknown, false, CosmicSizeScoring.Max),            // 在限定時間內…根據釣到的魚的最大尺寸給予評價。
+
         // ── 以下**刻意不列**，一律當成 Unknown 退回手動設定：
         //    116（種類越多評價越高）→ 雙重／三重與華麗提鉤對「種類數」都證不出好處。
-        //    117／119／120（根據尺寸給予評價）→ 「完好無損」跟「尺寸」是不是同一件事，離線沒有任何證據。
         //    135~138（漁師釣獲、別的職業製作交貨）→ 評分發生在製作端，釣魚只是前置。
     };
 
@@ -190,6 +215,8 @@ public static class CosmicMissionInfo
         {
             CosmicScoreFocus.Quantity => "數量／速度型（雙重、三重提鉤優先）",
             CosmicScoreFocus.Evaluation => "評價／收藏價值型（華麗提鉤優先）",
+            _ when profile.Size != CosmicSizeScoring.None
+                => $"{SizeLabel(profile.Size)}（華麗提鉤順位照你手動設定；耐心策略見「[宇宙耐心]」那行）",
             _ => "判不出型別（改用你手動設定的順位）",
         };
 
@@ -199,4 +226,12 @@ public static class CosmicMissionInfo
 
         Service.PrintInfo($"[宇宙探索] 目前任務 WKSMissionUnit#{missionId}，計分方式判定為：{focusText}{everyFish}。");
     }
+
+    public static string SizeLabel(CosmicSizeScoring size) => size switch
+    {
+        CosmicSizeScoring.Sum => "尺寸總和型（每條魚的尺寸加總）",
+        CosmicSizeScoring.Max => "最大尺寸型（限時）",
+        CosmicSizeScoring.MaxLimitedBait => "最大尺寸型（有限釣餌）",
+        _ => "尺寸不計分",
+    };
 }

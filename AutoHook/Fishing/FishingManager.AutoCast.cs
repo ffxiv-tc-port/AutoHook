@@ -72,9 +72,17 @@ public partial class FishingManager
             var acCfg = GetAutoCastCfg();
 
             var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
+            var hookset = GetHookCfg().GetHookset();
+
+            if (CosmicPatience.TryAutoCast(acCfg, hookset, ignoreMooch, beforePreset: true))
+                return;
+
             var autoCast = acCfg.GetNextAutoCast(ignoreMooch);
 
             if (acCfg.TryCastAction(autoCast, false, ignoreMooch))
+                return;
+
+            if (CosmicPatience.TryAutoCast(acCfg, hookset, ignoreMooch, beforePreset: false))
                 return;
 
             CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
