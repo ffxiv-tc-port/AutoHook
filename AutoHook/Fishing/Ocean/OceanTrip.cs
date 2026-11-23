@@ -57,27 +57,45 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
     public void Dispose()
     {
         Service.Framework.Update -= OnUpdate;
-        _machine.Stop(@"AutoHook 正在卸載");
+        RequestStop(@"AutoHook 正在卸載");
     }
 
     public void RequestStart()
     {
-        var now = Environment.TickCount64;
-        _hasPos = false;
-        var inputs = Read(now);
-        if (!_machine.Start(inputs, now, out var reason))
+        try
         {
-            ChatQueue.Print(@$"[AutoHook] 出海垂釣沒有開始：{reason}");
-            Service.PrintInfo(LogPrefix + @$"沒有開始：{reason}");
-            return;
-        }
+            var now = Environment.TickCount64;
+            _hasPos = false;
+            var inputs = Read(now);
+            if (!_machine.Start(inputs, now, out var reason))
+            {
+                ChatQueue.Print(@$"[AutoHook] 出海垂釣沒有開始：{reason}");
+                Service.PrintInfo(LogPrefix + @$"沒有開始：{reason}");
+                return;
+            }
 
-        _presetBefore = Service.Configuration.HookPresets.SelectedGuid;
-        _presetChanged = false;
-        ChatQueue.Print(@"[AutoHook] 出海垂釣自動化已開始（/ahocean stop 或設定視窗的停止鈕可隨時停下）");
+            _presetBefore = Service.Configuration.HookPresets.SelectedGuid;
+            _presetChanged = false;
+            ChatQueue.Print(@"[AutoHook] 出海垂釣自動化已開始（/ahocean stop 或設定視窗的停止鈕可隨時停下）");
+        }
+        catch (Exception e)
+        {
+            Service.PluginLog.Warning(e, LogPrefix + @"開始時擲出例外");
+            ChatQueue.Print(@$"[AutoHook] 出海垂釣沒有開始：內部錯誤（{e.GetType().Name}）");
+        }
     }
 
-    public void RequestStop(string reason) => _machine.Stop(reason);
+    public void RequestStop(string reason)
+    {
+        try
+        {
+            _machine.Stop(reason);
+        }
+        catch (Exception e)
+        {
+            Service.PluginLog.Warning(e, LogPrefix + @"停止時擲出例外");
+        }
+    }
 
     private void OnUpdate(IFramework _)
     {
@@ -89,8 +107,24 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
             return;
         _nextStepAt = now + StepIntervalMs;
 
-        var inputs = Read(now);
-        _machine.Step(inputs, now);
+        // 同一插件的 Framework.Update 共用一個 try/catch：這裡擲出去會讓排在後面的自動釣魚整幀跳過。
+        try
+        {
+            var inputs = Read(now);
+            _machine.Step(inputs, now);
+        }
+        catch (Exception e)
+        {
+            Service.PluginLog.Warning(e, LogPrefix + @"每拍處理擲出例外，停止出海垂釣自動化");
+            try
+            {
+                _machine.Stop(@$"內部錯誤（{e.GetType().Name}），已停止");
+            }
+            catch (Exception inner)
+            {
+                Service.PluginLog.Warning(inner, LogPrefix + @"停止時又擲出例外");
+            }
+        }
     }
 
     private OceanTripInputs Read(long now)
@@ -106,6 +140,8 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
             HookBusy = Service.TaskManager.IsBusy,
         };
         i.OnBoatTerritory = OceanData.IsBoatTerritory(i.TerritoryId);
+        if (i.UnavailableReason == null && !DirectorResolved)
+            i.UnavailableReason = @"遊戲改版後讀不到出海垂釣的狀態（遊戲位址對不上），請等插件更新";
 
         if (player != null)
         {
@@ -145,9 +181,15 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
         return i;
     }
 
+    // 改版後特徵碼沒解到時，呼叫這個函式指標＝存取違規（try/catch 攔不到）⇒ 先判。
+    private static unsafe bool DirectorResolved => EventFramework.MemberFunctionPointers.GetInstanceContentDirector != null;
+
     /// <summary>船上狀態的數值快照（不在船上＝OceanActive false）。設定視窗沒在跑時也用它顯示。</summary>
     public static unsafe OceanTripView ReadView()
     {
+        if (!DirectorResolved)
+            return default;
+
         var eventFramework = EventFramework.Instance();
         var ocean = eventFramework == null ? null : eventFramework->GetInstanceContentOceanFishing();
         if (ocean == null)
@@ -175,7 +217,8 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
         if (player == null)
             return false;
 
-        var target = PickRailPoint(player);
+        var from = player.Position;
+        var target = PickRailPoint(from, player.EntityId);
         var approach = new Vector3(target.X > 0 ? target.X - 1.1f : target.X + 1.1f, DeckY, target.Z);
         _walkTarget = target;
         try
@@ -189,7 +232,7 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
             return false;
         }
 
-        Service.PrintInfo(LogPrefix + @$"走向船邊 {target.X:F1}, {target.Z:F1}（目前 {player.Position.X:F1}, {player.Position.Z:F1}）");
+        Service.PrintInfo(LogPrefix + @$"走向船邊 {target.X:F1}, {target.Z:F1}（目前 {from.X:F1}, {from.Z:F1}）");
         return true;
     }
 
@@ -218,11 +261,11 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
     }
 
     // 選離其他玩家最遠（夠遠就好）的船邊點，平手時選離自己近的，避免和別人疊在同一格。
-    private static Vector3 PickRailPoint(IPlayerCharacter self)
+    private static Vector3 PickRailPoint(Vector3 from, uint selfId)
     {
-        var me = new Vector2(self.Position.X, self.Position.Z);
+        var me = new Vector2(from.X, from.Z);
         var others = Service.Objects.OfType<IPlayerCharacter>()
-            .Where(p => p.EntityId != self.EntityId)
+            .Where(p => p.EntityId != selfId)
             .Select(p => new Vector2(p.Position.X, p.Position.Z))
             .ToList();
 
