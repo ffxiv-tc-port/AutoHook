@@ -252,8 +252,9 @@ internal sealed class OceanTrip : IOceanTripEffects, IDisposable
     void IOceanTripEffects.ApplyRule(uint zone, bool spectral)
     {
         var (spot, time) = OceanData.Stop(View.Route, zone);
-        var where = @$"第 {zone + 1} 站 {OceanData.SpotName(spot)}（{OceanData.TimeName(time)}）{(spectral ? @"幻海流" : @"一般")}";
-        var rule = OceanStopRule.Match(Cfg.Rules, spot, time);
+        var routeName = OceanData.RouteName(View.Route);
+        var where = @$"{routeName} 第 {zone + 1} 站 {OceanData.SpotName(spot)}（{OceanData.TimeName(time)}）{(spectral ? @"幻海流" : @"一般")}";
+        var rule = OceanStopRule.Match(Cfg.Rules, routeName, spot, time);
         if (rule == null)
         {
             Service.PrintInfo(LogPrefix + @$"{where}：沒有設定規則，維持目前的 preset 與釣餌");

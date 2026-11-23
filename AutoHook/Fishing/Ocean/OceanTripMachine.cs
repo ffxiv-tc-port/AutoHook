@@ -71,9 +71,13 @@ public interface IOceanTripEffects
     void Ended(string reason, bool finished);
 }
 
-/// <summary>一條「哪一站用什麼」的規則。TimeId 0＝任何時段；字串 "-"／餌 0＝不切換。</summary>
+/// <summary>
+/// 一條「哪一站用什麼」的規則。RouteName 空字串／SpotId 0／TimeId 0＝不限；preset "-"／餌 0＝不切換。
+/// 多條都符合時取指定欄位最多的那條，一樣多取清單裡較前面的。
+/// </summary>
 public class OceanStopRule
 {
+    public string RouteName = @"";
     public uint SpotId;
     public uint TimeId;
     public string Preset = @"-";
@@ -81,20 +85,29 @@ public class OceanStopRule
     public string SpectralPreset = @"-";
     public int SpectralBaitId;
 
-    public static OceanStopRule? Match(IReadOnlyList<OceanStopRule> rules, uint spotId, uint timeId)
+    public static OceanStopRule? Match(IReadOnlyList<OceanStopRule> rules, string routeName, uint spotId, uint timeId)
     {
-        OceanStopRule? anyTime = null;
+        OceanStopRule? best = null;
+        var bestScore = -1;
         foreach (var rule in rules)
         {
-            if (rule.SpotId != spotId)
+            var anyRoute = string.IsNullOrEmpty(rule.RouteName);
+            if (!anyRoute && rule.RouteName != routeName)
                 continue;
-            if (rule.TimeId == timeId && timeId != 0)
-                return rule;
-            if (rule.TimeId == 0)
-                anyTime ??= rule;
+            if (rule.SpotId != 0 && rule.SpotId != spotId)
+                continue;
+            if (rule.TimeId != 0 && rule.TimeId != timeId)
+                continue;
+
+            var score = (anyRoute ? 0 : 1) + (rule.SpotId != 0 ? 1 : 0) + (rule.TimeId != 0 ? 1 : 0);
+            if (score > bestScore)
+            {
+                best = rule;
+                bestScore = score;
+            }
         }
 
-        return anyTime;
+        return best;
     }
 }
 

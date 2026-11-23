@@ -18,6 +18,7 @@ public class TabOceanTrip : BaseTab
     public override OpenWindow Type { get; } = OpenWindow.OceanTrip;
 
     private const string NoSwap = @"-";
+    private const string AnyRoute = @"任何航線";
     private string _baitFilter = @"";
 
     private static OceanTripConfig Cfg => Service.Configuration.OceanTrip;
@@ -69,7 +70,13 @@ public class TabOceanTrip : BaseTab
             return;
         }
 
-        ImGui.TextUnformatted(@$"航線 #{view.Route}　第 {view.Zone + 1} 站 {OceanData.SpotName(view.SpotId)}（{OceanData.TimeName(view.TimeId)}）");
+        var routeName = OceanData.RouteName(view.Route);
+        ImGui.TextUnformatted(@$"{(routeName.Length > 0 ? routeName : @$"航線 #{view.Route}")}　第 {view.Zone + 1} 站");
+        ImGui.SameLine();
+        if (view.SpotId == 0)
+            ImGui.TextColored(ImGuiColors.DalamudGrey, @"?");
+        else
+            ImGui.TextUnformatted(@$"{OceanData.SpotName(view.SpotId)}（{OceanData.TimeName(view.TimeId)}）");
         if (view.Spectral)
         {
             ImGui.SameLine();
@@ -114,16 +121,28 @@ public class TabOceanTrip : BaseTab
         ImGui.TextColored(ImGuiColors.DalamudGrey, @"(?)");
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(@"沒有規則的站維持目前的 preset 與釣餌。" + Environment.NewLine +
-                             @"同一海域可以分時段設定，指定時段優先於「任何時段」。" + Environment.NewLine +
+                             @"航線、海域、時段都可以設「任何」；同時符合好幾條時，取指定得最多的那條（一樣多取上面那條）。" + Environment.NewLine +
+                             @"例如整條航線用同一組 preset：只指定航線、海域與時段留「任何」。" + Environment.NewLine +
                              @"「幻海流」兩欄在幻海流出現時套用，結束時換回「一般」兩欄；設成不切換就不動。");
 
         if (ImGui.Button(@"新增規則"))
         {
-            Cfg.Rules.Add(new OceanStopRule { SpotId = OceanData.Spots.FirstOrDefault().Id });
+            Cfg.Rules.Add(new OceanStopRule());
             Service.Save();
         }
 
         var view = OceanTrip.ReadView();
+        var currentRoute = view.OceanActive ? OceanData.RouteName(view.Route) : @"";
+        if (currentRoute.Length > 0)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button(@"新增目前這條航線"))
+            {
+                Cfg.Rules.Add(new OceanStopRule { RouteName = currentRoute });
+                Service.Save();
+            }
+        }
+
         if (view.OceanActive && view.SpotId != 0)
         {
             ImGui.SameLine();
@@ -140,11 +159,12 @@ public class TabOceanTrip : BaseTab
             return;
         }
 
-        using var table = ImRaii.Table(@"###oceanRules", 7,
+        using var table = ImRaii.Table(@"###oceanRules", 8,
             ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX);
         if (!table)
             return;
 
+        ImGui.TableSetupColumn(@"航線");
         ImGui.TableSetupColumn(@"海域");
         ImGui.TableSetupColumn(@"時段");
         ImGui.TableSetupColumn(@"一般 preset");
@@ -161,6 +181,8 @@ public class TabOceanTrip : BaseTab
             using var id = ImRaii.PushId(k);
             ImGui.TableNextRow();
 
+            ImGui.TableNextColumn();
+            DrawRouteCombo(rule);
             ImGui.TableNextColumn();
             DrawSpotCombo(rule);
             ImGui.TableNextColumn();
@@ -185,12 +207,41 @@ public class TabOceanTrip : BaseTab
         }
     }
 
+    private static void DrawRouteCombo(OceanStopRule rule)
+    {
+        ImGui.SetNextItemWidth(Em(150));
+        using var combo = ImRaii.Combo(@"##route", rule.RouteName.Length > 0 ? rule.RouteName : AnyRoute);
+        if (!combo)
+            return;
+
+        if (ImGui.Selectable(AnyRoute, rule.RouteName.Length == 0))
+        {
+            rule.RouteName = @"";
+            Service.Save();
+        }
+
+        foreach (var name in OceanData.RouteNames)
+        {
+            if (ImGui.Selectable(name, name == rule.RouteName))
+            {
+                rule.RouteName = name;
+                Service.Save();
+            }
+        }
+    }
+
     private static void DrawSpotCombo(OceanStopRule rule)
     {
         ImGui.SetNextItemWidth(Em(140));
         using var combo = ImRaii.Combo(@"##spot", OceanData.SpotName(rule.SpotId));
         if (!combo)
             return;
+
+        if (ImGui.Selectable(OceanData.SpotName(0), rule.SpotId == 0))
+        {
+            rule.SpotId = 0;
+            Service.Save();
+        }
 
         foreach (var (spotId, name) in OceanData.Spots)
         {

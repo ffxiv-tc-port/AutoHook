@@ -12,6 +12,7 @@ internal static class OceanData
 
     private static HashSet<uint>? _boatTerritories;
     private static List<(uint Id, string Name)>? _spots;
+    private static List<string>? _routeNames;
     private static readonly Dictionary<uint, (uint Spot, uint Time)[]> RouteStops = new();
 
     public static bool IsBoatTerritory(uint territoryId)
@@ -43,6 +44,21 @@ internal static class OceanData
         return zone < stops.Length ? stops[zone] : (0, 0);
     }
 
+    /// <summary>IKDRoute 的航線名稱（同一條航線三個出發時段共用一個名稱）；查不到回空字串。</summary>
+    public static string RouteName(uint route)
+        => route != 0 && Service.DataManager.GetExcelSheet<IKDRoute>().TryGetRow(route, out var row)
+            ? row.Name.ExtractText()
+            : @"";
+
+    /// <summary>不重複的航線名稱，照列號順序。</summary>
+    public static IReadOnlyList<string> RouteNames
+        => _routeNames ??= Service.DataManager.GetExcelSheet<IKDRoute>()
+            .Where(r => r.RowId != 0)
+            .Select(r => r.Name.ExtractText())
+            .Where(n => n.Length > 0)
+            .Distinct()
+            .ToList();
+
     /// <summary>所有出海垂釣海域（IKDSpot 1 起），名稱取 PlaceName。</summary>
     public static IReadOnlyList<(uint Id, string Name)> Spots
         => _spots ??= Service.DataManager.GetExcelSheet<IKDSpot>()
@@ -58,7 +74,7 @@ internal static class OceanData
                 return name;
         }
 
-        return spotId == 0 ? @"?" : @$"海域 #{spotId}";
+        return spotId == 0 ? @"任何海域" : @$"海域 #{spotId}";
     }
 
     /// <summary>IKDTimeDefine 1／2／3＝白天／黃昏／夜晚；0＝規則用的「任何時段」。</summary>
