@@ -210,13 +210,23 @@ public class HookConfig : BaseOption
             }
 
             var multiHookUnavailable = false;
+            var noMultiHook = ShouldSkipMultiHook(CosmicMissionInfo.GetCurrentProfile().DistinctSpecies,
+                Service.Configuration.NoMultiHookWhenDistinctSpecies);
+            var multiHookWanted = false;
 
             // 華麗提鉤（宇宙探索）—— 排在雙重／三重之前。
             if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
                 return HookType.Stellar;
 
+            if (noMultiHook)
+            {
+                // 只記「preset 想在這一咬放雙重／三重」，提鉤種類在下面換成一般提鉤；GP 不足放掉魚的設定也不套用。
+                multiHookWanted = (hookset.UseTripleHook && hook.th.HooksetEnabled && CheckHookCondition(hook.th, timePassed, ignoreTimers))
+                                  || (hookset.UseDoubleHook && hook.dh.HooksetEnabled && CheckHookCondition(hook.dh, timePassed, ignoreTimers));
+            }
+
             // Triple Hook
-            if (hookset.UseTripleHook && hook.th.HooksetEnabled)
+            if (!noMultiHook && hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.th, timePassed, ignoreTimers))
                 {
@@ -236,7 +246,7 @@ public class HookConfig : BaseOption
             }
 
             // Double Hook
-            if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
+            if (!noMultiHook && hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.dh, timePassed, ignoreTimers))
                 {
@@ -271,6 +281,15 @@ public class HookConfig : BaseOption
             else if (Service.Status == "")
                 Service.Status = UIStrings.Status_NoHookEnabled;
 
+            if (multiHookWanted)
+            {
+                Service.PrintInfo(
+                    @$"[HookManager] 要湊幾種不同魚的任務（任務#{CosmicMissionInfo.GetCurrentMissionId()}）：" +
+                    @$"preset 在{CosmicCatchLog.BiteLabel(bite)}要放雙重／三重提鉤，改用一般提鉤" +
+                    @$"｜拋竿後 {timePassed.ToString(@"0.00", System.Globalization.CultureInfo.InvariantCulture)} 秒");
+                return HookType.Normal;
+            }
+
             noHookReason = DescribeSkip(hookedAtAll, multiHookUnavailable && !hook.ph.HooksetEnabled, unconfiguredNote);
             return HookType.None;
         }
@@ -279,6 +298,9 @@ public class HookConfig : BaseOption
         //Service.Status = "Skipping bite - No hook for this bite is enabled";
         return HookType.None;
     }
+
+    /// <summary>湊種類任務且設定開著＝不放雙重／三重提鉤（同種多條對種類數沒有幫助）。</summary>
+    internal static bool ShouldSkipMultiHook(bool distinctSpecies, bool settingOn) => distinctSpecies && settingOn;
 
     /// <summary>preset 對這種咬鉤力道有沒有開任何一種提鉤（雙重／三重要連同總開關一起看）。</summary>
     private static bool IsBiteHookedAtAll(BaseHookset hookset,

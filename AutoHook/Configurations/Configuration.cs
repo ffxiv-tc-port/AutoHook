@@ -158,6 +158,12 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     [DefaultValue(true)] public bool HookUnconfiguredBitesWhenEveryFishCounts = true;
 
+    /// <summary>
+    /// 任務要湊幾種不同的魚（WKSMissionText 113、116）時，preset 要放雙重／三重提鉤的咬鉤改用一般提鉤。
+    /// 只換提鉤種類、不改咬鉤篩選；條件不符照舊歇竿。
+    /// </summary>
+    [DefaultValue(true)] public bool NoMultiHookWhenDistinctSpecies = true;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 

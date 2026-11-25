@@ -100,6 +100,13 @@ public class TabSettings : BaseTab
             @"其他原因的跳過照舊（提鉤條件不符、preset 設定 GP 不夠時放掉魚）。" + "\n" +
             @"關掉＝完全照 preset。");
 
+        DrawUtil.Checkbox(@"宇宙探索：要湊幾種不同魚的任務，不用雙重／三重提鉤",
+            ref Service.Configuration.NoMultiHookWhenDistinctSpecies,
+            @"只作用在任務說明寫「釣到幾種不同的水產品」的宇宙探索釣魚任務。" + "\n" +
+            @"這類任務只算種類，同一種魚一次起獲好幾條沒有幫助，雙重提鉤（400 GP）、三重提鉤（700 GP）等於白花。" + "\n" +
+            @"preset 在這種咬鉤要放雙重／三重提鉤時，改用一般提鉤；preset 本來就不提的咬鉤照樣歇竿。" + "\n" +
+            @"關掉＝完全照 preset。");
+
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);

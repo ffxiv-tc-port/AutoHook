@@ -52,10 +52,15 @@ public enum CosmicSizeScoring
 ///    只有「任意魚都算」的任務才適合忽略時間窗。
 /// </param>
 /// <param name="Size">分數怎麼吃尺寸；只給耐心策略用，不影響華麗提鉤順位與時間窗。</param>
+/// <param name="DistinctSpecies">
+/// 任務要的是「幾種不同的水產品」（WKSMissionText 113、116）：同一種魚多起獲幾條對種類數沒有幫助。
+/// 跟 <paramref name="Focus"/> 分開放，關掉相關設定時順位判斷完全照舊。
+/// </param>
 public readonly record struct CosmicMissionProfile(
     CosmicScoreFocus Focus,
     bool EveryFishCounts,
-    CosmicSizeScoring Size = CosmicSizeScoring.None);
+    CosmicSizeScoring Size = CosmicSizeScoring.None,
+    bool DistinctSpecies = false);
 
 /// <summary>
 /// 判斷目前的宇宙探索任務是「要數量」還是「要評價」，用來決定華麗提鉤的順位。
@@ -77,7 +82,7 @@ public static class CosmicMissionInfo
         // ── 分數綁在速度上：早點釣完 → 剩餘時間多 → 評價高。一竿多魚直接縮短總時間。
         //    113/114 要的是「幾種不同」「特定」水產品 —— 釣到別的魚沒有用，
         //    所以 EveryFishCounts = false（preset 的提鉤時間窗正是拿來挑那條魚的，不能繞過）。
-        [113] = new(CosmicScoreFocus.Quantity, false), // 盡快釣到幾種不同的水產品，剩餘時間越多評價越高。
+        [113] = new(CosmicScoreFocus.Quantity, false, DistinctSpecies: true), // 盡快釣到幾種不同的水產品，剩餘時間越多評價越高。
         [114] = new(CosmicScoreFocus.Quantity, false), // 盡快釣到指定數量的特定水產品，剩餘時間越多評價越高。
         [115] = new(CosmicScoreFocus.Quantity, true),  // 盡快釣到指定數量的「任意」水產品，剩餘時間越多評價越高。
 
@@ -95,8 +100,10 @@ public static class CosmicMissionInfo
         [117] = new(CosmicScoreFocus.Unknown, false, CosmicSizeScoring.MaxLimitedBait), // 用有限的釣餌…根據最大尺寸給予評價。
         [120] = new(CosmicScoreFocus.Unknown, false, CosmicSizeScoring.Max),            // 在限定時間內…根據釣到的魚的最大尺寸給予評價。
 
+        // ── 種類計分：Focus 刻意留 Unknown（華麗提鉤順位照手動設定），只標「要湊種類」。
+        [116] = new(CosmicScoreFocus.Unknown, false, DistinctSpecies: true), // 用有限的釣餌釣到幾種不同的水產品，種類越多評價越高。
+
         // ── 以下**刻意不列**，一律當成 Unknown 退回手動設定：
-        //    116（種類越多評價越高）→ 雙重／三重與華麗提鉤對「種類數」都證不出好處。
         //    135~138（漁師釣獲、別的職業製作交貨）→ 評分發生在製作端，釣魚只是前置。
     };
 
@@ -197,8 +204,12 @@ public static class CosmicMissionInfo
         // 只取 RowId，不碰 .Value —— 指向不存在的 row 時 .Value 會丟例外。
         var textId = todo.WKSMissionText.RowId;
 
-        return ProfileByText.TryGetValue(textId, out var profile) ? profile : default;
+        return ProfileForText(textId);
     }
+
+    /// <summary><c>WKSMissionText</c> row id → 計分側寫；不在表裡＝<c>default</c>（Unknown、不放寬任何限制）。</summary>
+    public static CosmicMissionProfile ProfileForText(uint textId)
+        => ProfileByText.TryGetValue(textId, out var profile) ? profile : default;
 
     /// <summary>
     /// 換任務的時候寫一行 Information（要使用者回報的診斷）：
@@ -217,14 +228,21 @@ public static class CosmicMissionInfo
             CosmicScoreFocus.Evaluation => "評價／收藏價值型（華麗提鉤優先）",
             _ when profile.Size != CosmicSizeScoring.None
                 => $"{SizeLabel(profile.Size)}（華麗提鉤順位照你手動設定；耐心策略見「[宇宙耐心]」那行）",
+            _ when profile.DistinctSpecies => "種類型（華麗提鉤順位照你手動設定）",
             _ => "判不出型別（改用你手動設定的順位）",
         };
+
+        var distinct = !profile.DistinctSpecies
+            ? string.Empty
+            : Service.Configuration.NoMultiHookWhenDistinctSpecies
+                ? "，任務要湊幾種不同的魚 → 不用雙重／三重提鉤（preset 要放時改用一般提鉤）"
+                : "，任務要湊幾種不同的魚（設定關閉：雙重／三重提鉤照 preset）";
 
         var everyFish = profile.EveryFishCounts
             ? "，而且任務說明是「任意／每條魚都算分」→ 會忽略 preset 的提鉤時間窗，每一咬都提"
             : string.Empty;
 
-        Service.PrintInfo($"[宇宙探索] 目前任務 WKSMissionUnit#{missionId}，計分方式判定為：{focusText}{everyFish}。");
+        Service.PrintInfo($"[宇宙探索] 目前任務 WKSMissionUnit#{missionId}，計分方式判定為：{focusText}{everyFish}{distinct}。");
     }
 
     public static string SizeLabel(CosmicSizeScoring size) => size switch
