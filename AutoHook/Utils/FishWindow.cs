@@ -189,8 +189,8 @@ public static class FishWindow
         // 沒找到。要把「因為缺前置天氣記錄所以第一格判不了」跟「真的就是很久以後才開」分開講。
         var reason = missingPrevWeather
             ? $@"目前時段的前一個天氣沒有記錄（插件剛啟動時本來就會這樣），" +
-              $@"且往後 {searchPeriods} 個天氣時段內沒有符合的窗口"
-            : $@"往後 {searchPeriods} 個天氣時段（約 {searchPeriods * WeatherTimeline.PeriodMs / 3_600_000.0:F1} 小時）內沒有符合的窗口";
+              $@"且往後 {searchPeriods} 個天氣時段內都不符合條件"
+            : $@"往後 {searchPeriods} 個天氣時段（約 {searchPeriods * WeatherTimeline.PeriodMs / 3_600_000.0:F1} 小時）內都不符合條件";
 
         return new FishWindowResult
         {

@@ -157,7 +157,7 @@ public sealed class OceanTripMachine(IOceanTripEffects fx)
         else if (i.UnavailableReason != null)
             reason = i.UnavailableReason;
         else if ((i.OceanActive || i.OnBoatTerritory) && !i.IsFisher)
-            reason = @"目前職業不是捕魚人";
+            reason = @"目前職業不是漁師";
         if (reason.Length > 0)
             return false;
 
@@ -217,7 +217,7 @@ public sealed class OceanTripMachine(IOceanTripEffects fx)
 
         if (!i.IsFisher)
         {
-            End(@"目前職業不是捕魚人", false);
+            End(@"目前職業不是漁師", false);
             return;
         }
 

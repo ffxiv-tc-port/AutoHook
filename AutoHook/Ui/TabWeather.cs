@@ -29,7 +29,7 @@ namespace AutoHook.Ui;
 /// </summary>
 public class TabWeather : BaseTab
 {
-    public override string TabName { get; } = @"天氣與窗口";
+    public override string TabName { get; } = @"天氣與時段";
     public override bool Enabled { get; } = true;
     public override OpenWindow Type { get; } = OpenWindow.Weather;
 
@@ -118,7 +118,7 @@ public class TabWeather : BaseTab
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(
                     @"目前天氣走的是遊戲的 GetCurrentWeather()，會把特殊天氣覆寫算進去；" + Environment.NewLine +
-                    @"預報序列走的是純推算。下面的窗口計算用的是預報序列。");
+                    @"預報序列走的是純推算。下面的時段計算用的是預報序列。");
         }
 
         // 天氣時段邊界對齊 Unix epoch，所以「下次換天氣」不必問遊戲，自己算就準。
@@ -181,7 +181,7 @@ public class TabWeather : BaseTab
 
     private void DrawFishSection()
     {
-        ImGui.TextColored(ImGuiColors.DalamudViolet, @"有窗口條件的魚");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, @"有天氣或時間條件的魚");
 
         ImGui.SetNextItemWidth(240f);
         ImGui.InputTextWithHint(@"###AhWeatherFishFilter", @"輸入魚名過濾（留空＝看目前餌能釣的）", ref _filter, 64);
@@ -253,7 +253,7 @@ public class TabWeather : BaseTab
                     $@"{FishWindow.FormatCountdown(result.Window.Start - now)} 後");
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(
-                        $@"窗口長度 {FishWindow.FormatCountdown(result.Window.End - result.Window.Start)}");
+                        $@"時段長度 {FishWindow.FormatCountdown(result.Window.End - result.Window.Start)}");
                 break;
 
             default:
