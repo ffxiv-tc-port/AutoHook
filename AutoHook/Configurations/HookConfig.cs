@@ -218,15 +218,28 @@ public class HookConfig : BaseOption
             if (stellarFirst && ShouldUseStellarHook(hookset, hook, stellar, timePassed, ignoreTimers))
                 return HookType.Stellar;
 
-            if (noMultiHook)
+            var yieldGate = noMultiHook ? MultiHookGate.NoData : CosmicMultiHookYield.GateForBite(bite, timePassed);
+            var skipDouble = noMultiHook || !yieldGate.DoubleWorth;
+            var skipTriple = noMultiHook || !yieldGate.TripleWorth
+                             || (yieldGate.PreferDouble && !skipDouble && hookset.UseDoubleHook && hook.dh.HooksetEnabled
+                                 && CheckHookCondition(hook.dh, timePassed, ignoreTimers)
+                                 && PlayerRes.ActionTypeAvailable((uint)hook.dh.HooksetType));
+
+            if (skipTriple || skipDouble)
             {
-                // 只記「preset 想在這一咬放雙重／三重」，提鉤種類在下面換成一般提鉤；GP 不足放掉魚的設定也不套用。
-                multiHookWanted = (hookset.UseTripleHook && hook.th.HooksetEnabled && CheckHookCondition(hook.th, timePassed, ignoreTimers))
-                                  || (hookset.UseDoubleHook && hook.dh.HooksetEnabled && CheckHookCondition(hook.dh, timePassed, ignoreTimers));
+                // 只記「preset 想在這一咬放、但這裡不放的雙重／三重」，提鉤種類在下面換成一般提鉤；GP 不足放掉魚的設定也不套用。
+                multiHookWanted = (skipTriple && hookset.UseTripleHook && hook.th.HooksetEnabled && CheckHookCondition(hook.th, timePassed, ignoreTimers))
+                                  || (skipDouble && hookset.UseDoubleHook && hook.dh.HooksetEnabled && CheckHookCondition(hook.dh, timePassed, ignoreTimers));
+
+                if (multiHookWanted && !noMultiHook)
+                    Service.PrintInfo(
+                        @$"[HookManager] 每條魚都算分的任務（任務#{CosmicMissionInfo.GetCurrentMissionId()}）：" +
+                        @$"{CosmicCatchLog.BiteLabel(bite)}拋竿後 {timePassed.ToString(@"0.00", System.Globalization.CultureInfo.InvariantCulture)} 秒，" +
+                        @$"不放{(skipTriple && skipDouble ? @"雙重／三重" : skipTriple ? @"三重" : @"雙重")}提鉤｜{CosmicMultiHookYield.Describe(yieldGate)}");
             }
 
             // Triple Hook
-            if (!noMultiHook && hookset.UseTripleHook && hook.th.HooksetEnabled)
+            if (!skipTriple && hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.th, timePassed, ignoreTimers))
                 {
@@ -246,7 +259,7 @@ public class HookConfig : BaseOption
             }
 
             // Double Hook
-            if (!noMultiHook && hookset.UseDoubleHook && hook.dh.HooksetEnabled)
+            if (!skipDouble && hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.dh, timePassed, ignoreTimers))
                 {
@@ -283,10 +296,11 @@ public class HookConfig : BaseOption
 
             if (multiHookWanted)
             {
-                Service.PrintInfo(
-                    @$"[HookManager] 要湊幾種不同魚的任務（任務#{CosmicMissionInfo.GetCurrentMissionId()}）：" +
-                    @$"preset 在{CosmicCatchLog.BiteLabel(bite)}要放雙重／三重提鉤，改用一般提鉤" +
-                    @$"｜拋竿後 {timePassed.ToString(@"0.00", System.Globalization.CultureInfo.InvariantCulture)} 秒");
+                if (noMultiHook)
+                    Service.PrintInfo(
+                        @$"[HookManager] 要湊幾種不同魚的任務（任務#{CosmicMissionInfo.GetCurrentMissionId()}）：" +
+                        @$"preset 在{CosmicCatchLog.BiteLabel(bite)}要放雙重／三重提鉤，改用一般提鉤" +
+                        @$"｜拋竿後 {timePassed.ToString(@"0.00", System.Globalization.CultureInfo.InvariantCulture)} 秒");
                 return HookType.Normal;
             }
 

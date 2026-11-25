@@ -41,6 +41,9 @@ public class AutoLures : BaseActionCast
         if (Service.BaitManager.FishingState is not (NormalFishing or LureFishing))
             return false;
 
+        if (CosmicMultiHookYield.ShouldSkipLures(LureTarget))
+            return false;
+
         if (OnlyCastLarge && !PlayerRes.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 

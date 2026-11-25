@@ -107,6 +107,23 @@ public class TabSettings : BaseTab
             @"preset 在這種咬鉤要放雙重／三重提鉤時，改用一般提鉤；preset 本來就不提的咬鉤照樣歇竿。" + "\n" +
             @"關掉＝完全照 preset。");
 
+        DrawUtil.Checkbox(@"宇宙探索：每條魚都算分的任務，雙重／三重提鉤看實測起獲",
+            ref Service.Configuration.MultiHookByObservedYield,
+            @"只作用在任務說明寫「任意水產品」或「每條魚均給予評價」的宇宙探索釣魚任務。" + "\n" +
+            @"咬鉤前只知道咬鉤力道與拋竿後幾秒，所以記下每一竿「這個時間上鉤的是哪條魚、多重提鉤起了幾條」：" +
+            @"同樣力道、同樣引誘層數與撒餌、咬鉤秒數差 1 秒內的那些魚，雙重提鉤平均多起獲不到半條就不放、三重提鉤不到一條就不放；" +
+            @"雙重提鉤每 GP 多起獲得比較多時改放雙重。" + "\n" +
+            @"例：緊急籌備水產食材的月岩藻多重提鉤只起 1 條，月亮姐妹雙重 2 條、三重 3 條。" + "\n" +
+            @"還沒有樣本的時間窗照 preset。樣本存在插件設定資料夾，下次開遊戲接著用。" + "\n" +
+            @"關掉＝完全照 preset。");
+
+        DrawUtil.Checkbox(@"宇宙探索：只算釣到幾條的任務，不放引誘",
+            ref Service.Configuration.SkipLuresWhenAnyFishCounts,
+            @"只作用在任務說明寫「盡快釣到指定數量的任意水產品」的宇宙探索釣魚任務。" + "\n" +
+            @"每次放謙遜之餌／雄心之餌後 5 秒內魚不會咬鉤（三層等於至少等 14 秒才咬），三層共花 60 GP；" +
+            @"這類任務任何一條魚都算數，省下的 GP 留給雙重／三重提鉤。" + "\n" +
+            @"preset 的引誘設成鎖定特殊魚影時照放。關掉＝完全照 preset。");
+
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);

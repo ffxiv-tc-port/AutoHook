@@ -164,6 +164,15 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     [DefaultValue(true)] public bool NoMultiHookWhenDistinctSpecies = true;
 
+    /// <summary>
+    /// 每條魚都算分的任務（WKSMissionText 115、121）：依實測的時間窗魚種與起獲數決定這一咬放不放雙重／三重提鉤
+    /// （見 <see cref="CosmicMultiHookYield"/>）。時間窗內沒有樣本時照 preset。
+    /// </summary>
+    [DefaultValue(true)] public bool MultiHookByObservedYield = true;
+
+    /// <summary>只算條數的任務（WKSMissionText 115）不放「任何魚」的引誘；鎖定特殊魚影的引誘照舊。</summary>
+    [DefaultValue(true)] public bool SkipLuresWhenAnyFishCounts = true;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 

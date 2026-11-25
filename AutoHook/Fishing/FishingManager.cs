@@ -104,6 +104,9 @@ public partial class FishingManager : IDisposable
     private FishingSnapshot _biteSnapshot;
     private HookType? _lastHookDecision;
 
+    /// <summary>咬鉤當下的拋竿後秒數、引誘層數、撒餌（給 <see cref="CosmicMultiHookYield"/>）；釣起時用完就清。</summary>
+    private (double Seconds, int LureStacks, bool Chum) _lastBiteContext = (double.NaN, 0, false);
+
     private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, ulong targetId,
         uint a4, uint a5,
         uint a6, IntPtr a7);
@@ -517,6 +520,7 @@ public partial class FishingManager : IDisposable
         _castSnapshot = FishingSnapshot.Take();
         _biteSnapshot = default;
         _lastHookDecision = null;
+        _lastBiteContext = (double.NaN, 0, false);
 
         // 純蒐證：重設「距拋竿／距上一則階梯訊息」的基準。不影響任何行為。
         LureLadderLog.OnCastStarted();
@@ -586,6 +590,8 @@ public partial class FishingManager : IDisposable
             return;
 
         var timePassed = Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
+        var (lureStacks, chum) = CosmicMultiHookYield.CurrentContext();
+        _lastBiteContext = (timePassed, lureStacks, chum);
 
         var hook = currentHook.GetHook(bite, timePassed, out var noHookReason);
         _lastHookDecision = hook ?? HookType.None;
@@ -648,11 +654,15 @@ public partial class FishingManager : IDisposable
         var castSnapshot = _castSnapshot;
         var biteSnapshot = _biteSnapshot;
         var hookDecision = _lastHookDecision;
+        var biteContext = _lastBiteContext;
         _castSnapshot = default;
         _biteSnapshot = default;
         _lastHookDecision = null;
+        _lastBiteContext = (double.NaN, 0, false);
         if (!fromChat)
             CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType, castSnapshot, biteSnapshot, hookDecision);
+        CosmicMultiHookYield.Record(biteType, biteContext.Seconds, biteContext.LureStacks, biteContext.Chum,
+            hookDecision, fishId, amount);
 
         _lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         var lastFishCatchCfg = GetLastCatchConfig();
