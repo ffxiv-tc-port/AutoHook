@@ -1,8 +1,8 @@
 {
   "Author": "Det",
   "Name": "AutoHook",
-  "Punchline": "讓釣魚不再無聊(或更無聊)。",
-  "Description": "自動幫你提鉤釣魚,你能相信嗎?\n支援自訂預設集、自動以小釣大、自動刺魚等功能。",
+  "Punchline": "自動拋竿、提鉤與刺魚，可為每種魚設定釣法。",
+  "Description": "自動釣魚：依咬鉤型態與等待時間自動提鉤，並可用預設為每種魚、每種釣餌設定釣法。\n- 自動拋竿、以小釣大、換釣餌，自動施放釣魚技能與使用道具\n- 自動刺魚：依魚的尺寸與速度出手\n- 出海垂釣：上船後整趟自動拋竿、換預設與釣餌；每趟手動開始，走到船邊需搭配 vnavmesh\n- 「天氣與時段」分頁：顯示各種魚的天氣與時間條件，只顯示、不會自動開始或停止釣魚\n- 社群預設：取得其他玩家分享的預設，也能匯出自己的\n- 釣到稀有魚時請塔塔露出聲提醒（需搭配 TataruPraise）",
   "InternalName": "AutoHook",
   "RepoUrl": "https://github.com/PunishXIV/AutoHook",
   "ApplicableVersion": "any",
