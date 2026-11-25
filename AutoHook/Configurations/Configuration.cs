@@ -173,6 +173,9 @@ public class Configuration : IPluginConfiguration
     /// <summary>只算條數的任務（WKSMissionText 115）不放「任何魚」的引誘；鎖定特殊魚影的引誘照舊。</summary>
     [DefaultValue(true)] public bool SkipLuresWhenAnyFishCounts = true;
 
+    /// <summary>宇宙探索任務剩餘時間不夠一竿時不再拋竿（見 <see cref="CosmicCastTimeGate"/>）。讀不到剩餘時間照常拋竿。</summary>
+    [DefaultValue(true)] public bool HoldCastWhenCosmicTimeShort = true;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = new();
 

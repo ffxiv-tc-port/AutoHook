@@ -465,6 +465,9 @@ public partial class FishingManager : IDisposable
         if (!autoCastCfg.EnableAll || !autoCastCfg.CastLine.IsAvailableToCast())
             return;
 
+        if (CosmicCastTimeGate.ShouldHoldCast())
+            return;
+
         StartFishing();
     }
 
@@ -496,15 +499,17 @@ public partial class FishingManager : IDisposable
         CheckExtraActions(extraCfg);
 
         var casted = false;
+        var holdCast = CosmicCastTimeGate.ShouldHoldCast();
         if (_lastStep.HasFlag(FishingSteps.FishCaught) && !_lastStep.HasFlag(FishingSteps.Quitting))
         {
-            casted = UseFishCaughtActions(lastCatchCfg);
+            if (!holdCast)
+                casted = UseFishCaughtActions(lastCatchCfg);
             CheckFishCaughtSwap(lastCatchCfg);
         }
         
         FishingHelper.RemoveGuidQueue();
 
-        if (!casted)
+        if (!casted && !holdCast)
             UseAutoCasts();
     }
 

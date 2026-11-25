@@ -127,6 +127,12 @@ public class TabSettings : BaseTab
             @"這類任務任何一條魚都算數，省下的 GP 留給雙重／三重提鉤。" + "\n" +
             @"preset 的引誘設成鎖定特殊魚影時照放。關掉＝完全照 preset。");
 
+        DrawUtil.Checkbox(@"宇宙探索：任務剩餘時間不夠一竿就不再拋竿",
+            ref Service.Configuration.HoldCastWhenCosmicTimeShort,
+            @"讀任務面板的剩餘時間，剩不到 10 秒時不再拋竿，拋竿前的動作（撒餌、耐心、拍擊水面等）也不放，省下 GP。" + "\n" +
+            @"10 秒是「一定來不及」的下限：實測兩次起獲最短也相隔 13 秒（含收竿後再拋竿），剩不到 10 秒拋下去的那一竿釣不完。" + "\n" +
+            @"任務面板沒開、讀不到剩餘時間時照常拋竿。關掉＝照舊拋到最後一刻。");
+
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);
