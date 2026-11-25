@@ -1,0 +1,658 @@
+{
+  "source": "魚糕 v2（fish.ffmomola.com），2026-11-25 擷取",
+  "note": "任務 id＝WKSMissionUnit；bite：weak／strong／legendary＝弱咬／強咬／傳說咬；double＝雙重提鉤起獲條數（一個值或範圍，空＝不明）；identical＝能否同類拋竿；biteTime＝不放引誘、不撒餌時拋竿到咬鉤的秒數範圍。已對台服 7.30 EXD 核對任務存在、是捕魚人任務、釣場（FishingSpot）與任務地點同一個 PlaceName、魚都在該釣場魚池。",
+  "missions": {
+    "451": [
+      {"fish": 45693, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45694, "name": "月羅非魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 20]},
+      {"fish": 45695, "name": "月藍虹鯧", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 27]}
+    ],
+    "452": [
+      {"fish": 45696, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45697, "name": "小跳蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45698, "name": "藍麗魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]}
+    ],
+    "453": [
+      {"fish": 45699, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45700, "name": "月長嘴鱲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45701, "name": "鈷鐵鰻", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 23]}
+    ],
+    "454": [
+      {"fish": 45702, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 14]},
+      {"fish": 45703, "name": "月鈍口螈", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 45704, "name": "月鯰魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 16]}
+    ],
+    "455": [
+      {"fish": 45705, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 14]},
+      {"fish": 45706, "name": "彎月麗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 21]},
+      {"fish": 45707, "name": "月半齒脂鯉", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 21]}
+    ],
+    "456": [
+      {"fish": 45708, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45709, "name": "月白麗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 45710, "name": "小跳魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 18]}
+    ],
+    "457": [
+      {"fish": 45711, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 45712, "name": "月草魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45713, "name": "月神魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 23]},
+      {"fish": 45714, "name": "暗鱗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [24, 33]}
+    ],
+    "458": [
+      {"fish": 45715, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 14]},
+      {"fish": 45716, "name": "求星魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 19]},
+      {"fish": 45717, "name": "泣眼", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 45718, "name": "月鰻", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [19, 24]}
+    ],
+    "459": [
+      {"fish": 45719, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45720, "name": "月長嘴鱲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45721, "name": "月藍鈴鮭", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 24]},
+      {"fish": 45722, "name": "月乙太虱", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 25]}
+    ],
+    "460": [
+      {"fish": 45723, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 45724, "name": "粉月麗魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45725, "name": "月鰨", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45726, "name": "皎鱘", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 18]}
+    ],
+    "461": [
+      {"fish": 45727, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45728, "name": "求星魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45729, "name": "淚麗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [15, 24]},
+      {"fish": 45730, "name": "黃頰魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [21, 35]}
+    ],
+    "462": [
+      {"fish": 45731, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45732, "name": "月長嘴鱲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45733, "name": "小跳星", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [13, 22]},
+      {"fish": 45734, "name": "藍胡椒月光魚", "bite": "weak", "double": [1], "identical": true, "collectable": true, "biteTime": [10, 19]}
+    ],
+    "463": [
+      {"fish": 45735, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45736, "name": "小跳葉魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 13]},
+      {"fish": 45737, "name": "月盤麗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 16]},
+      {"fish": 45738, "name": "太陽核爆魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 16]}
+    ],
+    "464": [
+      {"fish": 45739, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 10]},
+      {"fish": 45740, "name": "月太陽魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 11]},
+      {"fish": 45741, "name": "冠尾鬥魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 14]},
+      {"fish": 45742, "name": "斑點狗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 22]},
+      {"fish": 45743, "name": "稜光魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 17]}
+    ],
+    "465": [
+      {"fish": 45744, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 45745, "name": "求星魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45746, "name": "虹彩淚滴", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 24]},
+      {"fish": 45747, "name": "月角菊石", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 31]},
+      {"fish": 45748, "name": "月腔棘魚", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [22, 36]}
+    ],
+    "466": [
+      {"fish": 45749, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45750, "name": "月太陽魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45751, "name": "月水盾草", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45752, "name": "蛋白石鰻", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 25]},
+      {"fish": 45753, "name": "月巨骨舌魚", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 28]}
+    ],
+    "467": [
+      {"fish": 45754, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45755, "name": "月水晶刺魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 45756, "name": "月彩魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 18]},
+      {"fish": 45757, "name": "黃金小跳魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [19, 23]},
+      {"fish": 45758, "name": "月多鰭魚", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [19, 28]}
+    ],
+    "468": [
+      {"fish": 45759, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45760, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 20]},
+      {"fish": 45761, "name": "砷海水螅", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 24]},
+      {"fish": 45762, "name": "角箱魨", "bite": "weak", "double": [1], "identical": true, "collectable": true, "biteTime": [10, 19]},
+      {"fish": 45763, "name": "月碧璽原石", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [16, 27]}
+    ],
+    "469": [
+      {"fish": 45764, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45765, "name": "小跳鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45766, "name": "月青銅琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45767, "name": "星空魟", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [18, 23]},
+      {"fish": 45768, "name": "月肺魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 16]}
+    ],
+    "470": [
+      {"fish": 45769, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45770, "name": "月草魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45771, "name": "彎月沼蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 24]},
+      {"fish": 45772, "name": "無結構隕鐵", "bite": "legendary", "double": [4], "identical": true, "collectable": false, "biteTime": [19, 31]}
+    ],
+    "471": [
+      {"fish": 45773, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45774, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45775, "name": "砷海水螅", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45776, "name": "微瓦霞蟲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 22]},
+      {"fish": 45777, "name": "須齒龍", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 29]}
+    ],
+    "472": [
+      {"fish": 45778, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45779, "name": "月水晶刺魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45780, "name": "月彩魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 15]},
+      {"fish": 45781, "name": "小跳鰕虎", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 45782, "name": "月狼魚", "bite": "legendary", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 14]},
+      {"fish": 45783, "name": "白金多鰭魚", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [19, 24]}
+    ],
+    "473": [
+      {"fish": 45784, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45785, "name": "月長嘴鱲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45786, "name": "訓導鬥魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45787, "name": "月球大學究", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [17, 21]},
+      {"fish": 45788, "name": "蹦跳星", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [22, 28]}
+    ],
+    "474": [
+      {"fish": 45789, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45790, "name": "月太陽魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45791, "name": "月暗鱸", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45792, "name": "月亮姐妹", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 24]},
+      {"fish": 45793, "name": "巨冠尾鬥魚", "bite": "weak", "double": [4], "identical": true, "collectable": false, "biteTime": [18, 31]}
+    ],
+    "475": [
+      {"fish": 45794, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45795, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45796, "name": "砷海水螅", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45797, "name": "深省威", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [18, 31]},
+      {"fish": 45798, "name": "銀河霧霾", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [18, 31]}
+    ],
+    "476": [
+      {"fish": 45799, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45800, "name": "月太陽魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 12]},
+      {"fish": 45801, "name": "月暗鱸", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 16]},
+      {"fish": 45802, "name": "月龜", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 21]},
+      {"fish": 45803, "name": "黑冠尾鬥魚", "bite": "weak", "double": [1], "identical": false, "collectable": true, "biteTime": [24, 28]}
+    ],
+    "477": [
+      {"fish": 45826, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 45827, "name": "求星魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45828, "name": "虹彩淚滴", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [15, 28]},
+      {"fish": 45829, "name": "暗鯉", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [24, 28]},
+      {"fish": 45830, "name": "金頰魚", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [31, 36]}
+    ],
+    "478": [
+      {"fish": 45820, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45821, "name": "月草魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45822, "name": "月光蛇頭鱧", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 45823, "name": "東南狗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 16]},
+      {"fish": 45824, "name": "月劍鋸蓋魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 21]},
+      {"fish": 45825, "name": "嘆息雀鱔", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [23, 28]}
+    ],
+    "479": [
+      {"fish": 45831, "name": "月面瓜水母", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 12]},
+      {"fish": 45832, "name": "不完整菌類721", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 12]},
+      {"fish": 45833, "name": "彎月阿耳戈航員", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 25]},
+      {"fish": 45834, "name": "月底魚", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [14, 17]},
+      {"fish": 45835, "name": "環冠水母", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [17, 28]}
+    ],
+    "480": [
+      {"fish": 45836, "name": "砷化鈍口螈", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45837, "name": "陽光水母", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45838, "name": "宇宙暗魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45839, "name": "月莓鱸", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 24]},
+      {"fish": 45840, "name": "月翻車魚", "bite": "legendary", "double": [4], "identical": true, "collectable": false, "biteTime": [16, 27]}
+    ],
+    "481": [
+      {"fish": 45865, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45866, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45867, "name": "砷海水螅", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45868, "name": "砷化花", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45869, "name": "砷化火焰蜥蜴", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 45870, "name": "球睛威", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [30, 36]}
+    ],
+    "482": [
+      {"fish": 45871, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45872, "name": "月劍尾魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 19]},
+      {"fish": 45873, "name": "彎月矛麗魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45874, "name": "滿月鰩", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45875, "name": "月黃鰭魚", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [14, 22]},
+      {"fish": 45876, "name": "食威魚", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [17, 26]}
+    ],
+    "483": [
+      {"fish": 45804, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45805, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 16]},
+      {"fish": 45806, "name": "月風花", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 16]},
+      {"fish": 45807, "name": "砷海鱎魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [19, 24]},
+      {"fish": 45808, "name": "嘆息月壤龜", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [25, 28]},
+      {"fish": 45809, "name": "硫磺水螅", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [27, 32]}
+    ],
+    "484": [
+      {"fish": 45841, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 13]},
+      {"fish": 45842, "name": "月草魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 16]},
+      {"fish": 45843, "name": "月光蛇頭鱧", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 23]},
+      {"fish": 45844, "name": "月明魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45845, "name": "月門鱈", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45846, "name": "月鱘", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [11, 19]}
+    ],
+    "485": [
+      {"fish": 45810, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 12]},
+      {"fish": 45811, "name": "月長嘴鱲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 15]},
+      {"fish": 45812, "name": "訓導鬥魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 18]},
+      {"fish": 45813, "name": "星水晶刀魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [20, 25]},
+      {"fish": 45814, "name": "光明鈷鐵鰻", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [24, 29]}
+    ],
+    "486": [
+      {"fish": 45847, "name": "嘆息螯蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45848, "name": "淚滴刀背魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45849, "name": "淚蟹", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 15]},
+      {"fish": 45850, "name": "銀月羅非魚", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [18, 28]},
+      {"fish": 45851, "name": "淚鯧", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 21]}
+    ],
+    "487": [
+      {"fish": 45877, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45878, "name": "月太陽魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45879, "name": "月暗鱸", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 17]},
+      {"fish": 45880, "name": "蛋白石虹鯧", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 20]},
+      {"fish": 45881, "name": "港灣利齒", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [23, 27]},
+      {"fish": 45882, "name": "深月水盾草", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [23, 28]}
+    ],
+    "488": [
+      {"fish": 45853, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 45857, "name": "月水晶刺魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45854, "name": "月彩魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45855, "name": "小跳鰈魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [20, 25]},
+      {"fish": 45858, "name": "鈷鐵魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 45856, "name": "銀河核爆魚", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 28]}
+    ],
+    "489": [
+      {"fish": 45883, "name": "砷化鈍口螈", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45884, "name": "陽光水母", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 12]},
+      {"fish": 45885, "name": "宇宙暗魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 13]},
+      {"fish": 45886, "name": "閃亮魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 17]},
+      {"fish": 45887, "name": "月上獵手", "bite": "strong", "double": [1], "identical": true, "collectable": true, "biteTime": [21, 25]},
+      {"fish": 45888, "name": "硬盾菊石", "bite": "legendary", "double": [1], "identical": true, "collectable": true, "biteTime": [17, 24]}
+    ],
+    "490": [
+      {"fish": 45815, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45816, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45817, "name": "砷海水螅", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 16]},
+      {"fish": 45818, "name": "月蝌蚪", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [15, 22]},
+      {"fish": 45819, "name": "巨須齒龍", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [18, 27]}
+    ],
+    "491": [
+      {"fish": 45859, "name": "月金魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 18]},
+      {"fish": 45860, "name": "月魔魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [12, 19]},
+      {"fish": 45861, "name": "閃亮鰩", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45862, "name": "月蝴蝶", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 21]},
+      {"fish": 45863, "name": "月海葡萄", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [18, 30]},
+      {"fish": 45864, "name": "漁丁威", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [19, 31]}
+    ],
+    "492": [
+      {"fish": 45889, "name": "月面瓜水母", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 11]},
+      {"fish": 45890, "name": "不完整菌類721", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 11]},
+      {"fish": 45891, "name": "彎月阿耳戈航員", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [15, 25]},
+      {"fish": 45892, "name": "月底劍", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [15, 28]},
+      {"fish": 45893, "name": "月蝠鱝", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [15, 23]},
+      {"fish": 45894, "name": "月底走鯨", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [24, 36]}
+    ],
+    "493": [
+      {"fish": 45907, "name": "月面瓜水母", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 12]},
+      {"fish": 45908, "name": "不完整菌類721", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 12]},
+      {"fish": 45909, "name": "彎月阿耳戈航員", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 21]},
+      {"fish": 45910, "name": "月底劍", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [19, 24]},
+      {"fish": 45911, "name": "管眼魚", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 10]},
+      {"fish": 45912, "name": "深月海龍", "bite": "legendary", "double": [5], "identical": false, "collectable": false, "biteTime": [15, 19]}
+    ],
+    "494": [
+      {"fish": 45895, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45896, "name": "砷化歐洛浦肯", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [22, 28]},
+      {"fish": 45897, "name": "月油鰻", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 22]},
+      {"fish": 45898, "name": "銀河雜訊", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 17]},
+      {"fish": 45899, "name": "爪網蟲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 13]},
+      {"fish": 45900, "name": "砷海角箱魨", "bite": "weak", "double": [1], "identical": false, "collectable": false, "biteTime": [23, 27]}
+    ],
+    "495": [
+      {"fish": 45901, "name": "月金魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 15]},
+      {"fish": 45902, "name": "月魔魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 16]},
+      {"fish": 45903, "name": "月玻璃魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [17, 20]},
+      {"fish": 45904, "name": "閃亮死亡蠕蟲", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [23, 24]},
+      {"fish": 45905, "name": "林喬利蟲", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [21, 26]},
+      {"fish": 45906, "name": "刺突鮫", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [18, 19]}
+    ],
+    "508": [
+      {"fish": 45913, "name": "星琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45914, "name": "月草魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45915, "name": "月鯰", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45916, "name": "月長須鯰魚", "bite": "legendary", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 12]},
+      {"fish": 45917, "name": "重無結構隕鐵", "bite": "legendary", "double": [4], "identical": false, "collectable": false, "biteTime": [14, 18]}
+    ],
+    "509": [
+      {"fish": 45918, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45919, "name": "月長嘴鱲", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45920, "name": "訓導鬥魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]},
+      {"fish": 45921, "name": "月影鯉", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45922, "name": "小跳肺魚", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [8, 15]}
+    ],
+    "510": [
+      {"fish": 45923, "name": "月蠍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 45924, "name": "月鞭", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45925, "name": "砷海水螅", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 16]},
+      {"fish": 45926, "name": "月暗蝦", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45927, "name": "星塵章魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45928, "name": "明月碧璽原石", "bite": "strong", "double": [4], "identical": false, "collectable": false, "biteTime": [21, 26]}
+    ],
+    "511": [
+      {"fish": 45929, "name": "月岩藻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 45930, "name": "月太陽魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 45931, "name": "瓢晶魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45932, "name": "月鼠魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [7, 11]},
+      {"fish": 45933, "name": "空虛鰻", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 45934, "name": "虛空鰻", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [19, 23]}
+    ],
+    "542": [
+      {"fish": 45935, "name": "藍月鰍", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 18]},
+      {"fish": 45936, "name": "嘆息萎鰓麗魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [16, 22]},
+      {"fish": 45937, "name": "月藍尾鯰", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [11, 19]}
+    ],
+    "543": [
+      {"fish": 45938, "name": "憂地魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [13, 19]},
+      {"fish": 45939, "name": "落水的無人機", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]}
+    ],
+    "544": [
+      {"fish": 45945, "name": "月光琵琶魚", "bite": "strong", "double": [1], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 45946, "name": "月巖琵琶魚", "bite": "weak", "double": [1], "identical": true, "collectable": false, "biteTime": [14, 19]}
+    ],
+    "965": [
+      {"fish": 47422, "name": "法恩娜長臂蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 47423, "name": "探索鰻", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 20]},
+      {"fish": 47424, "name": "退火鼬魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [20, 27]}
+    ],
+    "966": [
+      {"fish": 47425, "name": "玻璃針", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 12]},
+      {"fish": 47426, "name": "玻璃盤麗魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 17]},
+      {"fish": 47427, "name": "蛋白菊石", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 19]}
+    ],
+    "967": [
+      {"fish": 47428, "name": "珠璃貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 47429, "name": "鈷鐵寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 20]},
+      {"fish": 47430, "name": "33號作品", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 21]}
+    ],
+    "968": [
+      {"fish": 47431, "name": "法恩娜長臂蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47432, "name": "探索鰻", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47433, "name": "退火火焰蜥蜴", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]}
+    ],
+    "969": [
+      {"fish": 47434, "name": "珠璃貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 12]},
+      {"fish": 47435, "name": "鈷鐵寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]},
+      {"fish": 47436, "name": "法恩娜黃瓜", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 21]}
+    ],
+    "970": [
+      {"fish": 47437, "name": "玻璃針", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47438, "name": "圓頂生態魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47439, "name": "玫瑰紗寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 20]}
+    ],
+    "971": [
+      {"fish": 47440, "name": "法恩娜長臂蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47441, "name": "探索鰻", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 16]},
+      {"fish": 47442, "name": "宇宙鯰魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 23]},
+      {"fish": 47443, "name": "宇宙白鯰魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [21, 32]}
+    ],
+    "972": [
+      {"fish": 47444, "name": "玻璃針", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 15]},
+      {"fish": 47445, "name": "玻璃水母", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 20]},
+      {"fish": 47446, "name": "11號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 20]},
+      {"fish": 47447, "name": "玻璃緞帶", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [20, 22]}
+    ],
+    "973": [
+      {"fish": 47448, "name": "法恩娜長臂蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47449, "name": "探索鰻", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 18]},
+      {"fish": 47450, "name": "宇宙蚓螈", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 24]},
+      {"fish": 47451, "name": "退火鯉", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 21]}
+    ],
+    "974": [
+      {"fish": 47452, "name": "玻璃針", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 15]},
+      {"fish": 47453, "name": "玻璃盤麗魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 16]},
+      {"fish": 47454, "name": "法恩娜矢", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 15]},
+      {"fish": 47455, "name": "硼矽酸晶球", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 20]}
+    ],
+    "975": [
+      {"fish": 47456, "name": "法恩娜長臂蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47457, "name": "探索鰻", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47458, "name": "裸臀魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 23]},
+      {"fish": 47459, "name": "退火魟", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [20, 33]}
+    ],
+    "976": [
+      {"fish": 47460, "name": "珠璃貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47461, "name": "鈷鐵寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]},
+      {"fish": 47462, "name": "骨蕾絲", "bite": "weak", "double": [2], "identical": true, "collectable": true, "biteTime": [14, 21]},
+      {"fish": 47463, "name": "綠寶石背魚", "bite": "strong", "double": [2], "identical": true, "collectable": true, "biteTime": [12, 20]}
+    ],
+    "977": [
+      {"fish": 47464, "name": "珠璃貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47465, "name": "鈷鐵寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 20]},
+      {"fish": 47466, "name": "爆沙魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 16]},
+      {"fish": 47467, "name": "蛋白石貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 16]}
+    ],
+    "978": [
+      {"fish": 47480, "name": "霜生貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 11]},
+      {"fish": 47481, "name": "98號作品", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 12]},
+      {"fish": 47482, "name": "吊墜魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 14]},
+      {"fish": 47483, "name": "玻璃吸納者", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 20]},
+      {"fish": 47484, "name": "鈷鐵等腰魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 18]}
+    ],
+    "979": [
+      {"fish": 47485, "name": "玻璃大理花", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 12]},
+      {"fish": 47486, "name": "類水母", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 16]},
+      {"fish": 47487, "name": "玻璃骨碎片", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 25]},
+      {"fish": 47488, "name": "藍璃魟", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 25]},
+      {"fish": 47489, "name": "結晶石", "bite": "legendary", "double": [2], "identical": true, "collectable": false, "biteTime": [21, 32]}
+    ],
+    "980": [
+      {"fish": 47490, "name": "白閃星", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 11]},
+      {"fish": 47491, "name": "蹦跳威", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 14]},
+      {"fish": 47492, "name": "玻璃珊瑚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 20]},
+      {"fish": 47493, "name": "紫玻璃掛毯", "bite": "strong", "double": [2], "identical": true, "collectable": true, "biteTime": [16, 24]},
+      {"fish": 47494, "name": "鹼石灰偽魚", "bite": "legendary", "double": [2], "identical": true, "collectable": true, "biteTime": [18, 28]}
+    ],
+    "981": [
+      {"fish": 47495, "name": "偽吻魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47496, "name": "浮雲水母", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 15]},
+      {"fish": 47497, "name": "深藍腔棘魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 18]},
+      {"fish": 47498, "name": "冰晶巨雀鱔", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 18]},
+      {"fish": 47499, "name": "蛋白石莫拉", "bite": "legendary", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 18]}
+    ],
+    "982": [
+      {"fish": 47500, "name": "288號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 15]},
+      {"fish": 47501, "name": "沙境威", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [19, 20]},
+      {"fish": 47502, "name": "金砂魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 24]},
+      {"fish": 47503, "name": "沙漏球", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 17]},
+      {"fish": 47504, "name": "彩砂礫", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [19, 26]}
+    ],
+    "983": [
+      {"fish": 47505, "name": "玻璃針", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 12]},
+      {"fish": 47506, "name": "玻璃盤麗魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 18]},
+      {"fish": 47507, "name": "紫晶等腰魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 19]},
+      {"fish": 47508, "name": "裂冰魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 18]},
+      {"fish": 47509, "name": "粉閃星", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 18]}
+    ],
+    "984": [
+      {"fish": 47510, "name": "珠璃貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 12]},
+      {"fish": 47511, "name": "鈷鐵寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 19]},
+      {"fish": 47512, "name": "金繕木片魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 20]},
+      {"fish": 47513, "name": "蛋白石艦魚", "bite": "legendary", "double": [3], "identical": true, "collectable": false, "biteTime": [16, 21]}
+    ],
+    "985": [
+      {"fish": 47514, "name": "288號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 14]},
+      {"fish": 47515, "name": "沙境威", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 16]},
+      {"fish": 47516, "name": "沙塊的年輪", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 20]},
+      {"fish": 47517, "name": "偏光殘影", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 24]},
+      {"fish": 47518, "name": "沙坑類蝠魟", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 27]}
+    ],
+    "986": [
+      {"fish": 47519, "name": "法恩娜長臂蝦", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 14]},
+      {"fish": 47520, "name": "宇宙蜥蜴", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 14]},
+      {"fish": 47521, "name": "探索蟹", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 9]},
+      {"fish": 47522, "name": "退火鯧", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 14]},
+      {"fish": 47523, "name": "探索鬼魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47524, "name": "深度退火火焰蜥蜴", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [11, 14]}
+    ],
+    "987": [
+      {"fish": 47525, "name": "鉀玻璃類虹鯧", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47526, "name": "極光玻璃貝", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47527, "name": "66號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 19]},
+      {"fish": 47528, "name": "類花雕玻璃魚", "bite": "strong", "double": [2], "identical": true, "collectable": true, "biteTime": [14, 25]},
+      {"fish": 47529, "name": "珍珠等腰魚", "bite": "strong", "double": [2], "identical": true, "collectable": true, "biteTime": [18, 32]}
+    ],
+    "988": [
+      {"fish": 47530, "name": "珠璃貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47531, "name": "鈷鐵寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]},
+      {"fish": 47532, "name": "紅寶石鯡魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 20]},
+      {"fish": 47533, "name": "探索鱈", "bite": "strong", "double": [3], "identical": true, "collectable": false, "biteTime": [15, 26]},
+      {"fish": 47534, "name": "蛋白石偽魚", "bite": "weak", "double": [3], "identical": true, "collectable": false, "biteTime": [18, 32]}
+    ],
+    "989": [
+      {"fish": 47535, "name": "288號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47536, "name": "沙境威", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47537, "name": "砂金胸針", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 20]},
+      {"fish": 47538, "name": "龜矽石", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 32]},
+      {"fish": 47539, "name": "沙坑風箏", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 32]}
+    ],
+    "990": [
+      {"fish": 47540, "name": "玻璃大理花", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47541, "name": "類水母", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]},
+      {"fish": 47542, "name": "類骸骨魚", "bite": "weak", "double": [2], "identical": true, "collectable": true, "biteTime": [16, 20]},
+      {"fish": 47543, "name": "鈷藍玻鰻", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 17]},
+      {"fish": 47544, "name": "鑄玻璃花", "bite": "legendary", "double": [2], "identical": true, "collectable": true, "biteTime": [12, 16]}
+    ],
+    "991": [
+      {"fish": 47556, "name": "白閃星", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47557, "name": "蹦跳威", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47558, "name": "玻璃珊瑚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 28]},
+      {"fish": 47559, "name": "吹玻璃泡泡魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [24, 28]},
+      {"fish": 47560, "name": "青色角笛", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [28, 34]}
+    ],
+    "992": [
+      {"fish": 47561, "name": "偽吻魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47562, "name": "浮雲水母", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47563, "name": "深藍腔棘魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 47564, "name": "黑曜石貽貝", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 16]},
+      {"fish": 47565, "name": "玻璃雕塑家", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 22]},
+      {"fish": 47566, "name": "彩晶簇", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [23, 28]}
+    ],
+    "993": [
+      {"fish": 47609, "name": "法恩娜類虹鯧", "bite": "weak", "double": [], "identical": true, "collectable": false, "biteTime": [6, 8]},
+      {"fish": 47610, "name": "夜骨魚", "bite": "strong", "double": [], "identical": true, "collectable": false, "biteTime": [13, 15]},
+      {"fish": 47611, "name": "五角星寶石", "bite": "weak", "double": [], "identical": true, "collectable": false, "biteTime": [13, 15]},
+      {"fish": 47612, "name": "膠囊廢棄物", "bite": "strong", "double": [], "identical": true, "collectable": true, "biteTime": [19, 24]},
+      {"fish": 47613, "name": "膠囊琥珀", "bite": "strong", "double": [], "identical": true, "collectable": true, "biteTime": [21, 27]}
+    ],
+    "994": [
+      {"fish": 47632, "name": "288號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47633, "name": "沙境威", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47634, "name": "沙漏盔", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 24]},
+      {"fish": 47635, "name": "河濱鎮紙", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47636, "name": "沙漏金剛魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 47637, "name": "硝石玫瑰", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [21, 26]}
+    ],
+    "995": [
+      {"fish": 47638, "name": "霜生貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [6, 11]},
+      {"fish": 47639, "name": "98號作品", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47640, "name": "吊墜魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47641, "name": "紫晶寶石", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 18]},
+      {"fish": 47642, "name": "鹼石灰霧魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 27]},
+      {"fish": 47643, "name": "鹼藍偽魚", "bite": "legendary", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 23]}
+    ],
+    "996": [
+      {"fish": 47545, "name": "霜生貝", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47546, "name": "98號作品", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 14]},
+      {"fish": 47547, "name": "吊墜魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 17]},
+      {"fish": 47548, "name": "432號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 23]},
+      {"fish": 47549, "name": "河底白沙", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 18]},
+      {"fish": 47550, "name": "鹼石灰水紋魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 23]}
+    ],
+    "997": [
+      {"fish": 47567, "name": "玻璃大理花", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47568, "name": "類水母", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47569, "name": "飾輪神仙魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 16]},
+      {"fish": 47570, "name": "菖蒲花瓣", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 47571, "name": "蘋果頭", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 21]},
+      {"fish": 47572, "name": "765號作品", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 22]}
+    ],
+    "998": [
+      {"fish": 47551, "name": "玻璃大理花", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47552, "name": "類水母", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]},
+      {"fish": 47553, "name": "韻路威", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 19]},
+      {"fish": 47554, "name": "紅金花", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [25, 30]},
+      {"fish": 47555, "name": "晶岩龜", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [27, 32]}
+    ],
+    "999": [
+      {"fish": 47573, "name": "白閃星", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47574, "name": "蹦跳威", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47575, "name": "玻璃珊瑚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [15, 28]},
+      {"fish": 47576, "name": "貝非貝", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [22, 27]},
+      {"fish": 47577, "name": "吹玻璃球魚", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [14, 18]}
+    ],
+    "1000": [
+      {"fish": 47614, "name": "偽吻魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 9]},
+      {"fish": 47615, "name": "鹼石灰晨曦", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47616, "name": "深藍腔棘魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 16]},
+      {"fish": 47617, "name": "玻璃花絲", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 21]},
+      {"fish": 47618, "name": "藍蘇打雞尾酒", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 47619, "name": "鹼泡偽魚", "bite": "weak", "double": [3], "identical": true, "collectable": false, "biteTime": [17, 22]}
+    ],
+    "1001": [
+      {"fish": 47579, "name": "偽吻魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 12]},
+      {"fish": 47580, "name": "浮雲水母", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 13]},
+      {"fish": 47581, "name": "深藍腔棘魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 17]},
+      {"fish": 47582, "name": "345號作品", "bite": "weak", "double": [2], "identical": true, "collectable": true, "biteTime": [14, 17]},
+      {"fish": 47583, "name": "紫微星碎片", "bite": "weak", "double": [2], "identical": true, "collectable": true, "biteTime": [20, 24]},
+      {"fish": 47584, "name": "恐怖偽魚", "bite": "legendary", "double": [2], "identical": true, "collectable": true, "biteTime": [21, 24]}
+    ],
+    "1002": [
+      {"fish": 47626, "name": "爆裂風花", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 12]},
+      {"fish": 47627, "name": "泡沫裡的大嘴", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 20]},
+      {"fish": 47628, "name": "法恩娜蝴蝶", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 25]},
+      {"fish": 47629, "name": "觀泡者", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 16]},
+      {"fish": 47630, "name": "深毯", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [17, 25]},
+      {"fish": 47631, "name": "峽谷化身", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [18, 30]}
+    ],
+    "1003": [
+      {"fish": 47650, "name": "玻璃熔爐的剪鉗", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [5, 7]},
+      {"fish": 47651, "name": "玻璃熔爐的風箱", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 12]},
+      {"fish": 47652, "name": "玻璃熔爐的齒梳", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [12, 16]},
+      {"fish": 47653, "name": "玻璃熔爐的勺子", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 19]},
+      {"fish": 47654, "name": "石榴玻璃海馬", "bite": "weak", "double": [3], "identical": true, "collectable": false, "biteTime": [20, 24]},
+      {"fish": 47655, "name": "火口偽魚", "bite": "legendary", "double": [4], "identical": true, "collectable": false, "biteTime": [18, 28]}
+    ],
+    "1004": [
+      {"fish": 47668, "name": "288號作品", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 15]},
+      {"fish": 47669, "name": "沙境威", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 17]},
+      {"fish": 47670, "name": "馬賽克磚魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [7, 13]},
+      {"fish": 47671, "name": "沙漏剪碎手", "bite": "legendary", "double": [2], "identical": true, "collectable": false, "biteTime": [16, 20]},
+      {"fish": 47672, "name": "沙漏類雀鱔", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 18]},
+      {"fish": 47673, "name": "碎玻璃流砂", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [16, 20]}
+    ],
+    "1005": [
+      {"fish": 47656, "name": "法恩娜類虹鯧", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 47657, "name": "夜骨魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 13]},
+      {"fish": 47658, "name": "法恩娜類脂鯉", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [14, 16]},
+      {"fish": 47659, "name": "小膠囊", "bite": "strong", "double": [3], "identical": true, "collectable": false, "biteTime": [16, 21]},
+      {"fish": 47660, "name": "玻璃筆尖魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [18, 19]},
+      {"fish": 47661, "name": "膠囊偽魚", "bite": "strong", "double": [1], "identical": false, "collectable": false, "biteTime": [38, 44]}
+    ],
+    "1006": [
+      {"fish": 47662, "name": "玻璃熔爐的剪鉗", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [6, 10]},
+      {"fish": 47663, "name": "玻璃熔爐的風箱", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [9, 13]},
+      {"fish": 47664, "name": "玻璃熔爐的齒梳", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [11, 14]},
+      {"fish": 47665, "name": "熔融類鯰", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [13, 16]},
+      {"fish": 47666, "name": "熔融類鯊", "bite": "legendary", "double": [2], "identical": false, "collectable": false, "biteTime": [16, 19]},
+      {"fish": 47667, "name": "火口魂靈", "bite": "legendary", "double": [1], "identical": false, "collectable": false, "biteTime": [19, 23]}
+    ],
+    "1037": [
+      {"fish": 47674, "name": "探索蝦虎", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 12]},
+      {"fish": 47675, "name": "探索鱒", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [5, 9]}
+    ],
+    "1038": [
+      {"fish": 47676, "name": "類黃雲魚", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [10, 11]},
+      {"fish": 47677, "name": "探索獅子魚", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [5, 8]}
+    ],
+    "1039": [
+      {"fish": 47678, "name": "爆裂風花", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 10]},
+      {"fish": 47679, "name": "金色午夜", "bite": "weak", "double": [2], "identical": true, "collectable": false, "biteTime": [8, 9]},
+      {"fish": 47680, "name": "藍閃星", "bite": "strong", "double": [2], "identical": true, "collectable": false, "biteTime": [6, 9]}
+    ]
+  }
+}

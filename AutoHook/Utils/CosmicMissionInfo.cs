@@ -245,7 +245,7 @@ public static class CosmicMissionInfo
         var everyFish = profile.EveryFishCounts
             ? "，而且任務說明是「任意／每條魚都算分」→ 會忽略 preset 的提鉤時間窗，每一咬都提"
               + (Service.Configuration.MultiHookByObservedYield
-                  ? "；雙重／三重提鉤改看實測（這個咬鉤時間窗上鉤的魚，多重提鉤平均多起獲不到半條就不放）"
+                  ? "；雙重／三重提鉤改看實測＋內建魚池資料（這個咬鉤時間窗可能上鉤的魚，多重提鉤平均多起獲不到半條就不放）"
                   : string.Empty)
             : string.Empty;
 

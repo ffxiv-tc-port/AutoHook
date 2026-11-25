@@ -16,12 +16,16 @@ namespace AutoHook.Utils;
 public readonly record struct FishSample(
     uint FishId, BiteType Bite, double Seconds, int LureStacks, bool Chum, HookType Hook, uint Amount);
 
-/// <summary>這一咬值不值得放三重／雙重提鉤。<paramref name="Matched"/>＝0 表示沒有可用樣本、照 preset。</summary>
+/// <summary>
+/// 這一咬值不值得放三重／雙重提鉤。<paramref name="Matched"/>＝時間窗內的實測筆數；
+/// 它是 0 而且不是 <paramref name="FromPrior"/>＝沒有可用資料、照 preset。
+/// </summary>
 /// <param name="PreferDouble">每 GP 多起獲的條數雙重提鉤比較多：preset 這一咬放得出雙重提鉤時就不放三重。</param>
 /// <param name="FromPool">時間窗內沒有樣本，改用這個任務同咬鉤力道的全部樣本估。</param>
+/// <param name="FromPrior">候選魚來自內建魚池先驗（再以時間窗內實測加權）。</param>
 public readonly record struct MultiHookGate(
     bool TripleWorth, bool DoubleWorth, bool PreferDouble, int Matched, double ExtraDouble, double ExtraTriple,
-    string Detail, bool FromPool = false)
+    string Detail, bool FromPool = false, bool FromPrior = false)
 {
     public static readonly MultiHookGate NoData = new(true, true, false, 0, double.NaN, double.NaN, string.Empty);
 }
@@ -30,6 +34,7 @@ public readonly record struct MultiHookGate(
 /// 宇宙探索「每條魚都算分」的任務：用實測的「這個咬鉤時間窗裡上鉤的是哪些魚」＋「那些魚雙重／三重提鉤實際起幾條」
 /// 決定這一咬值不值得放雙重／三重提鉤；另判斷只算條數的任務要不要放引誘。
 /// 樣本依任務分開存、存檔在插件設定目錄（下次開遊戲接著用）；起獲數是魚的屬性，跨情境共用。
+/// 實測不足時用內建魚池先驗（<see cref="CosmicFishPrior"/>）補：每個任務的魚、咬鉤力道、雙重提鉤起獲、咬鉤秒數。
 /// </summary>
 public static class CosmicMultiHookYield
 {
@@ -69,6 +74,15 @@ public static class CosmicMultiHookYield
     /// </summary>
     public static MultiHookGate Judge(IReadOnlyList<FishSample> samples, BiteType bite, double seconds,
         int lureStacks, bool chum)
+        => JudgeWithPrior(samples, [], bite, seconds, lureStacks, chum);
+
+    /// <summary>
+    /// 同 <see cref="Judge"/>，再加內建魚池先驗（<see cref="CosmicFishPrior"/>）：這個咬鉤力道在先驗裡有魚時，
+    /// 候選＝咬鉤秒數對得上的先驗魚，每條權重＝1＋時間窗內實測次數（實測越多越以實測為準）；
+    /// 秒數全對不上就取同力道全部先驗魚。先驗裡沒有這個力道＝與 <see cref="Judge"/> 相同。
+    /// </summary>
+    public static MultiHookGate JudgeWithPrior(IReadOnlyList<FishSample> samples, IReadOnlyList<PriorFish> prior,
+        BiteType bite, double seconds, int lureStacks, bool chum)
     {
         var inWindow = new List<uint>();
         var pool = new List<uint>();
@@ -81,32 +95,87 @@ public static class CosmicMultiHookYield
                 inWindow.Add(s.FishId);
         }
 
+        var priorYield = new Dictionary<uint, double>();
+        var sameBite = new List<PriorFish>();
+        foreach (var p in prior)
+        {
+            priorYield[p.FishId] = p.DoubleYield;
+            if (p.Bite == bite)
+                sameBite.Add(p);
+        }
+
+        var table = YieldTable(samples);
+        if (sameBite.Count > 0)
+        {
+            var candidates = sameBite.Where(p => TimeCompatible(p, seconds, lureStacks, chum)).ToList();
+            if (candidates.Count == 0)
+                candidates = sameBite;
+
+            var weights = new Dictionary<uint, double>();
+            foreach (var p in candidates)
+                weights[p.FishId] = 1;
+            foreach (var f in inWindow)
+                weights[f] = weights.GetValueOrDefault(f) + 1;
+            return Score(weights.Select(kv => (kv.Key, kv.Value)).ToList(), table, priorYield, inWindow.Count,
+                false, true);
+        }
+
         var fromPool = inWindow.Count == 0;
         if (fromPool)
             inWindow = pool;
         if (inWindow.Count == 0)
             return MultiHookGate.NoData;
 
-        var table = YieldTable(samples);
-        double extraDouble = 0, extraTriple = 0;
-        foreach (var fish in inWindow)
+        return Score(inWindow.GroupBy(f => f).Select(g => (g.Key, (double)g.Count())).ToList(), table, priorYield,
+            inWindow.Count, fromPool, false);
+    }
+
+    public const double PriorEarlySeconds = 0.75;
+    public const double PriorLateSeconds = 2.5;
+
+    /// <summary>
+    /// 先驗秒數是不放引誘、不撒餌時量的：引誘只會讓魚晚咬（只看下限）、撒餌只會讓魚早咬（只看上限），兩個都有就不看。
+    /// 容許量：本機實測（不放引誘）的咬鉤秒數比先驗早最多約 0.4 秒、晚最多約 2 秒。
+    /// </summary>
+    internal static bool TimeCompatible(PriorFish p, double seconds, int lureStacks, bool chum)
+    {
+        if (double.IsNaN(p.TimeMin) || double.IsNaN(p.TimeMax) || double.IsNaN(seconds))
+            return true;
+        var aboveMin = seconds >= p.TimeMin - PriorEarlySeconds;
+        var belowMax = seconds <= p.TimeMax + PriorLateSeconds;
+        return (lureStacks > 0, chum) switch
         {
-            var (d, t) = ExpectedYield(table, fish);
-            extraDouble += d - 1;
-            extraTriple += t - 1;
+            (false, false) => aboveMin && belowMax,
+            (true, false) => aboveMin,
+            (false, true) => belowMax,
+            _ => true,
+        };
+    }
+
+    private static MultiHookGate Score(List<(uint Fish, double Weight)> weighted,
+        Dictionary<uint, (double Double, double Triple)> table, Dictionary<uint, double> priorYield,
+        int matched, bool fromPool, bool fromPrior)
+    {
+        double extraDouble = 0, extraTriple = 0, total = 0;
+        foreach (var (fish, w) in weighted)
+        {
+            var (d, t) = ExpectedYield(table, fish, priorYield.GetValueOrDefault(fish, double.NaN));
+            extraDouble += w * (d - 1);
+            extraTriple += w * (t - 1);
+            total += w;
         }
 
-        extraDouble /= inWindow.Count;
-        extraTriple /= inWindow.Count;
+        extraDouble /= total;
+        extraTriple /= total;
 
         var doubleWorth = extraDouble >= MinExtraFishPerHook;
         var tripleWorth = extraTriple >= 2 * MinExtraFishPerHook;
         var preferDouble = doubleWorth && extraTriple / TripleHookGp < extraDouble / DoubleHookGp;
 
-        var detail = string.Join(@"、", inWindow.GroupBy(f => f).OrderByDescending(g => g.Count())
-            .Select(g => @$"#{g.Key}×{g.Count()}"));
-        return new MultiHookGate(tripleWorth, doubleWorth, preferDouble, inWindow.Count, extraDouble, extraTriple,
-            detail, fromPool);
+        var detail = string.Join(@"、", weighted.OrderByDescending(x => x.Weight)
+            .Select(x => @$"#{x.Fish}×{x.Weight.ToString(@"0.#", CultureInfo.InvariantCulture)}"));
+        return new MultiHookGate(tripleWorth, doubleWorth, preferDouble, matched, extraDouble, extraTriple,
+            detail, fromPool, fromPrior);
     }
 
     /// <summary>每條魚的（雙重平均起獲, 三重平均起獲）；沒觀測過的那一格是 NaN。</summary>
@@ -129,21 +198,21 @@ public static class CosmicMultiHookYield
     }
 
     /// <summary>
-    /// 沒觀測過的那一格用推估：另一種多重提鉤只起 1 條＝這種也只起 1 條（這條魚不吃多重提鉤）；
-    /// 否則雙重至少 2、三重至少「雙重＋1」且至少 3。
+    /// 沒觀測過的那一格用推估。雙重：三重實測只起 1 條＝1，否則內建先驗 <paramref name="priorDouble"/>，再否則 2。
+    /// 三重＝2×雙重－1（實測：雙重 1／2／4 條的魚三重起 1／3／7 條）。
     /// </summary>
     internal static (double Double, double Triple) ExpectedYield(
-        Dictionary<uint, (double Double, double Triple)> table, uint fish)
+        Dictionary<uint, (double Double, double Triple)> table, uint fish, double priorDouble = double.NaN)
     {
         if (!table.TryGetValue(fish, out var y))
-            return (2, 3);
+            y = (double.NaN, double.NaN);
 
         var d = y.Double;
         var t = y.Triple;
         if (double.IsNaN(d))
-            d = !double.IsNaN(t) && t <= 1 ? 1 : 2;
+            d = !double.IsNaN(t) && t <= 1 ? 1 : !double.IsNaN(priorDouble) ? priorDouble : 2;
         if (double.IsNaN(t))
-            t = d <= 1 ? 1 : Math.Max(3, d + 1);
+            t = d <= 1 ? 1 : 2 * d - 1;
         return (d, t);
     }
 
@@ -176,7 +245,7 @@ public static class CosmicMultiHookYield
             return MultiHookGate.NoData;
 
         var (lure, chum) = CurrentContext();
-        return Judge(Snapshot(mission), bite, seconds, lure, chum);
+        return JudgeWithPrior(Snapshot(mission), CosmicFishPrior.ForMission(mission), bite, seconds, lure, chum);
     }
 
     /// <summary>
@@ -256,7 +325,10 @@ public static class CosmicMultiHookYield
     }
 
     public static string Describe(MultiHookGate gate) =>
-        @$"{(gate.FromPool ? @"時間窗沒樣本、同力道全部" : @"時間窗內")} {gate.Matched} 筆（{gate.Detail}）｜平均多起獲：雙重 " +
+        (gate.FromPrior
+            ? @$"內建魚池資料（魚糕 v2）秒數對得上的魚＋時間窗內實測 {gate.Matched} 筆（權重 {gate.Detail}）"
+            : @$"{(gate.FromPool ? @"時間窗沒樣本、同力道全部" : @"時間窗內")} {gate.Matched} 筆（{gate.Detail}）") +
+        @"｜平均多起獲：雙重 " +
         gate.ExtraDouble.ToString(@"0.00", CultureInfo.InvariantCulture) + @" 條、三重 " +
         gate.ExtraTriple.ToString(@"0.00", CultureInfo.InvariantCulture) + @" 條";
 
