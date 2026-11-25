@@ -252,6 +252,17 @@ public static class CosmicMissionInfo
         Service.PrintInfo($"[宇宙探索] 目前任務 WKSMissionUnit#{missionId}，計分方式判定為：{focusText}{everyFish}{distinct}。");
     }
 
+    /// <summary>量測行用的短標籤；分支順序必須與 <see cref="LogOnMissionChange"/> 的 focusText 相同，兩行才會一致。</summary>
+    /// <remarks>分析工具以 <c>計分=(\S+)</c> 解析 ⇒ 回傳值不可含空白。</remarks>
+    public static string ShortScoreLabel(CosmicMissionProfile profile) => profile.Focus switch
+    {
+        CosmicScoreFocus.Quantity => "數量/速度",
+        CosmicScoreFocus.Evaluation => "評價/收藏",
+        _ when profile.Size != CosmicSizeScoring.None => SizeLabel(profile.Size),
+        _ when profile.DistinctSpecies => "種類型",
+        _ => "判不出",
+    };
+
     public static string SizeLabel(CosmicSizeScoring size) => size switch
     {
         CosmicSizeScoring.Sum => "尺寸總和型（每條魚的尺寸加總）",

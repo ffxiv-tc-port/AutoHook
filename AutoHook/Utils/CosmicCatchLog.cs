@@ -34,7 +34,7 @@ public static class CosmicCatchLog
     private sealed class FishStats
     {
         public readonly Dictionary<BiteType, TugStats> ByTug = new();
-        public CosmicScoreFocus Focus = CosmicScoreFocus.Unknown;
+        public CosmicMissionProfile Profile;
         public bool Dirty;
     }
 
@@ -75,7 +75,7 @@ public static class CosmicCatchLog
                 return;
 
             var mission = CosmicMissionInfo.GetCurrentMissionId();
-            var focus = CosmicMissionInfo.GetCurrentFocus();
+            var profile = CosmicMissionInfo.GetCurrentProfile();
 
             lock (Gate)
             {
@@ -100,7 +100,7 @@ public static class CosmicCatchLog
                     fish.ByTug[bite] = tug;
                 }
 
-                fish.Focus = focus;
+                fish.Profile = profile;
                 fish.Dirty = true;
 
                 tug.Count++;
@@ -112,7 +112,7 @@ public static class CosmicCatchLog
 
                 // 前段格式不可改：分析工具以「…起獲=N」為前綴解析，新欄位一律接在後面。
                 QueueLine(ref pending,
-                    $"[宇宙釣魚量測] 任務#{mission} 計分={FocusLabel(focus)}" +
+                    $"[宇宙釣魚量測] 任務#{mission} 計分={CosmicMissionInfo.ShortScoreLabel(profile)}" +
                     $" ｜ 魚#{fishId} {MultiString.GetItemName(fishId)}" +
                     $" ｜ 咬鉤={BiteLabel(bite)} 尺寸={size} 大型={YesNo(large)} 收藏={YesNo(collectible)} 起獲={amount}" +
                     $" ｜ 提鉤={FishingSnapshot.HookLabel(hook)}" +
@@ -148,7 +148,7 @@ public static class CosmicCatchLog
             fish.Dirty = false;
 
             var sb = new StringBuilder();
-            sb.Append($"[宇宙釣魚量測][彙總] 任務#{key.Mission} 計分={FocusLabel(fish.Focus)}");
+            sb.Append($"[宇宙釣魚量測][彙總] 任務#{key.Mission} 計分={CosmicMissionInfo.ShortScoreLabel(fish.Profile)}");
             sb.Append($" ｜ 魚#{key.FishId} {MultiString.GetItemName(key.FishId)}");
 
             foreach (var (bite, tug) in fish.ByTug.OrderBy(kv => TugRank(kv.Key)))
@@ -199,13 +199,6 @@ public static class CosmicCatchLog
         BiteType.None => @"無咬鉤",
         // 「不知道」要看得見，不能靜靜當成某一種。
         _ => @"未知咬鉤",
-    };
-
-    private static string FocusLabel(CosmicScoreFocus focus) => focus switch
-    {
-        CosmicScoreFocus.Quantity => @"數量/速度",
-        CosmicScoreFocus.Evaluation => @"評價/收藏",
-        _ => @"判不出",
     };
 
     private static string YesNo(bool value) => value ? @"是" : @"否";
