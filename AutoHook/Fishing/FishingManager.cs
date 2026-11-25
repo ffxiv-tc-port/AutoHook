@@ -174,7 +174,7 @@ public partial class FishingManager : IDisposable
             return;
         }
 
-        UpdateCatch = Service.GameInteropProvider.HookFromAddress<UpdateCatchDelegate>(updateCatchPtr, UpdateCatchDetour);
+        UpdateCatch = CreateUpdateCatchHook(updateCatchPtr);
         _useActionHook = Service.GameInteropProvider.HookFromAddress<UseActionDelegate>(useActionPtr, OnUseAction);
 
         Enable();
@@ -347,6 +347,11 @@ public partial class FishingManager : IDisposable
         Service.BaitManager.PollSwimbaitConfirm();
 
         var currentState = Service.BaitManager.FishingState;
+
+        // 要排在 CheckPluginActions 之前：補記的那一竿要趕上這一幀的釣到後動作（換餌、拍擊水面）。
+        TrackCastForCatchFallback(currentState);
+        if (_pendingChatCatch != null)
+            ResolvePendingChatCatch(currentState);
 
         // 🔴 讀的是<b>疊加後</b>的值：別的外掛可以用暫停租約要求 AutoHook 先停手。
         //    見 Configurations/PluginEnabledLeases.cs。
@@ -630,7 +635,8 @@ public partial class FishingManager : IDisposable
     /// <param name="large">遊戲傳來的「大型」旗標。目前只給量測用，不影響任何決策。</param>
     /// <param name="size">遊戲傳來的尺寸。同上。</param>
     /// <param name="collectible">這一竿是不是以收藏品形式入手。同上。</param>
-    private void OnCatch(uint fishId, uint amount, bool large, ushort size, bool collectible)
+    /// <param name="fromChat">由聊天訊息補記（尺寸／大型不明）：不寫量測紀錄、不送誇獎，其餘照常。</param>
+    private void OnCatch(uint fishId, uint amount, bool large, ushort size, bool collectible, bool fromChat = false)
     {
         // 🔴 純量測，零行為變化：只寫 log。放在最前面是為了「就算下面的既有邏輯出事也已經量到了」。
         //    這裡刻意不讀任何任務分數 —— 那是 ICE 的職權，見 CosmicCatchLog 的權威邊界說明。
@@ -645,7 +651,8 @@ public partial class FishingManager : IDisposable
         _castSnapshot = default;
         _biteSnapshot = default;
         _lastHookDecision = null;
-        CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType, castSnapshot, biteSnapshot, hookDecision);
+        if (!fromChat)
+            CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType, castSnapshot, biteSnapshot, hookDecision);
 
         _lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         var lastFishCatchCfg = GetLastCatchConfig();
@@ -677,7 +684,8 @@ public partial class FishingManager : IDisposable
         // 🔴 刻意放在最後：上面每一行都是既有邏輯，先讓它們原封不動跑完，
         //    通知這一步就算整個爛掉也已經不可能影響換餌／換 preset／停手判斷。
         //    方法本身還有自己的 try/catch，這裡不需要再包一層。
-        NotifyRareCatch(fishId, large, collectible, biteType);
+        if (!fromChat)
+            NotifyRareCatch(fishId, large, collectible, biteType);
     }
 
     private void CheckStopCondition()
@@ -784,11 +792,26 @@ public partial class FishingManager : IDisposable
         return _useActionHook!.OriginalDisposeSafe(manager, actionType, actionId, targetId, a4, a5, a6, a7);
     }
 
-    private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
+    /// <summary>
+    /// detour 綁定建立它的那一個 hook 呼叫原函式，不經 <see cref="UpdateCatch"/> 欄位：
+    /// 重新掛 hook 之後舊的就算沒停乾淨，也不會繞回新 hook 形成遞迴。
+    /// </summary>
+    private Hook<UpdateCatchDelegate> CreateUpdateCatchHook(IntPtr address)
+    {
+        Hook<UpdateCatchDelegate>? self = null;
+        self = Service.GameInteropProvider.HookFromAddress<UpdateCatchDelegate>(address,
+            (module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12) =>
+                UpdateCatchDetour(self!, module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12));
+        return self;
+    }
+
+    private void UpdateCatchDetour(Hook<UpdateCatchDelegate> hook, IntPtr module, uint fishId, bool large, ushort size,
+        byte amount, byte level,
         byte unk7,
         byte unk8, byte unk9, byte unk10, byte unk11, byte unk12)
     {
-        UpdateCatch!.OriginalDisposeSafe(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
+        hook.OriginalDisposeSafe(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
+        _lastUpdateCatchTick = Environment.TickCount64;
 
         // 原函式已在上面呼叫恰好一次。下面的插件邏輯擲出的例外不可穿回原生框架（＝遊戲崩潰）；
         // 位址判斷只讀三個靜態欄位，每一竿都走也不配置。

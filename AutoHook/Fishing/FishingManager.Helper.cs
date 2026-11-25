@@ -119,6 +119,8 @@ public partial class FishingManager
 
                 if (logId is XivChatLog.CantFish)
                     Service.Status = UIStrings.CantFishHere;
+                else
+                    NoteChatCatch(messageSe, text);
             }
         }
         catch (Exception e)
