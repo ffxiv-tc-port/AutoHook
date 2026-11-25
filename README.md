@@ -9,18 +9,25 @@
 - 自動施放釣魚技能（撒餌、耐心、專一垂釣、大魚獵手、放生等）與使用道具
 - **自動刺魚**：依魚的尺寸與速度自動出手，可顯示刺魚命中框
 - **天氣與窗口**分頁：顯示各魚的天氣與時段窗口（唯讀，不會因此自動開始或停止釣魚）
+- **出海垂釣**分頁：上船之後的整趟自動化。每一站自動走到船邊拋竿、依航線／海域／時段換預設（preset）或釣餌、幻海流出現與結束時切換，航程結束就收手。每一趟都要自己按「開始」（或 `/ahocean start`），載入、進區、登入都不會自己開始；報名上船與結算畫面要自己操作；你收竿或走動時會讓位，AutoHook 被關閉時整個停下。走到船邊需搭配 vnavmesh
 - **社群預設**：從 wiki 取得他人分享的預設，也能匯出自己的預設到剪貼簿
 - 選用整合 TataruPraise：釣到稀有魚時請塔塔露念一句提醒你回來（預設只認大魚）
 - 提供 IPC 給其他插件（Questionable、ICE 等）開關自動釣魚、切換或匯入預設
 
 ## 指令
 
-`/autohook`、`/ahcfg`、`/ahon`、`/ahoff`、`/ahtg`、`/ahpreset`、`/ahstart`、`/ahbait`、`/bait`、`/agpreset`
+`/autohook`、`/ahcfg`、`/ahon`、`/ahoff`、`/ahtg`、`/ahpreset`、`/ahstart`、`/ahbait`、`/bait`、`/agpreset`、`/ahocean`
+
+- `/ahocean start`／`stop`：開始／停止出海垂釣的整趟自動化
 
 ## 台服版的修改
 
 - 新增「天氣與窗口」分頁（使用遊戲自己的天氣資料）
+- 新增「出海垂釣」分頁與整趟自動化（手動開始，說明見上）
 - 宇宙探索釣魚：條件式換預設讓多階段預設真的會推進、新增資料夾預設匯入 IPC（給 ICE 用）、華麗提鉤可用時優先使用
+- 宇宙探索釣魚：依尺寸計分的任務，預設沒在尺寸上花 GP 時自動補放耐心II，耐心期間改用精準提鉤／強力提鉤；每條魚都算分的任務，預設沒開的咬鉤也會提鉤（都可在設定頁調整）
+- 預設裡的游動餌自動切換會生效：送出切換後確認選中才拋竿
+- 加入台服 7.3 的新魚（含行星法恩娜的宇宙探索任務魚），預設釣法產生器選得到
 - 別的插件借走啟用開關時改用有逾時的租約，不再寫進使用者的設定檔
 - 補上 Questionable 會用到、上游卻沒註冊的 IPC 端點（換餌、自動拋竿、啟用狀態）
 - `/bait`、`/ahbait` 找不到或換不成釣餌時在聊天視窗說明原因
@@ -30,8 +37,17 @@
 
 ## 安裝
 
-在 Dalamud 設定的「自訂插件庫」加入
-`https://raw.githubusercontent.com/ffxiv-tc-port/DalamudPluginsTC/main/repo.json` 並啟用，
-再從插件列表安裝。
+1. 在遊戲內輸入 `/xlsettings` 開啟「Dalamud 設定」，到「試驗性功能」分頁的「第三方插件倉庫」加入
+   `https://raw.githubusercontent.com/ffxiv-tc-port/DalamudPluginsTC/main/repo.json`
+   勾選啟用後儲存。
+2. 輸入 `/xlplugins` 開啟「插件管理員」，搜尋「AutoHook」安裝。
+
+同一個插件只裝這裡的版本，不要同時安裝上游（國際服）版本。
+
+## 需要搭配的插件
+
+- 選用：[vnavmesh](https://github.com/ffxiv-tc-port/vnavmesh)（出海垂釣走到船邊）、[TataruPraise](https://github.com/ffxiv-tc-port/TataruPraise)（釣到稀有魚的語音提醒）
 
 原作者：Det，上游由 [PunishXIV](https://github.com/PunishXIV/AutoHook) 維護
+
+授權：BSD-3-Clause（見 LICENSE）
