@@ -188,7 +188,7 @@ public class HookConfig : BaseOption
 
             if (!hookedAtAll)
             {
-                var blocker = UnconfiguredBiteBlocker();
+                var blocker = UnconfiguredBiteBlocker(hookset);
                 if (blocker == null)
                 {
                     Service.PrintInfo(
@@ -369,9 +369,11 @@ public class HookConfig : BaseOption
     /// 只在每條魚都算分的任務（WKSMissionText 115、121）放寬；條件不符、GP 不足放掉魚照舊。
     /// 身上有大魚獵手／大魚知識時不放寬：魚一上岸效果就用掉，preset 可能正留給它要的咬鉤。
     /// </summary>
-    private static string? UnconfiguredBiteBlocker()
+    private static string? UnconfiguredBiteBlocker(BaseHookset hookset)
     {
         var everyFish = CosmicMissionInfo.GetCurrentProfile().EveryFishCounts;
+        if (everyFish && !hookset.HookUnconfiguredWhenEveryFishCounts)
+            return @"（每條魚都算分的任務，但這份 preset 設定只提它有開的咬鉤）";
         var enabled = Service.Configuration.HookUnconfiguredBitesWhenEveryFishCounts;
         var bigFishBuff = everyFish && enabled
                           && (PlayerRes.HasStatus(IDs.Status.PrizeCatch) || PlayerRes.HasStatus(IDs.Status.BigGameFishing));

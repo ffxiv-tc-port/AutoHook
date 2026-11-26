@@ -499,7 +499,8 @@ public partial class FishingManager : IDisposable
         CheckExtraActions(extraCfg);
 
         var casted = false;
-        var holdCast = CosmicCastTimeGate.ShouldHoldCast();
+        var holdCast = CosmicCastTimeGate.ShouldHoldCast()
+                       || CosmicStellarWait.ShouldHoldCast(GetHookCfg().GetHookset(), _lastCatch?.Id ?? 0);
         if (_lastStep.HasFlag(FishingSteps.FishCaught) && !_lastStep.HasFlag(FishingSteps.Quitting))
         {
             if (!holdCast)
@@ -612,6 +613,9 @@ public partial class FishingManager : IDisposable
             LogNoHook(bite, timePassed, noHookReason);
             return;
         }
+
+        if (hook == HookType.Stellar)
+            CosmicStellarWait.RecordStellarHook();
 
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() =>

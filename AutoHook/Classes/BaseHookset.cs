@@ -70,6 +70,18 @@ public class BaseHookset
     [DefaultValue(true)] public bool IgnoreTimersWhenEveryFishCounts = true;
 
     /// <summary>
+    /// 每條魚都算分的任務裡，這份 preset 完全沒開的咬鉤要不要改用一般提鉤（還要全域設定也開著）。
+    /// preset 刻意只挑幾種魚（例：只等大魚、其他咬鉤全部歇竿）時設 false；目前只有內建 preset 會設，介面沒有這一格。
+    /// </summary>
+    [DefaultValue(true)] public bool HookUnconfiguredWhenEveryFishCounts = true;
+
+    /// <summary>
+    /// 宇宙探索：專一垂釣生效中、華麗提鉤還在冷卻時，等到冷卻剩下的秒數不超過那條魚最早的咬鉤秒數再拋竿，
+    /// 讓同一條魚的第二竿也吃得到華麗提鉤（細節見 <see cref="Utils.CosmicStellarWait"/>）。預設關。
+    /// </summary>
+    public bool WaitStellarForIdenticalCast;
+
+    /// <summary>
     /// 這一竿要不要忽略提鉤時間窗。看 <see cref="IgnoreTimersWhenEveryFishCounts"/> 有沒有開，
     /// 以及目前任務是不是「任意／每條魚都算分」那一型。
     /// 不在宇宙探索、沒有進行中的任務、型別判不出來 → 一律 false（維持 preset 原本的行為）。
