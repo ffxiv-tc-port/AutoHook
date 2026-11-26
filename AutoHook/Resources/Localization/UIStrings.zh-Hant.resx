@@ -1195,6 +1195,9 @@
   <data name="OnlySpecial" xml:space="preserve">
     <value>隱藏魚</value>
   </data>
+  <data name="NotSpecial" xml:space="preserve">
+    <value>大型／小型魚</value>
+  </data>
   <data name="SpecialFishExemple" xml:space="preserve">
     <value>隱藏魚是指需要100級大招觸發條件的魚，例如：</value>
   </data>

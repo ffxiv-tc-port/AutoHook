@@ -460,17 +460,21 @@ public class HookConfig : BaseOption
         if (!PlayerRes.ActionTypeAvailable((uint)HookType.Stellar))
             return false;
 
-        // ⚠️ 條件要沿用「這一咬原本那一格」的設定，不能用華麗提鉤自己那格的空白預設。
+        // ⚠️ 條件要沿用「這一咬原本那一格」的設定，不能只看華麗提鉤自己那格的空白預設。
         //    華麗提鉤只是換一個提鉤**動作**，不該自帶一套條件 —— 否則 preset 設好的時間窗對華麗提鉤完全無效，
-        //    表現成「preset 說要放掉的咬鉤，只有華麗提鉤會去勾」。
-        var conditionSource = hook.ph.HooksetEnabled ? hook.ph : stellar;
-
+        //    表現成「preset 說要放掉的咬鉤，只有華麗提鉤會去勾」。一般提鉤沒開時看三重／雙重那格（規則見 HookDecisionRules）。
         var statusBefore = Service.Status;
-        if (!CheckHookCondition(conditionSource, timePassed, ignoreTimers))
-        {
-            Service.Status = statusBefore;
+        var normalOn = hook.ph.HooksetEnabled;
+        var tripleOn = hookset.UseTripleHook && hook.th.HooksetEnabled;
+        var doubleOn = hookset.UseDoubleHook && hook.dh.HooksetEnabled;
+        var passes = HookDecisionRules.StellarConditionPasses(normalOn,
+            normalOn && CheckHookCondition(hook.ph, timePassed, ignoreTimers),
+            !normalOn && CheckHookCondition(stellar, timePassed, ignoreTimers),
+            tripleOn, !normalOn && tripleOn && CheckHookCondition(hook.th, timePassed, ignoreTimers),
+            doubleOn, !normalOn && doubleOn && CheckHookCondition(hook.dh, timePassed, ignoreTimers));
+        Service.Status = statusBefore;
+        if (!passes)
             return false;
-        }
 
         // 要使用者回報的診斷。華麗提鉤有 60 秒 CD，所以這行最多每分鐘一次，不需要另外節流。
         Service.PrintInfo(@$"[HookManager] 華麗提鉤可用且條件符合，本次改用華麗提鉤（動作 ID {(uint)HookType.Stellar}）。");

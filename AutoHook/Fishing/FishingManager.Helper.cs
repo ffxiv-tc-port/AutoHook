@@ -84,8 +84,11 @@ public partial class FishingManager
                 var shadowAppeared = lureFishes.FirstOrDefault(f => f.LureMessage == text);
                 if (shadowAppeared != null)
                 {
-                    SetLureShadow(shadowAppeared, @"魚影出現訊息 (FishParameter._1)");
-                    _lureSuccess = true;
+                    // 設定讀不到時照舊版（魚影一律停手），魚影狀態照記。
+                    var shadowStops = HookDecisionRules.MatchesLureSuccess(
+                        GetHookCfg()?.GetHookset()?.CastLures?.LureTarget ?? LureTarget.Special, false, true);
+                    SetLureShadow(shadowAppeared, @"魚影出現訊息 (FishParameter._1)", shadowStops);
+                    _lureSuccess = shadowStops;
                     return;
                 }
 
@@ -108,9 +111,9 @@ public partial class FishingManager
 
                 // ── 體型鎖定（每竿）─────────────────────────────────────────────
                 // 魚影那一支已經在上面 return 掉了，所以這裡只看鎖定訊息。
-                // ⚠️ LureTarget != Any 時不因鎖定訊息停手是刻意取捨（追特定魚影時不停），不要動。
-                _lureSuccess = GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any &&
-                               logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess;
+                // ⚠️ Special 時不因鎖定訊息停手是刻意取捨（追特定魚影時不停），不要動。
+                _lureSuccess = HookDecisionRules.MatchesLureSuccess(GetHookCfg().GetHookset().CastLures.LureTarget,
+                    logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess, false);
             }
             else if (type is SystemAlert)
             {

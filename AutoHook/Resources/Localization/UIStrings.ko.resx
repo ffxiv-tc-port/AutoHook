@@ -1253,6 +1253,9 @@
   <data name="OnlySpecial" xml:space="preserve">
     <value>특수 물고기만</value>
   </data>
+  <data name="NotSpecial" xml:space="preserve">
+    <value>소형/대형 물고기만</value>
+  </data>
   <data name="SpecialFishExemple" xml:space="preserve">
     <value>특수 물고기는 루어를 사용할 때 고유한 설명을 가진 물고기를 의미합니다.</value>
   </data>

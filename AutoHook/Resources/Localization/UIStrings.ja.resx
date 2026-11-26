@@ -1230,6 +1230,9 @@
   <data name="OnlySpecial" xml:space="preserve">
     <value>特別な魚のみ</value>
   </data>
+  <data name="NotSpecial" xml:space="preserve">
+    <value>小/大のみ</value>
+  </data>
   <data name="SpecialFishExemple" xml:space="preserve">
     <value>特別な魚とは、ルアーを使った際にこのようなダイアログが表示されます：</value>
   </data>

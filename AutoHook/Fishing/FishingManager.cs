@@ -42,7 +42,7 @@ public partial class FishingManager : IDisposable
     /// <summary>
     /// 「體型鎖定」旗標（LogMessage 5565／5569 那兩則三驚嘆號訊息）。
     /// ⚠️ 語意刻意維持原樣：**每拋一竿就在 <see cref="OnBeganFishing"/> 清掉**，
-    ///    而且只有 <see cref="LureTarget.Any"/> 時才會因為鎖定訊息而設起來。
+    ///    而且只有 <see cref="LureTarget.Any"/>／<see cref="LureTarget.NotSpecial"/> 時才會因為鎖定訊息而設起來。
     ///    要跨竿保留的是魚影，不是鎖定 —— 見 <see cref="_lureShadowFish"/>。
     /// </summary>
     private bool _lureSuccess;
@@ -59,11 +59,13 @@ public partial class FishingManager : IDisposable
 
     /// <summary>
     /// 「引誘的目的已經達成，不要再放引誘」＝ 體型鎖定（每竿）**或** 魚影已觸發（跨竿）。
+    /// 魚影只在引誘目標認魚影時算數（NotSpecial 不算）；目標以施放當下的 preset 為準，換 preset 後跟著變。
     /// </summary>
-    private bool LureStopRequested => _lureSuccess || _lureShadowFish != null;
+    private bool LureStopRequested(LureTarget target)
+        => _lureSuccess || (_lureShadowFish != null && HookDecisionRules.MatchesLureSuccess(target, false, true));
 
     /// <summary>記下魚影已觸發。<paramref name="source"/> 會進 log，用來事後判斷是哪條路徑設起來的。</summary>
-    private void SetLureShadow(BaitFishClass fish, string source)
+    private void SetLureShadow(BaitFishClass fish, string source, bool pausesLures)
     {
         var previous = _lureShadowFish;
         _lureShadowFish = fish;
@@ -71,14 +73,17 @@ public partial class FishingManager : IDisposable
         if (previous != null && previous.Id == fish.Id)
         {
             Service.PrintInfo(
-                @$"[魚影] 重複收到出現訊息：{fish.Name} (id {fish.Id})｜來源＝{source}（狀態不變，仍暫停引誘）");
+                @$"[魚影] 重複收到出現訊息：{fish.Name} (id {fish.Id})｜來源＝{source}" +
+                (pausesLures ? @"（狀態不變，仍暫停引誘）" : @"（狀態不變；引誘目標是大型／小型魚，不暫停引誘）"));
             return;
         }
 
         var replaced = previous == null ? @"無" : @$"{previous.Name} (id {previous.Id})";
         Service.PrintInfo(
             @$"[魚影] 設定：{fish.Name} (id {fish.Id})｜來源＝{source}｜原本的魚影＝{replaced}" +
-            @"｜在消失/釣起/離開釣魚之前都會暫停施放引誘（跨拋竿）");
+            (pausesLures
+                ? @"｜在消失/釣起/離開釣魚之前都會暫停施放引誘（跨拋竿）"
+                : @"｜引誘目標是大型／小型魚，魚影不暫停引誘（換成認魚影的 preset 才會暫停）"));
     }
 
     /// <summary>清除魚影狀態。已經是 null 時完全不做事，所以放在每幀路徑上也不會洗版。</summary>

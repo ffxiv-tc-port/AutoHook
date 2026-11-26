@@ -2547,6 +2547,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only Small/Large.
+        /// </summary>
+        internal static string NotSpecial {
+            get {
+                return ResourceManager.GetString("NotSpecial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only use when Identical Cast is active.
         /// </summary>
         internal static string OnlyUseWhenActiveIdentical {
