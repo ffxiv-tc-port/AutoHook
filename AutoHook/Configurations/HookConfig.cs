@@ -209,6 +209,8 @@ public class HookConfig : BaseOption
                 return guarded;
             }
 
+            LogPresetMultiHookOff(hookset, hook, bite);
+
             var multiHookUnavailable = false;
             var noMultiHook = ShouldSkipMultiHook(CosmicMissionInfo.GetCurrentProfile().DistinctSpecies,
                 Service.Configuration.NoMultiHookWhenDistinctSpecies);
@@ -311,6 +313,45 @@ public class HookConfig : BaseOption
         noHookReason = @$"讀不到咬鉤力道（{bite}），沒有對應的提鉤設定";
         //Service.Status = "Skipping bite - No hook for this bite is enabled";
         return HookType.None;
+    }
+
+    private static ushort _multiHookOffLogMission;
+    private static int _multiHookOffLoggedBites;
+
+    /// <summary>
+    /// 只算條數的任務：preset 沒開這種咬鉤的雙重／三重提鉤、內建魚池資料卻有這種咬鉤起獲 2 條以上的魚時，
+    /// 每個任務每種咬鉤記一次（要使用者回報的診斷；只記不改提鉤）。
+    /// </summary>
+    private static void LogPresetMultiHookOff(BaseHookset hookset,
+        (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph) hook, BiteType bite)
+    {
+        if ((hookset.UseTripleHook && hook.th.HooksetEnabled) || (hookset.UseDoubleHook && hook.dh.HooksetEnabled))
+            return;
+        if (!CosmicMissionInfo.GetCurrentProfile().AnyFishCountOnly)
+            return;
+
+        var mission = CosmicMissionInfo.GetCurrentMissionId();
+        if (mission != _multiHookOffLogMission)
+        {
+            _multiHookOffLogMission = mission;
+            _multiHookOffLoggedBites = 0;
+        }
+
+        var bit = 1 << ((int)bite & 31);
+        if ((_multiHookOffLoggedBites & bit) != 0)
+            return;
+        _multiHookOffLoggedBites |= bit;
+
+        var best = 0.0;
+        foreach (var p in CosmicFishPrior.ForMission(mission))
+            if (p.Bite == bite && p.DoubleYield > best)
+                best = p.DoubleYield;
+        if (best < 2)
+            return;
+
+        Service.PrintInfo(
+            @$"[HookManager] 只算條數的任務（任務#{mission}）：preset 沒開{CosmicCatchLog.BiteLabel(bite)}的雙重／三重提鉤，" +
+            @$"這種咬鉤照 preset 只用一般提鉤；內建魚池資料（魚糕 v2）裡這種咬鉤的魚雙重提鉤最多起獲 {best:0} 條。");
     }
 
     /// <summary>湊種類任務且設定開著＝不放雙重／三重提鉤（同種多條對種類數沒有幫助）。</summary>
