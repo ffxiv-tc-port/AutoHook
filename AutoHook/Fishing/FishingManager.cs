@@ -112,6 +112,15 @@ public partial class FishingManager : IDisposable
     /// <summary>咬鉤當下的拋竿後秒數、引誘層數、撒餌（給 <see cref="CosmicMultiHookYield"/>）；釣起時用完就清。</summary>
     private (double Seconds, int LureStacks, bool Chum) _lastBiteContext = (double.NaN, 0, false);
 
+    /// <summary>咬鉤當下的餌（道具 id）；以小釣大／游動餌＝0。給 <see cref="CosmicMultiHookYield"/> 樣本，釣起時用完就清。</summary>
+    private uint _lastBiteBait;
+
+    /// <summary>每拋一竿加一；給「同一竿只判一次」的判斷當鍵。</summary>
+    internal static int CastSerial { get; private set; }
+
+    private uint CurrentPlainBait()
+        => _isMooching || Service.BaitManager.CurrentSwimBait != null ? 0u : Service.BaitManager.Current;
+
     private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, ulong targetId,
         uint a4, uint a5,
         uint a6, IntPtr a7);
@@ -527,11 +536,13 @@ public partial class FishingManager : IDisposable
 
         _isMooching = mooching;
         _lureSuccess = false;
+        CastSerial++;
 
         _castSnapshot = FishingSnapshot.Take();
         _biteSnapshot = default;
         _lastHookDecision = null;
         _lastBiteContext = (double.NaN, 0, false);
+        _lastBiteBait = 0;
 
         // 純蒐證：重設「距拋竿／距上一則階梯訊息」的基準。不影響任何行為。
         LureLadderLog.OnCastStarted();
@@ -603,8 +614,13 @@ public partial class FishingManager : IDisposable
         var timePassed = Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
         var (lureStacks, chum) = CosmicMultiHookYield.CurrentContext();
         _lastBiteContext = (timePassed, lureStacks, chum);
+        _lastBiteBait = CurrentPlainBait();
 
         var hook = currentHook.GetHook(bite, timePassed, out var noHookReason);
+        if (hook is null or HookType.None
+            && CosmicDistinctSpecies.TryHookInstead(currentHook, bite, timePassed, lureStacks, chum, _isMooching,
+                (uint)Math.Max(_lureShadowFish?.Id ?? 0, 0), _lastBiteBait, noHookReason, out var newSpeciesHook))
+            hook = newSpeciesHook;
         _lastHookDecision = hook ?? HookType.None;
 
         if (hook is null or HookType.None)
@@ -669,6 +685,8 @@ public partial class FishingManager : IDisposable
         var biteSnapshot = _biteSnapshot;
         var hookDecision = _lastHookDecision;
         var biteContext = _lastBiteContext;
+        var biteBait = _lastBiteBait;
+        _lastBiteBait = 0;
         _castSnapshot = default;
         _biteSnapshot = default;
         _lastHookDecision = null;
@@ -676,7 +694,7 @@ public partial class FishingManager : IDisposable
         if (!fromChat)
             CosmicCatchLog.Record(fishId, amount, large, size, collectible, biteType, castSnapshot, biteSnapshot, hookDecision);
         CosmicMultiHookYield.Record(biteType, biteContext.Seconds, biteContext.LureStacks, biteContext.Chum,
-            hookDecision, fishId, amount);
+            hookDecision, fishId, amount, biteBait);
 
         _lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         var lastFishCatchCfg = GetLastCatchConfig();

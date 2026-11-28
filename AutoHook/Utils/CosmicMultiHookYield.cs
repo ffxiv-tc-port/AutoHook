@@ -13,8 +13,9 @@ namespace AutoHook.Utils;
 
 /// <summary>一竿的觀測：咬鉤當下的情境（力道、拋竿後秒數、引誘層數、撒餌）＋釣起哪條魚、用哪種提鉤、起獲幾條。</summary>
 /// <param name="Seconds">拋竿到咬鉤的秒數；<see cref="double.NaN"/>＝只提供起獲數、不參與時間比對。</param>
+/// <param name="Bait">這一竿的餌（道具 id）；0＝不明或以小釣大／游動餌（舊樣本檔沒有這一欄＝0）。</param>
 public readonly record struct FishSample(
-    uint FishId, BiteType Bite, double Seconds, int LureStacks, bool Chum, HookType Hook, uint Amount);
+    uint FishId, BiteType Bite, double Seconds, int LureStacks, bool Chum, HookType Hook, uint Amount, uint Bait = 0);
 
 /// <summary>
 /// 這一咬值不值得放三重／雙重提鉤。<paramref name="Matched"/>＝時間窗內的實測筆數；
@@ -273,7 +274,7 @@ public static class CosmicMultiHookYield
 
     /// <summary>記一竿。只在宇宙探索、有任務、咬鉤力道已知時記；失敗只寫 log，不影響釣魚。</summary>
     public static void Record(BiteType bite, double seconds, int lureStacks, bool chum, HookType? hook,
-        uint fishId, uint amount)
+        uint fishId, uint amount, uint bait = 0)
     {
         try
         {
@@ -284,7 +285,7 @@ public static class CosmicMultiHookYield
             if (mission == 0)
                 return;
 
-            var sample = new FishSample(fishId, bite, seconds, lureStacks, chum, hook ?? HookType.None, amount);
+            var sample = new FishSample(fishId, bite, seconds, lureStacks, chum, hook ?? HookType.None, amount, bait);
             Dictionary<ushort, List<FishSample>>? toSave = null;
             lock (Gate)
             {

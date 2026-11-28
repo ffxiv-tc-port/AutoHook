@@ -37,7 +37,8 @@ public partial class FishingManager
         {
             var lures = hookCfg.GetHookset().CastLures;
             lures.TryCasting(LureStopRequested(lures.LureTarget),
-                _fishingTimer.IsRunning ? _fishingTimer.Elapsed.TotalSeconds : null);
+                _fishingTimer.IsRunning ? _fishingTimer.Elapsed.TotalSeconds : null,
+                () => CosmicDistinctSpecies.ShouldHoldLureCancel(hookCfg, _isMooching, CurrentPlainBait(), CastSerial));
         });
     }
     

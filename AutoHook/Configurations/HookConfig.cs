@@ -354,6 +354,27 @@ public class HookConfig : BaseOption
             @$"這種咬鉤照 preset 只用一般提鉤；內建魚池資料（魚糕 v2）裡這種咬鉤的魚雙重提鉤最多起獲 {best:0} 條。");
     }
 
+    /// <summary>
+    /// preset 原本要歇竿、改成照提時用的單鉤：這種咬鉤那一格的精準／強力提鉤放得出來（耐心中）就用它，否則一般提鉤。
+    /// 刻意不放雙重／三重提鉤：只在湊種類任務用，同種多條沒有幫助。
+    /// </summary>
+    internal HookType SingleHookFor(BiteType bite)
+    {
+        var hookset = GetHookset();
+        var ph = bite switch
+        {
+            BiteType.Weak => hookset.PatienceWeak,
+            BiteType.Strong => hookset.PatienceStrong,
+            BiteType.Legendary => hookset.PatienceLegendary,
+            _ => null,
+        };
+
+        return ph is { HooksetType: HookType.Precision or HookType.Powerful }
+               && PlayerRes.ActionTypeAvailable((uint)ph.HooksetType)
+            ? ph.HooksetType
+            : HookType.Normal;
+    }
+
     /// <summary>湊種類任務且設定開著＝不放雙重／三重提鉤（同種多條對種類數沒有幫助）。</summary>
     internal static bool ShouldSkipMultiHook(bool distinctSpecies, bool settingOn) => distinctSpecies && settingOn;
 

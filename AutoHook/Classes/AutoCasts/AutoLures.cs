@@ -128,7 +128,8 @@ public class AutoLures : BaseActionCast
 
     protected override ConditionContext ActionConditionContext() => ConditionContext.ForAction(_castElapsedSeconds);
 
-    public void TryCasting(bool lureSuccess, double? castElapsedSeconds = null)
+    /// <param name="holdCancel">「沒魚影就歇竿」這一竿要不要先不收；只在真的要收竿時才呼叫（同一竿重複呼叫要回同一個答案）。</param>
+    public void TryCasting(bool lureSuccess, double? castElapsedSeconds = null, Func<bool>? holdCancel = null)
     {
         if (!EzThrottler.Check("CastingLure"))
             return;
@@ -137,7 +138,8 @@ public class AutoLures : BaseActionCast
 
         if (PlayerRes.GetStatusStacks(StatusId) >= LureStacks && CancelAttempt && !lureSuccess)
         {
-            PlayerRes.CastActionDelayed(IDs.Actions.Rest);
+            if (holdCancel?.Invoke() != true)
+                PlayerRes.CastActionDelayed(IDs.Actions.Rest);
             return;
         }
 

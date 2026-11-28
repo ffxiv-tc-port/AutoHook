@@ -165,6 +165,12 @@ public class Configuration : IPluginConfiguration
     [DefaultValue(true)] public bool NoMultiHookWhenDistinctSpecies = true;
 
     /// <summary>
+    /// 任務要湊幾種不同的魚（WKSMissionText 113、116）時：preset 要歇竿的咬鉤，依內建魚池資料可能是還沒釣到的魚種就照提；
+    /// 還有不需要魚影的魚種沒釣到時，引誘放滿沒出魚影也不收竿（見 <see cref="CosmicDistinctSpecies"/>）。
+    /// </summary>
+    [DefaultValue(true)] public bool HookNewSpeciesWhenDistinctSpecies = true;
+
+    /// <summary>
     /// 每條魚都算分的任務（WKSMissionText 115、121）：依實測的時間窗魚種與起獲數決定這一咬放不放雙重／三重提鉤
     /// （見 <see cref="CosmicMultiHookYield"/>）。時間窗內沒有樣本時照 preset。
     /// </summary>
